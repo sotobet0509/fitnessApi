@@ -7,20 +7,22 @@ import * as helmet from 'helmet'
 import { AuthRouter } from '../routes/auth'
 import ErrorHandler from '../middleware/ErrorHandler'
 import EndpointNotFound from '../middleware/EndpointNotFound'
-const swaggerjsondoc = require('swagger-jsdoc')
-const swaggerui = require('swagger-ui-express')
-const swaggerOptions = {
+
+import swaggerjsondoc = require('swagger-jsdoc')
+import swaggerui = require('swagger-ui-express')
+
+const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
-      info: {
-          title: 'Bloom-api',
-          description: 'Documentacion de api de bloom',
-      },
-      host: 'http://localhost:4000',
-      basePath: '/'
+    info: {
+      title: 'Bloom API',
+      version: '1.0',
+      description: 'Documentación de la API de Bloom',
+    },
+    host: 'localhost:' + config.httpPort,
+    basePath: '/'
   },
-  apis: ['../routes/auth.js']
-};
-const swaggerDocs = swaggerjsondoc(swaggerOptions)
+  apis: ['**/*.ts']
+})
 
 
 export default class ExpressApp {
@@ -45,10 +47,10 @@ export default class ExpressApp {
     this.application.use(cors())
     this.application.use(helmet())
     this.application.use(morgan('dev'))
+    this.application.use('/api', swaggerui.serve, swaggerui.setup(swaggerDocs))
   }
 
   private loadRouters(): void {
-    this.application.use('/api', swaggerui.serve, swaggerui.setup(swaggerDocs))
     this.application.use('/auth', AuthRouter)
   }
 

@@ -9,16 +9,32 @@ AuthRouter.post('/google', h(AuthController.google))
 
 /**
  * @swagger
- * /api/fruits:
+ * /auth/login:
  *   post:
- *     tags:
- *       - Fruits
- *     description: Adds a new fruit to the database
+ *     description: Iniciar sesión con correo y contraseña
+ *     security:
+ *      - ApiKeyAuth:
+ *        type: apiKey
+ *        in: header
+ *        name: Authorization
  *     produces:
  *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         schema:
+ *          type: object
+ *          properties:
+ *           email:
+ *            type: string
+ *            required: true
+ *           password:
+ *            type: string
+ *            required: true
  *     responses:
  *       200:
- *         description: Successfully added
+ *         description: Sesión iniciada correctamente
  *       500:
  *         description: Server error
  */
