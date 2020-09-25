@@ -3,6 +3,7 @@ export interface CustomerData {
     name?: string
     lastname?: string
     pictureUrl?: string
+    tempToken?:string
   }
   
   export interface FacebookLoginRequest extends CustomerData {

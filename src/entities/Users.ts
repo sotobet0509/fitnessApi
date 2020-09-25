@@ -22,7 +22,7 @@ export class User {
     password: string
 
     @Column('text')
-    pictureurl: string
+    pictureUrl: string
 
     @Column({nullable: true })
     facebookId: string
@@ -31,7 +31,7 @@ export class User {
     googleId: string
 
     @Column({nullable: true })
-    temptoken: string
+    tempToken: string
 
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking
