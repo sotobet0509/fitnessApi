@@ -5,6 +5,8 @@ import * as morgan from 'morgan'
 import * as cors from 'cors'
 import * as helmet from 'helmet'
 import { AuthRouter } from '../routes/auth'
+import { MeRouter } from '../routes/me'
+import { BundleRouter } from '../routes/bundle'
 import ErrorHandler from '../middleware/ErrorHandler'
 import EndpointNotFound from '../middleware/EndpointNotFound'
 
@@ -52,6 +54,8 @@ export default class ExpressApp {
 
   private loadRouters(): void {
     this.application.use('/auth', AuthRouter)
+    this.application.use('/me', MeRouter)
+    this.application.use('/bundles', BundleRouter)
   }
 
   private loadErrorHandlers(): void {

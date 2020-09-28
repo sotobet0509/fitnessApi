@@ -6,8 +6,8 @@ export class Bundle {
     @PrimaryGeneratedColumn('increment')
     id: number
 
-    @Column('integer')
-    name: number
+    @Column()
+    name: string
 
     @Column('float')
     price: number
