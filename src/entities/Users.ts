@@ -21,7 +21,7 @@ export class User {
     @Column({nullable: true })
     password: string
 
-    @Column('text')
+    @Column('text',{nullable: true })
     pictureUrl: string
 
     @Column({nullable: true })
