@@ -12,6 +12,9 @@ export class Bundle {
     @Column('float')
     price: number
 
+    @Column('float')
+    offer: number
+
     @Column()
     description: string
 
@@ -20,6 +23,9 @@ export class Bundle {
 
     @Column('integer')
     expirationDays: number
+
+    @Column('integer')
+    passes: number
 
     @Column()
     isDeleted: boolean

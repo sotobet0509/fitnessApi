@@ -9,19 +9,17 @@ import { TokenService } from '../services/token'
 import { ExtendedRequest } from '../../types'
 import { MeRepository } from '../repositories/me'
 import { BundleRepository } from '../repositories/bundle'
+import { LocationRepository } from '../repositories/location'
+import { ScheduleRepository } from '../repositories/schedule'
 
 
-export const BundleController ={
+export const ScheduleController ={
 
-    async getBundle(req: ExtendedRequest, res: Response){
-        const bundleId = parseInt(req.params.bundle_id)
-        const bundle = await BundleRepository.getBundle(bundleId)
-        res.json({ success: true, data: bundle})
+    async getSchedule(req: ExtendedRequest, res: Response){
+        const scheduleId = parseInt(req.params.scheduleId)
+        const schedule = await ScheduleRepository.getSchedule(scheduleId)
+        res.json({ success: true, data: schedule})
         
-    },
-
-    async getAllBundles(req: ExtendedRequest, res: Response){
-        const bundles = await BundleRepository.getAllBundles()
-        res.json({ success: true, data: bundles})
     }
+
 }

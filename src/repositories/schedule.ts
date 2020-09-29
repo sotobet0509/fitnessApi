@@ -8,21 +8,19 @@ import { Bundle } from '../entities/Bundles'
 import { Payment_method } from '../entities/Payment_methods'
 import { Booking } from '../entities/Bookings'
 import { build } from 'swagger-express-ts'
+import { Location } from '../entities/Locantions'
+import { Schedule } from '../entities/Schedules'
 
-export const BundleRepository = {
-    async getBundle(bundleId: number){
-        const bundle = await getRepository(Bundle).findOne({
+export const ScheduleRepository = {
+    async getSchedule(scheduleId: number){
+        const schedule = await getRepository(Schedule).find({
             where: {
-                id: bundleId
-            }
+                id: scheduleId
+            },
+            relations: ['Booking','Booking.Seat']
         })
-        if (!bundle) throw new ErrorResponse(404, 11, 'El paquete no existe')
-        return bundle
-    },
+        if (schedule.length == 0) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
-    async getAllBundles(){
-        const bundles = await getRepository(Bundle).find({})
-        return bundles
+        return schedule
     }
-
 }

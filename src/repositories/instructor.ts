@@ -8,21 +8,23 @@ import { Bundle } from '../entities/Bundles'
 import { Payment_method } from '../entities/Payment_methods'
 import { Booking } from '../entities/Bookings'
 import { build } from 'swagger-express-ts'
+import { Instructor } from '../entities/Instructors'
 
-export const BundleRepository = {
-    async getBundle(bundleId: number){
-        const bundle = await getRepository(Bundle).findOne({
+export const InstructorRepository = {
+    async getInstructor(instructorId: number){
+        const instructor = await getRepository(Instructor).findOne({
             where: {
-                id: bundleId
+                id: instructorId
             }
         })
-        if (!bundle) throw new ErrorResponse(404, 11, 'El paquete no existe')
-        return bundle
+        if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
+        return instructor
     },
 
-    async getAllBundles(){
-        const bundles = await getRepository(Bundle).find({})
-        return bundles
+    async getAllInstructors(){
+        const instructors = await getRepository(Instructor).find({})
+        return instructors
+
     }
 
 }

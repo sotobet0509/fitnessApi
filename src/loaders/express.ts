@@ -12,6 +12,9 @@ import EndpointNotFound from '../middleware/EndpointNotFound'
 
 import swaggerjsondoc = require('swagger-jsdoc')
 import swaggerui = require('swagger-ui-express')
+import { LocationRouter } from '../routes/location'
+import { ScheduleRouter } from '../routes/schedule'
+import { InstructorRouter } from '../routes/instructor'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -56,6 +59,9 @@ export default class ExpressApp {
     this.application.use('/auth', AuthRouter)
     this.application.use('/me', MeRouter)
     this.application.use('/bundles', BundleRouter)
+    this.application.use('/locations', LocationRouter)
+    this.application.use('/schedules', ScheduleRouter)
+    this.application.use('/instructors', InstructorRouter)
   }
 
   private loadErrorHandlers(): void {
