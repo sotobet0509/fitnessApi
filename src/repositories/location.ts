@@ -44,13 +44,6 @@ export const LocationRepository = {
         let days = [ [], [], [], [], [], [], [] ]
         for (var i in filteredSchedules) {
             const filteredSchedule = filteredSchedules[i]
-            filteredSchedule['booked'] = false
-            const booking = await getRepository(Booking).findOne({
-                where: {
-                    Schedule: filteredSchedule
-                }
-            })
-            if (booking) filteredSchedule['booked'] = true
             days[filteredSchedule.date.getDay()].push(filteredSchedule)
         }
         return days
