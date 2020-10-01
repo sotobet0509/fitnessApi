@@ -9,6 +9,8 @@ import { ScheduleSchema } from '../interfaces/schedule'
 import { Instructor } from '../entities/Instructors'
 import { Room } from '../entities/Rooms'
 
+import * as moment from 'moment'
+
 export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
         const schedule = await getRepository(Schedule).find({
@@ -49,13 +51,18 @@ export const ScheduleRepository = {
         const repository = getRepository(Purchase)
         const purchases = await repository.find({
             where: {
-                User: clientId
+                User: clientId,
             },
             relations: ['Bundle', 'Payment_method']
         })
         let clases = 0
         purchases.forEach(purchase => {
-            clases += purchase.Bundle.classNumber
+            const bundle = purchase.Bundle
+            const buyedAt = moment(purchase.date)
+            // no se añaden clases de paquetes expirados
+            if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+                clases += purchase.Bundle.classNumber
+            }
         })
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({
@@ -65,7 +72,7 @@ export const ScheduleRepository = {
         })
         let clasesTomadas = bookings.length
 
-        let pending = clases - clasesTomadas
+        let pending = clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
         if(pending == 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         const schedule = await bookingRepository.findOne({

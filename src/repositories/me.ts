@@ -4,6 +4,8 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { Purchase } from '../entities/Purchases'
 import { Booking } from '../entities/Bookings'
 
+import * as moment from 'moment'
+
 export const MeRepository = {
     async getProfile(id: string) {
         const repository = getRepository(User)
@@ -27,7 +29,12 @@ export const MeRepository = {
         })
         let clases = 0
         purchases.forEach(purchase => {
-            clases += purchase.Bundle.classNumber
+            const bundle = purchase.Bundle
+            const buyedAt = moment(purchase.date)
+            // no se añaden clases de paquetes expirados
+            if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+                clases += purchase.Bundle.classNumber
+            }
         })
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({
@@ -39,7 +46,7 @@ export const MeRepository = {
         return {
             purchases,
             taken: clasesTomadas,
-            pending: clases - clasesTomadas
+            pending: clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
         }
     },
     async getClasses(user: User){
