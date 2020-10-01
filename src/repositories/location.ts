@@ -1,3 +1,4 @@
+import { Booking } from './../entities/Bookings';
 import { getRepository, getConnection, Repository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Location } from '../entities/Locantions'
@@ -41,9 +42,17 @@ export const LocationRepository = {
             return false
         })
         let days = [ [], [], [], [], [], [], [] ]
-        filteredSchedules.forEach((schedule: Schedule) => {
-            days[schedule.date.getDay()].push(schedule)
-        })
+        for (var i in filteredSchedules) {
+            const filteredSchedule = filteredSchedules[i]
+            filteredSchedule['booked'] = false
+            const booking = await getRepository(Booking).findOne({
+                where: {
+                    Schedule: filteredSchedule
+                }
+            })
+            if (booking) filteredSchedule['booked'] = true
+            days[filteredSchedule.date.getDay()].push(filteredSchedule)
+        }
         return days
     }
 
