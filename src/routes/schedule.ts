@@ -56,6 +56,40 @@ const ScheduleRouter = Router({ mergeParams: true })
  */
 ScheduleRouter.get('/:scheduleId', h(ScheduleController.getSchedule))
 
+/**
+ * @swagger
+ * /schedules/{schedule_id}/seat/{seat_id}/client/{client_id}:
+ *   post:
+ *     description: Reliza la reservacion de un asiento en un horario para un usuario por id (requiere token de usuario tipo admin)
+ *     security:
+ *      - ApiKeyAuth:
+ *        type: apiKey
+ *        in: header
+ *        name: Authorization
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         schema:
+ *          type: object
+ *          properties:
+ *           scheduleid:
+ *             type: integer
+ *             required: true
+ *           seatId:
+ *             type: integer
+ *             required: true
+ *           clientId:
+ *             type: string
+ *             required: true 
+ *     responses:
+ *       200:
+ *         description: Sesión iniciada correctamente
+ *       500:
+ *         description: Server error
+ */
 ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id',h(checkToken), h(ScheduleController.booking))
 
 export { ScheduleRouter }
