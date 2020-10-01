@@ -4,7 +4,10 @@ import { Purchase } from './Purchases'
 @Entity({name: 'transactions'})
 export class Transaction {
     @PrimaryGeneratedColumn('uuid')
-    id: number
+    id: string
+
+    @Column({nullable: true})
+    voucher: string
 
     @Column()
     date: Date

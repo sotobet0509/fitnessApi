@@ -15,7 +15,7 @@ export class User {
     @Column()
     email: string
 
-    @Column()
+    @Column({nullable: true })
     lastname: string
 
     @Column({nullable: true })
@@ -32,6 +32,9 @@ export class User {
 
     @Column({nullable: true })
     tempToken: string
+
+    @Column( {default: false})
+    isAdmin: boolean
 
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking

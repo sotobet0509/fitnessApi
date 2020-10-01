@@ -15,6 +15,8 @@ import swaggerui = require('swagger-ui-express')
 import { LocationRouter } from '../routes/location'
 import { ScheduleRouter } from '../routes/schedule'
 import { InstructorRouter } from '../routes/instructor'
+import { ClientRouter } from '../routes/client'
+import { PurchaseRouter } from '../routes/purchase'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -62,6 +64,8 @@ export default class ExpressApp {
     this.application.use('/locations', LocationRouter)
     this.application.use('/schedules', ScheduleRouter)
     this.application.use('/instructors', InstructorRouter)
+    this.application.use('/clients', ClientRouter)
+    this.application.use('/purchase', PurchaseRouter)
   }
 
   private loadErrorHandlers(): void {

@@ -140,18 +140,18 @@ export const
       if (error) throw new DataMissingError()
       const data = <LocalLoginData>value
   
-      const customer = await AuthRepository.authenticateCustomer(data)
+      const user = await AuthRepository.authenticateCustomer(data)
   
       //Dar acceso
-      const customerToken = new TokenService(customer.id)
-      const token = await customerToken.signToken()
+      const userToken = new TokenService(user.id)
+      const token = await userToken.signToken()
   
-      customer.password = undefined
+      delete user.password
   
       return res.json({
         success: true,
         token,
-        customer,
+        user,
       })
     },
   }

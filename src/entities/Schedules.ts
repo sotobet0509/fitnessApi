@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Timestamp, ManyToOne, JoinColumn } from 'typeorm'
 import { Instructor } from './Instructors'
 import { Booking } from './Bookings'
+import { Room } from './Rooms'
 
 
 @Entity({name: 'schedules'})
@@ -23,5 +24,8 @@ export class Schedule {
 
     @OneToMany(type => Booking, Booking => Booking.Schedule)
     Booking: Booking
+
+    @ManyToOne(type => Room, Room => Room.Schedules)
+    Rooms: Room
 
 }

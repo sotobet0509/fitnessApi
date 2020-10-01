@@ -18,14 +18,13 @@ export const LocationController ={
     },
 
     async getLocationsByWeek(req: ExtendedRequest, res: Response){
-        const locationId = parseInt(req.params.location_id)
         const roomId = parseInt(req.params.room_id)
         const year = parseInt(req.params.year)
-        const mounth = parseInt(req.params.mounth)
+        const month = parseInt(req.params.month)
         const week = parseInt(req.params.week)
 
-        const locations = await LocationRepository.getLocationsByWeek()
-        res.json({ success: true, locations})
+        const schedules = await LocationRepository.getLocationsByWeek(roomId, year, month, week)
+        res.json({ success: true, schedules})
 
     }
 }

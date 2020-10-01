@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class CammelCase1600975055136 implements MigrationInterface {
+export class NuevoComienzo1601503348964 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
     }

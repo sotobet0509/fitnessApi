@@ -25,3 +25,6 @@ export interface CustomerData {
     password: string
   }
   
+  export interface AdminSignupData {
+    email: string
+  }
