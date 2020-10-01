@@ -23,21 +23,19 @@ export const LocationRepository = {
     },
 
     async getLocationsByWeek(room_id: number, year: number, month: number, week: number){
-        console.log(room_id)
         const room = await getRepository(Room).findOne({
             where: {
                 id: room_id
             },
-            relations: ['Schedules']
+            relations: ['Schedules','Schedules.Instructor']
         })
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         const schedules = room.Schedules
         const filteredSchedules = schedules.filter((schedule: Schedule) =>{
             const date = moment(schedule.date)
             const _year = date.year()
-            const _month = date.month() + 1
             const _week = date.week()
-            if(year === _year && month === _month && week === _week) return true
+            if(year === _year && week === _week) return true
             return false
         })
         let days = [ [], [], [], [], [], [], [] ]

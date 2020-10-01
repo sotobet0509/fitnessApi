@@ -92,4 +92,47 @@ ScheduleRouter.get('/:scheduleId', h(ScheduleController.getSchedule))
  */
 ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id',h(checkToken), h(ScheduleController.booking))
 
+/**
+ * @swagger
+ * /schedules/create:
+ *   post:
+ *     description: Crear un nuevo horario (el campo start y end requieren una fecha la inicio la cual no se guarda)
+ *     security:
+ *      - ApiKeyAuth:
+ *        type: apiKey
+ *        in: header
+ *        name: Authorization
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         schema:
+ *          type: object
+ *          properties:
+ *           date:
+ *            type: string
+ *            required: true
+ *           end:
+ *            type: string
+ *            required: true
+ *           start:
+ *            type: string
+ *            required: true
+ *           instructor_id:
+ *            type: string
+ *            required: true
+ *           roomsId:
+ *            type: string
+ *            required: true
+ * 
+ *     responses:
+ *       200:
+ *         description: Sesión iniciada correctamente
+ *       500:
+ *         description: Server error
+ */
+ScheduleRouter.post('/create',h(checkToken), h(ScheduleController.createSchedule))
+
 export { ScheduleRouter }

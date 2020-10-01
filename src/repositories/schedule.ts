@@ -5,6 +5,9 @@ import { Booking } from '../entities/Bookings'
 import { User } from '../entities/Users'
 import { Purchase } from '../entities/Purchases'
 import { Seat } from '../entities/Seats'
+import { ScheduleSchema } from '../interfaces/schedule'
+import { Instructor } from '../entities/Instructors'
+import { Room } from '../entities/Rooms'
 
 export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
@@ -82,6 +85,41 @@ export const ScheduleRepository = {
 
         await bookingRepository.save(booking)
         
+        },
+
+        async createSchedule(data: ScheduleSchema) {
+            const scheduleRepository = getRepository(Schedule)
+            
+            const instructor = await getRepository(Instructor).findOne(
+                {
+                    where:{
+                        id: data.instructor_id
+                    }
+                }
+            )
+            if (!instructor) throw new ErrorResponse(404, 17, 'El instructor no existe')
+
+            const room = await getRepository(Room).findOne(
+                {
+                    where:{
+                        id: data.roomsId
+                    }
+                }
+            )
+            if (!room) throw new ErrorResponse(404, 18, 'La sala no existe')
+            
+
+            let schedule = new Schedule()
+            schedule.date = data.date
+            schedule.end = new Date(data.end)
+            schedule.start = new Date(data.start)
+            schedule.Instructor = instructor
+            schedule.Rooms = room
+    
+            schedule = await scheduleRepository.save(schedule)
+    
+            return schedule
         }
+
 
 }
