@@ -6,6 +6,8 @@ import { User } from '../entities/Users'
 import { Purchase } from '../entities/Purchases'
 import { Seat } from '../entities/Seats'
 
+import * as moment from 'moment'
+
 export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
         const schedule = await getRepository(Schedule).find({
@@ -46,13 +48,18 @@ export const ScheduleRepository = {
         const repository = getRepository(Purchase)
         const purchases = await repository.find({
             where: {
-                User: clientId
+                User: clientId,
             },
             relations: ['Bundle', 'Payment_method']
         })
         let clases = 0
         purchases.forEach(purchase => {
-            clases += purchase.Bundle.classNumber
+            const bundle = purchase.Bundle
+            const buyedAt = moment(purchase.date)
+            // no se añaden clases de paquetes expirados
+            if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+                clases += purchase.Bundle.classNumber
+            }
         })
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({
