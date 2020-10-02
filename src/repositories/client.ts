@@ -31,15 +31,19 @@ export const ClientRepository = {
             for (var j in purchases) {
                 const purchase = purchases[j]
                 const bundle = purchase.Bundle
-                if (moment().diff(moment(purchase.date), 'days') >= bundle.expirationDays) {
+                if (moment().diff(purchase.date, 'days') <= bundle.expirationDays) {
                     classes = classes + bundle.classNumber
                 }
             }
-            let taken = bookings.length
+            const taken = bookings.length
+            let pending = classes - taken
+            if (pending < 0) {
+                pending = 0
+            }
             delete client.password
             data.push({
                 client,
-                pending: classes - taken >= 0 ? classes - taken : 0,
+                pending,
                 taken
             })
         }
