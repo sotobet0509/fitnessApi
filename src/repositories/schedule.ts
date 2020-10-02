@@ -51,7 +51,7 @@ export const ScheduleRepository = {
         const repository = getRepository(Purchase)
         const purchases = await repository.find({
             where: {
-                User: clientId,
+                User: client,
             },
             relations: ['Bundle', 'Payment_method']
         })
@@ -68,7 +68,7 @@ export const ScheduleRepository = {
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({
             where: {
-                User: clientId
+                User: client
             }
         })
         let clasesTomadas = bookings.length
