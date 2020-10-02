@@ -72,6 +72,7 @@ export const ScheduleRepository = {
             }
         })
         let clasesTomadas = bookings.length
+        console.log('clases tomadas', clasesTomadas)
 
         let pending = (clases - clasesTomadas) >= 0 ? (clases - clasesTomadas) : 0
         if (pending == 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
