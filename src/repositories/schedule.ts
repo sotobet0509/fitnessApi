@@ -5,6 +5,9 @@ import { Booking } from '../entities/Bookings'
 import { User } from '../entities/Users'
 import { Purchase } from '../entities/Purchases'
 import { Seat } from '../entities/Seats'
+import { ScheduleSchema } from '../interfaces/schedule'
+import { Instructor } from '../entities/Instructors'
+import { Room } from '../entities/Rooms'
 
 import * as moment from 'moment'
 
@@ -36,14 +39,14 @@ export const ScheduleRepository = {
                 id: scheduleId
             }
         })
-        if(!scheduleExist) throw new ErrorResponse(404, 16, 'Horario no existe')
-        
+        if (!scheduleExist) throw new ErrorResponse(404, 16, 'Horario no existe')
+
         const seat = await getRepository(Seat).findOne({
             where: {
                 id: seatId
             }
         })
-        if(!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
+        if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
 
         const repository = getRepository(Purchase)
         const purchases = await repository.find({
@@ -71,16 +74,16 @@ export const ScheduleRepository = {
         let clasesTomadas = bookings.length
 
         let pending = (clases - clasesTomadas) >= 0 ? (clases - clasesTomadas) : 0
-        if(pending == 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
+        if (pending == 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         const schedule = await bookingRepository.findOne({
             where: {
                 Schedule: scheduleExist
             }
         })
-        if(schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
+        if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
 
-        
+
 
 
         const booking = new Booking()
@@ -89,7 +92,41 @@ export const ScheduleRepository = {
         booking.User = client
 
         await bookingRepository.save(booking)
-        
-        }
+
+    },
+
+    async createSchedule(data: ScheduleSchema) {
+        const scheduleRepository = getRepository(Schedule)
+
+        const instructor = await getRepository(Instructor).findOne(
+            {
+                where: {
+                    id: data.instructor_id
+                }
+            }
+        )
+        if (!instructor) throw new ErrorResponse(404, 17, 'El instructor no existe')
+
+        const room = await getRepository(Room).findOne(
+            {
+                where: {
+                    id: data.roomsId
+                }
+            }
+        )
+        if (!room) throw new ErrorResponse(404, 18, 'La sala no existe')
+
+
+        let schedule = new Schedule()
+        schedule.date = data.date
+        schedule.end = new Date(data.end)
+        schedule.start = new Date(data.start)
+        schedule.Instructor = instructor
+        schedule.Rooms = room
+
+        schedule = await scheduleRepository.save(schedule)
+
+        return schedule
+    }
 
 }
