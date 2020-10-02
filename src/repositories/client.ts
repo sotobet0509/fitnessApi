@@ -1,8 +1,11 @@
+import { Booking } from './../entities/Bookings';
+import { Purchase } from './../entities/Purchases';
 import { getRepository, getConnection, Repository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
+import * as moment from 'moment'
 
 export const ClientRepository = {
     async getAllClients(){
@@ -11,10 +14,41 @@ export const ClientRepository = {
                 isAdmin: false
             }
         })
-        clients.forEach((client: User)=>{
+        let data = []
+        for (var i in clients) {
+            const client = clients[i]
+            const purchases = await getRepository(Purchase).find({
+                where: {
+                    User: client
+                },
+                relations: ['Bundle']
+            })
+            const bookings = await getRepository(Booking).find({
+                where: {
+                    User: client
+                }
+            })
+            let classes = 0
+            for (var j in purchases) {
+                const purchase = purchases[j]
+                const bundle = purchase.Bundle
+                if (moment().diff(purchase.date, 'days') <= bundle.expirationDays) {
+                    classes = classes + bundle.classNumber
+                }
+            }
+            const taken = bookings.length
+            let pending = classes - taken
+            if (pending < 0) {
+                pending = 0
+            }
             delete client.password
-        })
-        return clients
+            data.push({
+                client,
+                pending,
+                taken
+            })
+        }
+        return data
 
     },
     

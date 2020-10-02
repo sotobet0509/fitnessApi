@@ -51,7 +51,7 @@ export const ScheduleRepository = {
         const repository = getRepository(Purchase)
         const purchases = await repository.find({
             where: {
-                User: clientId,
+                User: client,
             },
             relations: ['Bundle', 'Payment_method']
         })
@@ -61,23 +61,27 @@ export const ScheduleRepository = {
             const buyedAt = moment(purchase.date)
             // no se añaden clases de paquetes expirados
             if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
-                clases += purchase.Bundle.classNumber
+                console.log('clases añadidas', bundle.classNumber)
+                clases = clases + bundle.classNumber
             }
         })
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({
             where: {
-                User: clientId
+                User: client
             }
         })
         let clasesTomadas = bookings.length
+        console.log('clases tomadas', clasesTomadas)
 
-        let pending = clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
-        if (pending == 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
+        let pending = clases - clasesTomadas
+        console.log('clases pendientes', pending)
+        if (pending <= 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         const schedule = await bookingRepository.findOne({
             where: {
-                Schedule: scheduleExist
+                Schedule: scheduleExist,
+                Seat: seat
             }
         })
         if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
