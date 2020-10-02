@@ -62,7 +62,7 @@ export const ScheduleRepository = {
             // no se añaden clases de paquetes expirados
             if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
                 console.log('clases añadidas', bundle.classNumber)
-                clases += bundle.classNumber
+                clases = clases + bundle.classNumber
             }
         })
         const bookingRepository = getRepository(Booking)
@@ -75,6 +75,7 @@ export const ScheduleRepository = {
         console.log('clases tomadas', clasesTomadas)
 
         let pending = clases - clasesTomadas
+        console.log('clases pendientes', pending)
         if (pending <= 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         const schedule = await bookingRepository.findOne({
