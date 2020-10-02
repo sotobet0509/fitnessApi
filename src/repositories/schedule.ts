@@ -80,7 +80,8 @@ export const ScheduleRepository = {
 
         const schedule = await bookingRepository.findOne({
             where: {
-                Schedule: scheduleExist
+                Schedule: scheduleExist,
+                Seat: seat
             }
         })
         if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
