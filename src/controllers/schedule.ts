@@ -27,6 +27,17 @@ export const ScheduleController ={
         res.json({ success: true})
     },
 
+    async bookingClient(req: ExtendedRequest, res: Response){
+        if (req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const scheduleId = parseInt(req.params.schedule_id)
+        const seatId = parseInt(req.params.seat_id)
+        const clientId = req.user.id
+
+        await ScheduleRepository.setBooking(scheduleId, seatId, clientId)
+
+        res.json({ success: true})
+    },
+
     async createSchedule(req: ExtendedRequest, res: Response){
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
         const scheduleSchema = Joi.object().keys({
