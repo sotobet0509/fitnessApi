@@ -1,7 +1,8 @@
 import { getRepository, getConnection, Repository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
-import { CustomerData } from '../interfaces/auth'
+import { ClientData, CustomerData } from '../interfaces/auth'
+import { PasswordService } from '../services/password'
 
 export const ClientRepository = {
     async getAllClients(){
@@ -49,6 +50,50 @@ export const ClientRepository = {
     
         //await sendActivationUrl(client.email, client.tempToken)
         return client
-    } 
+    },
 
+
+    async changeClientStatus(clientId: string) {
+        const clientRepository = getRepository(User)
+        
+        const client = await getRepository(User).findOne({
+            where: {
+                id: clientId
+            }
+        })
+        if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
+        
+    
+        client.isDeleted = !client.isDeleted
+        await clientRepository.save(client)
+
+    },
+
+    async updateClient(data: ClientData) {
+        const clientRepository = getRepository(User)
+        const updateClient = await getRepository(User).findOne({
+            where: {
+                id: data.id
+            }
+        })
+        if (!updateClient) throw new ErrorResponse(404, 14, 'El usuario no existe')
+        
+        updateClient.name = data.name ? data.name : updateClient.name
+        updateClient.email = data.email ? data.email : updateClient.email
+        updateClient.lastname = data.lastname ? data.lastname : updateClient.lastname
+        
+        updateClient.password = data.password ? data.password : updateClient.password
+        //Hash Password
+        const passwordService = new PasswordService(updateClient.password)
+        const password = await passwordService.getHashedPassword()
+        updateClient.password = password
+
+        updateClient.pictureUrl = data.pictureUrl ? data.pictureUrl : updateClient.pictureUrl
+        updateClient.facebookId = data.facebookId ? data.facebookId : updateClient.facebookId
+        updateClient.googleId = data.googleId ? data.googleId : updateClient.googleId
+        updateClient.isAdmin = data.isAdmin ? data.isAdmin : updateClient.isAdmin
+        updateClient.createdAt = data.createdAt ? data.createdAt : updateClient.createdAt
+
+        await clientRepository.save(updateClient)    
+    }
 }

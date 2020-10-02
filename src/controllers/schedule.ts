@@ -42,6 +42,33 @@ export const ScheduleController ={
 
         await ScheduleRepository.createSchedule(data)
         res.json({ success: true})
+    },
+
+    async updateSchedule(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const scheduleSchema = Joi.object().keys({
+            id: Joi.number().required(),
+            date: Joi.date(),
+            end: Joi.date(),
+            start: Joi.date(),
+            instructor_id: Joi.number(),
+            roomsId: Joi.number()
+        })
+        const { error, value } = scheduleSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ScheduleSchema>value
+
+        await ScheduleRepository.updateSchedule(data)
+        res.json({ success: true})
+    },
+
+    async deleteSchedule(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        
+        const scheduleId = parseInt(req.params.schedule_id)
+
+        await ScheduleRepository.deleteSchedule(scheduleId)
+        res.json({ success: true})
     }
 
 

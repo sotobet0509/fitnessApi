@@ -137,4 +137,9 @@ ClientRouter.get('/', h(checkToken), h(ClientController.getAllClients))
 ClientRouter.get('/:client_id',  h(checkToken), h(ClientController.getClient))
 
 
+ClientRouter.patch('/update',h(checkToken), h(ClientController.updateClient))
+
+ClientRouter.patch('/delete/:client_id',h(checkToken), h(ClientController.changeClientStatus))
+
+
 export { ClientRouter }

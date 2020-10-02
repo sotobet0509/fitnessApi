@@ -34,5 +34,33 @@ export const InstructorController ={
 
         await InstructorRepository.createInstructor(data)
         res.json({ success: true})
+    },
+
+    async updateInstructor(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const instructorSchema = Joi.object().keys({
+            id: Joi.number().required(),
+            name: Joi.string(),
+            lastname: Joi.string(),
+            description: Joi.string(),
+            profilePicture: Joi.string(),
+            largePicture: Joi.string(),
+        })
+        const { error, value } = instructorSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <InstructorSchema>value
+
+        await InstructorRepository.updateInstructor(data)
+        res.json({ success: true})
+    },
+
+    async changeInstructorStatus(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        
+        const instructorId = parseInt(req.params.instructor_id)
+
+
+        await InstructorRepository.changeInstructorStatus(instructorId)
+        res.json({ success: true})
     }
 }

@@ -1,6 +1,9 @@
 export interface InstructorSchema {
-    name: string
-    lastname: string
-    description: string
-    profilePicture: string
+    id?: number
+    name?: string
+    lastname?: string
+    description?: string
+    profilePicture?: string
+    largePicture?: string
+    isDeleted?: boolean
   }

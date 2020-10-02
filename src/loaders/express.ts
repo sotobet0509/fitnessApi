@@ -17,6 +17,7 @@ import { ScheduleRouter } from '../routes/schedule'
 import { InstructorRouter } from '../routes/instructor'
 import { ClientRouter } from '../routes/client'
 import { PurchaseRouter } from '../routes/purchase'
+import { BookingRouter } from '../routes/booking'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -66,6 +67,7 @@ export default class ExpressApp {
     this.application.use('/instructors', InstructorRouter)
     this.application.use('/clients', ClientRouter)
     this.application.use('/purchase', PurchaseRouter)
+    this.application.use('/bookings', BookingRouter)
   }
 
   private loadErrorHandlers(): void {

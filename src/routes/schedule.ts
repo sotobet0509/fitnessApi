@@ -135,4 +135,9 @@ ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id',h(checkToken
  */
 ScheduleRouter.post('/create',h(checkToken), h(ScheduleController.createSchedule))
 
+ScheduleRouter.patch('/update',h(checkToken), h(ScheduleController.updateSchedule))
+
+
+ScheduleRouter.delete('/:schedule_id',h(checkToken), h(ScheduleController.deleteSchedule))
+
 export { ScheduleRouter }

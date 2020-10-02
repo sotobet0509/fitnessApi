@@ -122,4 +122,11 @@ InstructorRouter.get('/:instructor_id', h(InstructorController.getInstructor))
  */
 InstructorRouter.post('/create',h(checkToken), h(InstructorController.createInstructor))
 
+
+InstructorRouter.patch('/update',h(checkToken), h(InstructorController.updateInstructor))
+
+
+InstructorRouter.patch('/delete/:instructor_id',h(checkToken), h(InstructorController.changeInstructorStatus))
+
+
 export { InstructorRouter }

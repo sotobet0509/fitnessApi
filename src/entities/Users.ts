@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, PromiseUtils } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, PromiseUtils, Timestamp, CreateDateColumn } from 'typeorm'
 import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 import { Booking } from './Bookings'
 import { Purchase } from './Purchases'
@@ -35,6 +35,12 @@ export class User {
 
     @Column( {default: false})
     isAdmin: boolean
+    
+    @Column({default: false})
+    isDeleted: boolean
+
+    @CreateDateColumn()
+    createdAt: Date
 
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking
