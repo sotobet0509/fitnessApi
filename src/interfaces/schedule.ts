@@ -6,3 +6,7 @@ export interface ScheduleSchema {
     instructor_id?: number
     roomsId?: number
 }
+
+export interface ScheduleIsPass{
+    isPass: boolean
+}

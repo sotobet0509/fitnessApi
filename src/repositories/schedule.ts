@@ -24,7 +24,7 @@ export const ScheduleRepository = {
         return schedule
     },
 
-    async setBooking(scheduleId: number, seatId: number, clientId: string) {
+    async setBooking(scheduleId: number, seatId: number, clientId: string, isPass: boolean) {
         const client = await getRepository(User).findOne(
             {
                 where: {
@@ -55,6 +55,7 @@ export const ScheduleRepository = {
             },
             relations: ['Bundle', 'Payment_method']
         })
+        let passes = 0
         let clases = 0
         purchases.forEach(purchase => {
             const bundle = purchase.Bundle
@@ -63,6 +64,7 @@ export const ScheduleRepository = {
             if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
                 console.log('clases añadidas', bundle.classNumber)
                 clases = clases + bundle.classNumber
+                passes = passes + bundle.passes
             }
         })
         const bookingRepository = getRepository(Booking)
@@ -71,12 +73,23 @@ export const ScheduleRepository = {
                 User: client
             }
         })
-        let clasesTomadas = bookings.length
+
+        let clasesTomadas = bookings.filter(booking =>{
+            return !booking.isPass
+        }).length
         console.log('clases tomadas', clasesTomadas)
 
+        let pasesTomados = bookings.filter(booking =>{
+            return booking.isPass
+        }).length
+        console.log('pases tomados', pasesTomados)
+
         let pending = clases - clasesTomadas
+        let pendingPasses = passes - pasesTomados
         console.log('clases pendientes', pending)
-        if (pending <= 0) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
+        if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
+
+        if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
 
         const schedule = await bookingRepository.findOne({
             where: {
@@ -86,15 +99,15 @@ export const ScheduleRepository = {
         })
         if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
 
-
-
-
         const booking = new Booking()
         booking.Schedule = scheduleExist
         booking.Seat = seat
         booking.User = client
+        booking.isPass = isPass
 
         await bookingRepository.save(booking)
+        
+        return isPass ? pendingPasses - 1 : pendingPasses
 
     },
 

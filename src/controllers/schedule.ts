@@ -3,7 +3,7 @@ import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { ScheduleRepository } from '../repositories/schedule'
 import { ErrorResponse } from '../errors/ErrorResponse'
-import { ScheduleSchema } from '../interfaces/schedule'
+import { ScheduleIsPass, ScheduleSchema } from '../interfaces/schedule'
 import { DataMissingError } from '../errors/DataMissingError'
 
 
@@ -22,7 +22,14 @@ export const ScheduleController ={
         const seatId = parseInt(req.params.seat_id)
         const clientId = req.params.client_id
 
-        await ScheduleRepository.setBooking(scheduleId, seatId, clientId)
+        const scheduleSchema = Joi.object().keys({
+            isPass: Joi.boolean().required()
+        })
+        const { error, value } = scheduleSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ScheduleIsPass>value
+
+        await ScheduleRepository.setBooking(scheduleId, seatId, clientId, data.isPass)
 
         res.json({ success: true})
     },
@@ -32,8 +39,16 @@ export const ScheduleController ={
         const scheduleId = parseInt(req.params.schedule_id)
         const seatId = parseInt(req.params.seat_id)
         const clientId = req.user.id
+        
 
-        await ScheduleRepository.setBooking(scheduleId, seatId, clientId)
+        const scheduleSchema = Joi.object().keys({
+            isPass: Joi.boolean().required()
+        })
+        const { error, value } = scheduleSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ScheduleIsPass>value
+
+        await ScheduleRepository.setBooking(scheduleId, seatId, clientId, data.isPass)
 
         res.json({ success: true})
     },
