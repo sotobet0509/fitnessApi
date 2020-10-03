@@ -21,8 +21,8 @@ export const BookingRepository = {
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
 
         const start = moment(booking.Schedule.date).set({
-            hour: new Date(booking.Schedule.start).getHours(),
-            minutes: new Date(booking.Schedule.start).getMinutes(),
+            hour: new Date("2020-01-01 " + booking.Schedule.start).getHours(),
+            minutes: new Date("2020-01-01 " + booking.Schedule.start).getMinutes(),
             seconds: 0
         })
         const duration = moment.duration(moment().diff(start)).asHours()
