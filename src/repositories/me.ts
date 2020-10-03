@@ -15,7 +15,7 @@ export const MeRepository = {
             }
         })
         if (!profile) throw new ErrorResponse(404, 10, 'El usuario no existe')
-        const bookings = getRepository(Booking).find({
+        const bookings = await getRepository(Booking).find({
             where: {
                 User: profile
             },
