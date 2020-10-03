@@ -8,6 +8,9 @@ export class Booking {
     @PrimaryGeneratedColumn('increment')
     id: number
 
+    @Column({default: false})
+    isPass: boolean
+
     @ManyToOne(type => Schedule, Schedule => Schedule.Booking)
     @JoinColumn({name: 'schedules_id'})
     Schedule: Schedule

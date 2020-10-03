@@ -49,13 +49,13 @@ export const MeRepository = {
             pending: clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
         }
     },
-    async getClasses(user: User){
+    async getClasses(user: User) {
         const repository = getRepository(Booking)
         const bookings = await repository.find({
             where: {
                 User: user
             },
-            relations: ['Schedule', 'Seat','Schedule.Instructor','Seat.Room','Seat.Room.Location']
+            relations: ['Schedule', 'Seat', 'Schedule.Instructor', 'Seat.Room', 'Seat.Room.Location']
         })
         const purchases = await getRepository(Purchase).find({
             where: {
@@ -64,15 +64,32 @@ export const MeRepository = {
             relations: ['Bundle', 'Payment_method']
         })
         let clases = 0
+        let passes = 0
         purchases.forEach(purchase => {
             clases += purchase.Bundle.classNumber
+            passes += purchase.Bundle.passes
         })
 
-        let clasesTomadas = bookings.length
+        let takenClases = 0
+        let takenPasses = 0
+        for (var i in bookings) {
+            const booking = bookings[i]
+            if (booking.isPass) {
+                takenPasses += 1
+            } else {
+                takenClases += 1
+            }
+        }
+
+
+        let clasesPendientes = clases - takenClases
+        let pasesPendientes= passes - takenPasses
         return {
             bookings,
-            taken: clasesTomadas,
-            pending: clases - clasesTomadas
+            taken: takenClases,
+            pending: clasesPendientes,
+            pendingPasses: pasesPendientes,
+            takenPasses
         }
 
     }
