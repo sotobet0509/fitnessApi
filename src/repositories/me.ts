@@ -15,8 +15,60 @@ export const MeRepository = {
             }
         })
         if (!profile) throw new ErrorResponse(404, 10, 'El usuario no existe')
+        const bookings = getRepository(Booking).find({
+            where: {
+                User: profile
+            },
+            relations: ['Schedule', 'Schedule.Instructor']
+        })
+        let minutesDone = 0
+        let favorites = []
+        for (var i in bookings) {
+            const booking: Booking = bookings[i]
+            const schedule = booking.Schedule
+            const start = moment(schedule.date).set({
+                hour: schedule.start.getHours(),
+                minutes: schedule.start.getMinutes(),
+                seconds: 0
+            })
+            const end = moment(schedule.date).set({
+                hour: schedule.end.getHours(),
+                minutes: schedule.end.getMinutes(),
+                seconds: 0
+            })
+            const minutes = moment.duration(end.diff(start))
+            if (moment(schedule.date).isBefore(moment()) && start.isBefore(moment())) {
+                minutesDone = minutes.asMinutes()
+            }
+            const instructor = schedule.Instructor
+            let added = false
+            for (var j in favorites) {
+                const fav = favorites[j]
+                if (instructor.name === fav[0]) {
+                    added = true
+                    favorites[j][1] = favorites[j][1] + 1
+                    break
+                }
+            }
+            if (!added) {
+                favorites.push([instructor.name, 1])
+            }
+        }
+        let sFav = ""
+        let sFavNum = 0
+        for (var i in favorites) {
+            const fav = favorites[i]
+            if (fav[1] > sFavNum) {
+                sFavNum = fav[1]
+                sFav = fav[0]
+            }
+        }
         delete profile.password
-        return profile
+        return {
+            profile,
+            minutesDone,
+            favorite: sFav
+        }
     },
 
     async getHistory(user: User) {

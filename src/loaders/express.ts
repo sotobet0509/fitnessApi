@@ -9,6 +9,8 @@ import { MeRouter } from '../routes/me'
 import { BundleRouter } from '../routes/bundle'
 import ErrorHandler from '../middleware/ErrorHandler'
 import EndpointNotFound from '../middleware/EndpointNotFound'
+import * as fileUpload from 'express-fileupload'
+import * as path from 'path'
 
 import swaggerjsondoc = require('swagger-jsdoc')
 import swaggerui = require('swagger-ui-express')
@@ -56,6 +58,27 @@ export default class ExpressApp {
     this.application.use(helmet())
     this.application.use(morgan('dev'))
     this.application.use('/api', swaggerui.serve, swaggerui.setup(swaggerDocs))
+    this.application.use(
+      fileUpload({
+        limits: {
+          fileSize: 5242880, //5 MB
+        },
+        useTempFiles: true,
+        tempFileDir: path.join(__dirname, '../../tmp/'),
+        debug: true,
+        createParentPath: true,
+        limitHandler: (req, res, next) => {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 7,
+              message: 'File size greater than 5MB',
+            },
+          })
+        },
+      })
+    )
+    this.application.use('/files', express.static(path.join(__dirname, '../../files')))
   }
 
   private loadRouters(): void {
