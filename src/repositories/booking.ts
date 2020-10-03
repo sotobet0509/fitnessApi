@@ -25,7 +25,7 @@ export const BookingRepository = {
             minutes: new Date("2020-01-01 " + booking.Schedule.start).getMinutes(),
             seconds: 0
         })
-        const duration = moment.duration(moment().diff(start)).asHours()
+        const duration = moment.duration(start.diff(moment())).asHours()
         console.log(duration, start)
         if (duration >= 12) {
             await bookingRepository.remove(booking)
