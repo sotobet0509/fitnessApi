@@ -28,13 +28,13 @@ export const MeRepository = {
             const booking: Booking = bookings[i]
             const schedule = booking.Schedule
             const start = moment(schedule.date).set({
-                hour: schedule.start.getHours(),
-                minutes: schedule.start.getMinutes(),
+                hour: new Date(schedule.start).getHours(),
+                minutes: new Date(schedule.start).getMinutes(),
                 seconds: 0
             })
             const end = moment(schedule.date).set({
-                hour: schedule.end.getHours(),
-                minutes: schedule.end.getMinutes(),
+                hour: new Date(schedule.start).getHours(),
+                minutes: new Date(schedule.start).getMinutes(),
                 seconds: 0
             })
             const minutes = moment.duration(end.diff(start))
