@@ -23,6 +23,7 @@ export const MeRepository = {
         })
         let minutesDone = 0
         let favorites = []
+        console.log(bookings, profile)
         for (var i in bookings) {
             const booking: Booking = bookings[i]
             const schedule = booking.Schedule
