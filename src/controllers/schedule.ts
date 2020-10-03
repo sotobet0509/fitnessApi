@@ -48,9 +48,9 @@ export const ScheduleController ={
         if (error) throw new DataMissingError()
         const data = <ScheduleIsPass>value
 
-        await ScheduleRepository.setBooking(scheduleId, seatId, clientId, data.isPass)
+        const passes = await ScheduleRepository.setBooking(scheduleId, seatId, clientId, data.isPass)
 
-        res.json({ success: true})
+        res.json({ success: true, passes})
     },
 
     async createSchedule(req: ExtendedRequest, res: Response){
