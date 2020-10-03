@@ -5,6 +5,8 @@ import { InstructorController } from '../controllers/instructor'
 import { InstructorSchema } from '../interfaces/instructor'
 import { Booking } from '../entities/Bookings'
 
+import * as moment from 'moment'
+
 export const BookingRepository = {
 
     async deleteBooking(bookingId: number) {
@@ -13,12 +15,22 @@ export const BookingRepository = {
         const booking = await getRepository(Booking).findOne({
             where: {
                 id: bookingId
-            }
+            },
+            relations: ['Schedule']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
 
-
-        await bookingRepository.remove(booking)
+        const start = moment(booking.Schedule.date).set({
+            hour: new Date(booking.Schedule.start).getHours(),
+            minutes: new Date(booking.Schedule.start).getMinutes(),
+            seconds: 0
+        })
+        const duration = moment.duration(moment().diff(start)).asHours()
+        if (duration >= 12) {
+            await bookingRepository.remove(booking)
+        } else {
+            throw new ErrorResponse(409, 18, 'La reservacion ya no se puede eliminar')
+        }
 
     }
 }
