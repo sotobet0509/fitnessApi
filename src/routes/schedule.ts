@@ -92,6 +92,8 @@ ScheduleRouter.get('/:scheduleId', h(ScheduleController.getSchedule))
  */
 ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id',h(checkToken), h(ScheduleController.booking))
 
+ScheduleRouter.post('/:schedule_id/seat/:seat_id',h(checkToken), h(ScheduleController.bookingClient))
+
 /**
  * @swagger
  * /schedules/create:

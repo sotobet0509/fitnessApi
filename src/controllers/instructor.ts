@@ -25,8 +25,7 @@ export const InstructorController ={
         const instructorSchema = Joi.object().keys({
             name: Joi.string().required(),
             lastname: Joi.string().required(),
-            description: Joi.string().required(),
-            profilePicture: Joi.string().required()
+            description: Joi.string().required()
         })
         const { error, value } = instructorSchema.validate(req.body)
         if (error) throw new DataMissingError()
