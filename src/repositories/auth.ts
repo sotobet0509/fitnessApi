@@ -111,6 +111,43 @@ export const AuthRepository = {
     customer.tempToken = null
 
     customer = await customerRepository.save(customer)
+
+    const bundleRepository = getRepository(Bundle)
+
+    const bundleId = await bundleRepository.findOne({
+      where: {
+        name: "Paquete Prueba"
+      }
+    })
+    const paymentMethod = await getRepository(Payment_method).findOne(
+      {
+        where: {
+          id: 0
+        }
+      }
+    )
+    if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
+
+
+    const purchase = new Purchase()
+    purchase.User = customer
+    purchase.date = new Date()
+    purchase.Payment_method = paymentMethod
+    purchase.Bundle = bundleId
+
+    const _purchase = await getRepository(Purchase).save(purchase)
+
+    const transaction = new Transaction()
+    transaction.voucher = uuidv4()
+    transaction.date = new Date()
+    transaction.invoice = false
+    transaction.total = 0
+    transaction.Purchase = _purchase
+    await getRepository(Transaction).save(transaction)
+
+    await sendActivationUrl(customer.email, customer.tempToken)
+
+
     return customer
   },
 
