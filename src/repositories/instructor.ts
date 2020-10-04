@@ -16,7 +16,9 @@ export const InstructorRepository = {
     },
 
     async getAllInstructors() {
-        const instructors = await getRepository(Instructor).find({})
+        const instructors = await getRepository(Instructor).find({
+            isDeleted: false
+        })
         return instructors
     },
 
