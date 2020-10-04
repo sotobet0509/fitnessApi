@@ -12,5 +12,17 @@ export const BookingController ={
 
         await BookingRepository.deleteBooking(bookingId)
         res.json({ success: true})
+    },
+
+    async getSeats(req: ExtendedRequest, res: Response) {
+        const scheduleId = parseInt(req.params.schedule_id)
+        const user = req.user
+        if (!user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+
+        const response = await BookingRepository.getSeats(scheduleId)
+        res.json({
+            success: true,
+            data: response
+        })
     }
 }

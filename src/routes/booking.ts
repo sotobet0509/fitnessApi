@@ -7,5 +7,6 @@ import {checkToken} from '../middleware/CheckToken'
 const BookingRouter = Router({ mergeParams: true })
 
 BookingRouter.delete('/:booking_id',h(checkToken), h(BookingController.deleteBooking))
+BookingRouter.get('/list/:schedule_id', h(checkToken), h(BookingController.getSeats))
 
 export { BookingRouter }

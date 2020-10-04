@@ -6,6 +6,7 @@ import { InstructorSchema } from '../interfaces/instructor'
 import { Booking } from '../entities/Bookings'
 
 import * as moment from 'moment'
+import { Schedule } from '../entities/Schedules'
 
 export const BookingRepository = {
 
@@ -32,6 +33,39 @@ export const BookingRepository = {
         } else {
             throw new ErrorResponse(409, 18, 'La reservacion ya no se puede eliminar')
         }
+
+    },
+
+    async getSeats(scheduleId: number) {
+        const schedule = await getRepository(Schedule).findOne({
+            where: {
+                id: scheduleId
+            }
+        })
+        if (!schedule) throw new ErrorResponse(404, 20, 'El horario no existe')
+
+        const bookings = await getRepository(Booking).find({
+            where: {
+                Schedule: schedule
+            },
+            relations: ['Seat', 'User']
+        })
+
+        let data = []
+        for (var i in bookings) {
+            const booking = bookings[i]
+            data.push({
+                id: booking.id,
+                name: booking.User.name,
+                lastname: booking.User.lastname,
+                seat: booking.Seat.number,
+                date: schedule.date,
+                start: schedule.start,
+                end: schedule.end
+            })
+        }
+
+        return data
 
     }
 }
