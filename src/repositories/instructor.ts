@@ -18,7 +18,6 @@ export const InstructorRepository = {
     async getAllInstructors() {
         const instructors = await getRepository(Instructor).find({})
         return instructors
-
     },
 
     async createInstructor(data: InstructorSchema) {
