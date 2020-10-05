@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import axios from 'axios'
 import Joi = require('@hapi/joi')
 import config from '../config'
-import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData } from '../interfaces/auth'
+import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema } from '../interfaces/auth'
 import { DataMissingError } from '../errors/DataMissingError'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { AuthRepository } from '../repositories/auth'
@@ -17,6 +17,7 @@ export const
         lastname: Joi.string().required(),
         password: Joi.string().required(),
       })
+     
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalSignUpData>value
@@ -135,23 +136,64 @@ export const
         email: Joi.string().required(),
         password: Joi.string().required(),
       })
-  
+
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalLoginData>value
-  
+
       const user = await AuthRepository.authenticateCustomer(data)
-  
+
       //Dar acceso
       const userToken = new TokenService(user.id)
       const token = await userToken.signToken()
-  
+
       delete user.password
-  
+
       return res.json({
         success: true,
         token,
         user,
       })
     },
+
+    async recoveryPassword(req: Request, res: Response) {
+      const userEmail = Joi.object().keys({
+        email: Joi.string().required()
+      })
+      const { error, value } = userEmail.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <AdminSignupData>value
+
+      await AuthRepository.recoveryPassword(data)
+
+      return res.json({ success: true })
+    },
+
+    async changePassword(req: Request, res: Response) {
+      const changePasswordSchema = Joi.object().keys({
+        tempToken: Joi.string().required(),
+        password: Joi.string().required()
+      })
+      
+    
+      console.log(changePasswordSchema.tempToken, changePasswordSchema.password)
+
+      const { error, value } = changePasswordSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <ChangePasswordSchema>value
+
+     const user = await AuthRepository.changePassword(data)
+
+     //Dar acceso
+     const userToken = new TokenService(user.id)
+     const token = await userToken.signToken()
+
+     delete user.password
+
+      return res.json({
+        success: true,
+        user})
+    }
+
+
   }

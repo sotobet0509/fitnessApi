@@ -41,3 +41,8 @@ export interface ClientData {
   isAdmin?: boolean
   createdAt?: Date
 }
+
+export interface ChangePasswordSchema {
+ tempToken: string
+ password: string
+}

@@ -1,10 +1,10 @@
 import { getRepository, getConnection } from 'typeorm'
 import { User } from '../entities/Users'
-import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData } from '../interfaces/auth'
+import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
 import { TokenService } from '../services/token'
 import { ErrorResponse } from '../errors/ErrorResponse'
-import { sendActivationUrl } from '../services/mail'
+import { sendActivationUrl, sendRecoveryPasswordMail } from '../services/mail'
 import { BundleRepository } from './bundle'
 import { Bundle } from '../entities/Bundles'
 import { Purchase } from '../entities/Purchases'
@@ -26,7 +26,7 @@ export const AuthRepository = {
     if (exists) throw new ErrorResponse(403, 6, 'Email already registered')
 
     let customer = new User()
-    customer.email = data.email
+    customer.email = data.email.toLocaleLowerCase()
     customer.name = data.name
     customer.lastname = data.lastname
 
@@ -103,7 +103,7 @@ export const AuthRepository = {
   async createCustomerFromFacebook(data: FacebookLoginRequest) {
     const customerRepository = getRepository(User)
     let customer = new User()
-    customer.email = data.email
+    customer.email = data.email.toLocaleLowerCase()
     customer.facebookId = data.facebookId
     customer.name = data.name
     customer.lastname = data.lastname
@@ -170,7 +170,7 @@ export const AuthRepository = {
   async createCustomerFromGoogle(data: GoogleLoginRequest) {
     const customerRepository = getRepository(User)
     let customer = new User()
-    customer.email = data.email
+    customer.email = data.email.toLocaleLowerCase()
     customer.googleId = data.googleId
     customer.name = data.name
     customer.lastname = data.lastname
@@ -183,7 +183,7 @@ export const AuthRepository = {
   async authenticateCustomer(data: LocalLoginData) {
     const customerRepository = getRepository(User)
     const customer = await customerRepository.findOne({
-      where: { email: data.email },
+      where: { email: data.email.toLocaleLowerCase() },
     })
 
     if (!customer?.password) throw new ErrorResponse(403, 4, 'Invalid Credentials')
@@ -194,4 +194,42 @@ export const AuthRepository = {
     if (!valid) throw new ErrorResponse(403, 4, 'Invalid Credentials')
     return customer
   },
+
+  async recoveryPassword(data: AdminSignupData) {
+    const userRepository = getRepository(User)
+    let user = await userRepository.findOne({
+      where: {
+        email: data.email
+      }
+    })
+
+    user.tempToken = uuidv4()
+    console.log(user.tempToken)
+    await userRepository.save(user)
+
+    await sendRecoveryPasswordMail(user.email, user.tempToken)
+  },
+
+  async changePassword(data: ChangePasswordSchema) {
+    console.log(data)
+    const userRepository = getRepository(User)
+    let user = await userRepository.findOne({
+
+      where: {
+        tempToken: data.tempToken
+      }
+    })
+    if (!user) throw new ErrorResponse(404, 14, 'El usuario no existe')
+
+    //Hash Password
+    const passwordService = new PasswordService(data.password)
+    const password = await passwordService.getHashedPassword()
+
+    user.password = password
+    user.tempToken = null
+
+    await userRepository.save(user)
+    return user
+  }
+
 }
