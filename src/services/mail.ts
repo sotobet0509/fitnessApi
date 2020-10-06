@@ -11,7 +11,7 @@ export async function sendActivationUrl(email: string, token: string) {
   sgMail.setApiKey(config.sendGridApiKey)
   const mailData: MailDataRequired = {
     to: email,
-    from: 'no-reply@bloomcycling.com',
+    from: 'bienvenidoabloom@digital-ignition.com.mx',
     subject: 'Bienvenido a Bloom',
     html: `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
