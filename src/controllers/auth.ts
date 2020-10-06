@@ -192,8 +192,7 @@ export const
 
       return res.json({
         success: true,
-        user})
+        user,
+        token})
     }
-
-
   }
