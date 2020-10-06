@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { request, Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { ClientRepository } from '../repositories/client'
@@ -6,6 +6,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
 import { CustomerData } from '../interfaces/auth'
 import { ClientData } from '../interfaces/auth'
+
 
 export const ClientController = {
 
@@ -70,8 +71,9 @@ export const ClientController = {
         
         const clientId = req.params.client_id
 
-
         await ClientRepository.changeClientStatus(clientId)
         res.json({ success: true})
-    }
+    },
+
+    
 }

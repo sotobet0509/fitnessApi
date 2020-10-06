@@ -112,4 +112,6 @@ MeRouter.get('/history', h(checkToken), h(MeController.history))
 
 MeRouter.get('/classes', h(checkToken), h(MeController.classes))
 
+MeRouter.patch('/changeProfilePicture', h(checkToken), h(MeController.uploadProfilePicture))
+
 export { MeRouter }

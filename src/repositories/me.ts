@@ -136,7 +136,7 @@ export const MeRepository = {
 
 
         let clasesPendientes = clases - takenClases
-        let pasesPendientes= passes - takenPasses
+        let pasesPendientes = passes - takenPasses
         return {
             bookings,
             taken: takenClases,
@@ -144,6 +144,11 @@ export const MeRepository = {
             pendingPasses: pasesPendientes,
             takenPasses
         }
+    },
 
+    async uploadProfilePicture(url: string, user: User){
+        const userRepository = getRepository(User)
+        user.pictureUrl = url
+        await userRepository.save(user)
     }
 }

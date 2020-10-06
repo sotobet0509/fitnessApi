@@ -1,10 +1,9 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class addIsPass1601752160126 implements MigrationInterface {
-    name = 'addIsPass1601752160126'
+export class deleteClientNumberv21602005472771 implements MigrationInterface {
+    name = 'deleteClientNumberv21602005472771'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query("ALTER TABLE `bookings` ADD `isPass` tinyint NOT NULL DEFAULT 0");
         await queryRunner.query("ALTER TABLE `seats` DROP FOREIGN KEY `FK_fb50bf5e21a79337fa688489cf9`");
         await queryRunner.query("ALTER TABLE `seats` CHANGE `rooms_id` `rooms_id` int NULL");
         await queryRunner.query("ALTER TABLE `rooms` DROP FOREIGN KEY `FK_0178c51847d16edcc783f2f2190`");
@@ -94,7 +93,6 @@ export class addIsPass1601752160126 implements MigrationInterface {
         await queryRunner.query("ALTER TABLE `rooms` ADD CONSTRAINT `FK_0178c51847d16edcc783f2f2190` FOREIGN KEY (`locations_id`) REFERENCES `locations`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `seats` CHANGE `rooms_id` `rooms_id` int NULL DEFAULT 'NULL'");
         await queryRunner.query("ALTER TABLE `seats` ADD CONSTRAINT `FK_fb50bf5e21a79337fa688489cf9` FOREIGN KEY (`rooms_id`) REFERENCES `rooms`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
-        await queryRunner.query("ALTER TABLE `bookings` DROP COLUMN `isPass`");
     }
 
 }

@@ -45,6 +45,13 @@ export const LocationRepository = {
             days[filteredSchedule.date.getDay()].push(filteredSchedule)
         }
         return days
+    },
+    
+    async getSchedules(){
+        const schedueles  = await getRepository(Schedule).find({
+            relations: ['Instructor','Booking']
+        })
+        return schedueles
     }
 
 }

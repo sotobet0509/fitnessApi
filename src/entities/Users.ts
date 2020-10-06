@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, PromiseUtils, Timestamp, CreateDateColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated } from 'typeorm'
 import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 import { Booking } from './Bookings'
 import { Purchase } from './Purchases'

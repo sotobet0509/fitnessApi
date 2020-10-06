@@ -10,6 +10,7 @@ import { Instructor } from '../entities/Instructors'
 import { Room } from '../entities/Rooms'
 
 import * as moment from 'moment'
+import { sendUpdateBooking, sendDeleteBooking } from '../services/mail'
 
 export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
@@ -74,12 +75,12 @@ export const ScheduleRepository = {
             }
         })
 
-        let clasesTomadas = bookings.filter(booking =>{
+        let clasesTomadas = bookings.filter(booking => {
             return !booking.isPass
         }).length
         console.log('clases tomadas', clasesTomadas)
 
-        let pasesTomados = bookings.filter(booking =>{
+        let pasesTomados = bookings.filter(booking => {
             return booking.isPass
         }).length
         console.log('pases tomados', pasesTomados)
@@ -106,7 +107,7 @@ export const ScheduleRepository = {
         booking.isPass = isPass
 
         await bookingRepository.save(booking)
-        
+
         return isPass ? pendingPasses - 1 : pendingPasses
 
     },
@@ -140,32 +141,48 @@ export const ScheduleRepository = {
         schedule.Instructor = instructor
         schedule.Rooms = room
 
-       
+
 
         return schedule
     },
 
     async updateSchedule(data: ScheduleSchema) {
         const scheduleRepository = getRepository(Schedule)
-        
+
         const updateSchedule = await getRepository(Schedule).findOne({
             where: {
                 id: data.id
             }
         })
-
         if (!updateSchedule) throw new ErrorResponse(404, 14, 'El horario no existe')
+
+            const bookingRepository = getRepository(Booking)
+            const booking = await getRepository(Booking).find({
+                where: {
+                    Schedule: updateSchedule
+                },
+                relations: ['User']
+            })
+
+            for (var i in booking) {
+                if (data.sendEmail) {
+                await sendUpdateBooking(booking[i].User.email)
+                }
+                await bookingRepository.remove(booking[i])
+            }
+        
+
         let instructor = new Instructor()
         instructor.id = data.instructor_id
         let room = new Room()
-        room.id= data.roomsId
+        room.id = data.roomsId
 
-        updateSchedule.date = data.date ? data.date: updateSchedule.date
-        updateSchedule.end = data.end ? data.end: updateSchedule.end
-        updateSchedule.start = data.start ? data.start:  updateSchedule.start
+        updateSchedule.date = data.date ? data.date : updateSchedule.date
+        updateSchedule.end = data.end ? data.end : updateSchedule.end
+        updateSchedule.start = data.start ? data.start : updateSchedule.start
         updateSchedule.Instructor = instructor ? instructor : updateSchedule.Instructor
-        updateSchedule.Rooms = room ? room: updateSchedule.Rooms
-        
+        updateSchedule.Rooms = room ? room : updateSchedule.Rooms
+
         await scheduleRepository.save(updateSchedule)
     },
 
@@ -183,14 +200,16 @@ export const ScheduleRepository = {
 
         const booking = await getRepository(Booking).find({
             where: {
-                Schedule: scheduleId
-            }
+                Schedule: schedule
+            },
+            relations: ['User']
         })
 
-        for(var i in booking) {         
+        for (var i in booking) {
+            await sendDeleteBooking(booking[i].User.email) 
             await bookingRepository.remove(booking[i])
         }
-        
+
         await scheduleRepository.remove(schedule)
     }
 }

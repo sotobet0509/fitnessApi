@@ -78,13 +78,15 @@ export const ScheduleController ={
             end: Joi.date(),
             start: Joi.date(),
             instructor_id: Joi.number(),
-            roomsId: Joi.number()
+            roomsId: Joi.number(),
+            sendEmail: Joi.boolean().required()
         })
         const { error, value } = scheduleSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <ScheduleSchema>value
 
-        await ScheduleRepository.updateSchedule(data)
+        await ScheduleRepository.updateSchedule(data) 
+  
         res.json({ success: true})
     },
 

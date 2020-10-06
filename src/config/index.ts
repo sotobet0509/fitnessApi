@@ -12,5 +12,7 @@ export default {
   internalToken: process.env.INTERNAL_TOKEN,
   sendGridApiKey: process.env.SENDGRID_API_KEY,
   stripeApiKey: process.env.STRIPE_API_KEY,
+  profilePictureUrl: process.env.PROFILE_PICTURES_URL,
+  profileInstructorPictureUrl: process.env.PROFILE_INSTRUCTOR_PICTURES_URL
 
 }
