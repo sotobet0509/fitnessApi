@@ -181,7 +181,7 @@ export const AuthRepository = {
   },
 
   async authenticateCustomer(data: LocalLoginData) {
-    const customerRepository = getRepository(User)
+    const customerRepository = getConnection().getRepository(User)
     const customer = await customerRepository.findOne({
       where: { email: data.email.toLocaleLowerCase() },
     })
@@ -202,12 +202,13 @@ export const AuthRepository = {
         email: data.email
       }
     })
+    if (user) {
+      user.tempToken = uuidv4()
+      await userRepository.save(user)
+      await sendRecoveryPasswordMail(user.email, user.tempToken)
+    }
 
-    user.tempToken = uuidv4()
-    console.log(user.tempToken)
-    await userRepository.save(user)
 
-    await sendRecoveryPasswordMail(user.email, user.tempToken)
   },
 
   async changePassword(data: ChangePasswordSchema) {
