@@ -132,6 +132,18 @@ export const ScheduleRepository = {
             }
         )
         if (!room) throw new ErrorResponse(404, 18, 'La sala no existe')
+        
+        let tempStart = data.start.toString().substring(16, 24)
+        const validateSchedule = await getRepository(Schedule).findOne(
+            {
+                where: {
+                    date: data.date,
+                    start: tempStart
+                }
+            }
+        )
+        if (validateSchedule) throw new ErrorResponse(404, 19, 'El horario ya esta ocupado')
+
 
 
         let schedule = new Schedule()
@@ -156,21 +168,21 @@ export const ScheduleRepository = {
         })
         if (!updateSchedule) throw new ErrorResponse(404, 14, 'El horario no existe')
 
-            const bookingRepository = getRepository(Booking)
-            const booking = await getRepository(Booking).find({
-                where: {
-                    Schedule: updateSchedule
-                },
-                relations: ['User']
-            })
+        const bookingRepository = getRepository(Booking)
+        const booking = await getRepository(Booking).find({
+            where: {
+                Schedule: updateSchedule
+            },
+            relations: ['User']
+        })
 
-            for (var i in booking) {
-                if (data.sendEmail) {
+        for (var i in booking) {
+            if (data.sendEmail) {
                 await sendUpdateBooking(booking[i].User.email)
-                }
-                await bookingRepository.remove(booking[i])
             }
-        
+            await bookingRepository.remove(booking[i])
+        }
+
 
         let instructor = new Instructor()
         instructor.id = data.instructor_id
@@ -206,7 +218,7 @@ export const ScheduleRepository = {
         })
 
         for (var i in booking) {
-            await sendDeleteBooking(booking[i].User.email) 
+            await sendDeleteBooking(booking[i].User.email)
             await bookingRepository.remove(booking[i])
         }
 
