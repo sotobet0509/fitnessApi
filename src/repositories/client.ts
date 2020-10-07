@@ -12,7 +12,8 @@ export const ClientRepository = {
         const clients = await getRepository(User).find({
             where:{
                 isAdmin: false
-            }
+            },
+            relations: ['Booking','Booking.Schedule']
         })
         let data = []
         for (var i in clients) {
