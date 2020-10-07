@@ -6,6 +6,13 @@ import { Room } from '../entities/Rooms'
 import { Schedule } from '../entities/Schedules'
 import * as moment from 'moment'
 
+
+moment.locale('en',{
+    week: {
+        dow: 1
+    }
+})
+
 export const LocationRepository = {
     async getLocation(locationId: number){
         const location = await getRepository(Location).findOne({
@@ -32,6 +39,7 @@ export const LocationRepository = {
         })
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         const schedules = room.Schedules
+        console.log(schedules)
         const filteredSchedules = schedules.filter((schedule: Schedule) =>{
             const date = moment(schedule.date)
             const _year = date.year()
@@ -42,8 +50,25 @@ export const LocationRepository = {
         let days = [ [], [], [], [], [], [], [] ]
         for (var i in filteredSchedules) {
             const filteredSchedule = filteredSchedules[i]
-            days[filteredSchedule.date.getDay()].push(filteredSchedule)
+            days[moment(filteredSchedule.date).isoWeekday()-1].push(filteredSchedule)
         }
+
+        console.log(schedules)
+
+       /* const filteredSchedules2 = schedules.filter((schedule: Schedule) =>{
+            const date = moment(schedule.date)
+            const _year = date.weekYear()
+            const _week = date.week()
+            console.log(_week, week +1, year, _year )
+            if(year === _year && (week+1) === _week) return true
+            return false
+        })
+        for (var i in filteredSchedules2) {
+            //console.log(filteredSchedules2[i])
+            const filteredSchedule2 = filteredSchedules2[i]
+            filteredSchedule2.date.getDay() == 0 && days[6].push(filteredSchedule2)
+        }*/
+
         return days
     },
     
