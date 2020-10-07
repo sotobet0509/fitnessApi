@@ -3,6 +3,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { Instructor } from '../entities/Instructors'
 import { InstructorController } from '../controllers/instructor'
 import { InstructorSchema } from '../interfaces/instructor'
+import { User } from '../entities/Users'
 
 export const InstructorRepository = {
     async getInstructor(instructorId: number) {
@@ -49,27 +50,40 @@ export const InstructorRepository = {
         updateInstructor.lastname = data.lastname ? data.lastname : updateInstructor.lastname
         updateInstructor.description = data.description ? data.description : updateInstructor.description
         updateInstructor.profilePicture = data.profilePicture ? data.profilePicture : updateInstructor.profilePicture
-        updateInstructor.largePicture = data.largePicture ? data.largePicture : updateInstructor.largePicture     
+        updateInstructor.largePicture = data.largePicture ? data.largePicture : updateInstructor.largePicture
         updateInstructor.isDeleted = updateInstructor.isDeleted
         updateInstructor.createdAt = updateInstructor.createdAt
-        await instructorRepository.save(updateInstructor)    
+        await instructorRepository.save(updateInstructor)
     },
 
     async changeInstructorStatus(instructorId: number) {
         const instructorRepository = getRepository(Instructor)
-        
+
         const instructor = await getRepository(Instructor).findOne({
             where: {
                 id: instructorId
             }
         })
         if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
-        
-    
+
+
         instructor.isDeleted = !instructor.isDeleted
 
         await instructorRepository.save(instructor)
 
+    },
+
+    async changeInstructorProfilePicture(url: string, instructorId: number) {
+        const InstructorRepository = getRepository(Instructor)
+        const instructor = await getRepository(Instructor).findOne({
+            where: {
+                id: instructorId
+            }
+        })
+        if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
+        instructor.profilePicture = url
+        
+        await InstructorRepository.save(instructor)
     }
 
 }

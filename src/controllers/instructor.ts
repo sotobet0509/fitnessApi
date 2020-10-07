@@ -5,6 +5,7 @@ import { InstructorRepository } from '../repositories/instructor'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { InstructorSchema } from '../interfaces/instructor'
 import { DataMissingError } from '../errors/DataMissingError'
+import { handleInstructorProfilePicture } from '../services/files'
 
 export const InstructorController ={
 
@@ -61,5 +62,17 @@ export const InstructorController ={
 
         await InstructorRepository.changeInstructorStatus(instructorId)
         res.json({ success: true})
-    }
+    },
+
+    async changeInstructorProfilePicture(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        console.log(req.files)
+        const url = await handleInstructorProfilePicture(req.files.file)
+        console.log(url)
+        const instructorId = parseInt(req.params.instructor_id)
+
+        await InstructorRepository.changeInstructorProfilePicture(url, instructorId)
+
+        res.json({ success: true})
+   }
 }

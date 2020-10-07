@@ -141,7 +141,7 @@ export const ScheduleRepository = {
         schedule.Instructor = instructor
         schedule.Rooms = room
 
-
+        await scheduleRepository.save(schedule)
 
         return schedule
     },
