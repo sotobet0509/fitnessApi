@@ -420,7 +420,7 @@ export async function sendUpdateBooking(email: string) {
   const mailData: MailDataRequired = {
     to: email,
     from: 'bienvenidoabloom@digital-ignition.com.mx',
-    subject: 'clase actualizada en Bloom',
+    subject: 'Una clase ha sido actualizada',
     html: `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" style="width:100%;font-family:arial, 'helvetica neue', helvetica, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
@@ -512,10 +512,10 @@ export async function sendUpdateBooking(email: string) {
                           <td align="center" style="padding:0;Margin:0;font-size:0px"><img src="https://izcywv.stripocdn.email/content/guids/CABINET_9e7cea61aff8bd57f9dafdb9369bd208/images/20671601681098768.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="180"></td> 
                          </tr> 
                          <tr style="border-collapse:collapse"> 
-                          <td align="center" style="padding:0;Margin:0;padding-top:15px;padding-bottom:15px"><h2 style="Margin:0;line-height:29px;mso-line-height-rule:exactly;font-family:'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;font-size:24px;font-style:normal;font-weight:normal;color:#000000">¡Cuenta creada!</h2></td> 
+                          <td align="center" style="padding:0;Margin:0;padding-top:15px;padding-bottom:15px"><h2 style="Margin:0;line-height:29px;mso-line-height-rule:exactly;font-family:'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;font-size:24px;font-style:normal;font-weight:normal;color:#000000">Una de tus clases ha sido actualizada</h2></td> 
                          </tr> 
                          <tr style="border-collapse:collapse"> 
-                          <td align="left" style="padding:0;Margin:0;padding-top:20px;padding-bottom:20px"><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;line-height:21px;color:#333333">¡Bienvenido!.<br>Gracias por registrarte en nuestra plataforma.<br><br>A partir de ahora podrás disfrutar de tus clases reservando desde tu perfil.</p></td> 
+                          <td align="left" style="padding:0;Margin:0;padding-top:20px;padding-bottom:20px"><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;line-height:21px;color:#333333">¡Hola!<br>El horario de una de tus clases ha sido modificado y como medida hemos eliminado tu reserva. Pero no te preocupes, aun puedes entrar a tu perfil y recuperar tu clases reservando un lugar en cualquier otro horario.</p></td> 
                          </tr> 
                          <tr style="border-collapse:collapse"> 
                           <td align="center" style="padding:20px;Margin:0"><span class="es-button-border" style="border-style:solid;border-color:#2CB543;background:#D78676;border-width:0px;display:inline-block;border-radius:20px;width:auto"><a href="http://bloomcycling.com/perfil" class="es-button" target="_blank" style="mso-style-priority:100 !important;text-decoration:none;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;font-size:18px;color:#FFFFFF;border-style:solid;border-color:#D78676;border-width:10px 20px;display:inline-block;background:#D78676;border-radius:20px;font-weight:bold;font-style:normal;line-height:22px;width:auto;text-align:center">Ir a mi cuenta</a></span></td> 
@@ -565,7 +565,7 @@ export async function sendDeleteBooking(email: string) {
   const mailData: MailDataRequired = {
     to: email,
     from: 'bienvenidoabloom@digital-ignition.com.mx',
-    subject: 'clase eliminada en Bloom',
+    subject: 'Una clase ha sido eliminada',
     html: `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" style="width:100%;font-family:arial, 'helvetica neue', helvetica, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
@@ -657,10 +657,10 @@ export async function sendDeleteBooking(email: string) {
                           <td align="center" style="padding:0;Margin:0;font-size:0px"><img src="https://izcywv.stripocdn.email/content/guids/CABINET_9e7cea61aff8bd57f9dafdb9369bd208/images/20671601681098768.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="180"></td> 
                          </tr> 
                          <tr style="border-collapse:collapse"> 
-                          <td align="center" style="padding:0;Margin:0;padding-top:15px;padding-bottom:15px"><h2 style="Margin:0;line-height:29px;mso-line-height-rule:exactly;font-family:'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;font-size:24px;font-style:normal;font-weight:normal;color:#000000">¡Cuenta creada!</h2></td> 
+                          <td align="center" style="padding:0;Margin:0;padding-top:15px;padding-bottom:15px"><h2 style="Margin:0;line-height:29px;mso-line-height-rule:exactly;font-family:'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;font-size:24px;font-style:normal;font-weight:normal;color:#000000">Una de tus clases fue eliminada</h2></td> 
                          </tr> 
                          <tr style="border-collapse:collapse"> 
-                          <td align="left" style="padding:0;Margin:0;padding-top:20px;padding-bottom:20px"><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;line-height:21px;color:#333333">¡Bienvenido!.<br>Gracias por registrarte en nuestra plataforma.<br><br>A partir de ahora podrás disfrutar de tus clases reservando desde tu perfil.</p></td> 
+                          <td align="left" style="padding:0;Margin:0;padding-top:20px;padding-bottom:20px"><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;line-height:21px;color:#333333">¡Hola!<br>Desafortunadamente, una de tus clases ha sido cancelada. Pero no te preocupes, puedes recuperar la clase entrado al sitio y reservando un lugar en cualquier otro horario.</p></td> 
                          </tr> 
                          <tr style="border-collapse:collapse"> 
                           <td align="center" style="padding:20px;Margin:0"><span class="es-button-border" style="border-style:solid;border-color:#2CB543;background:#D78676;border-width:0px;display:inline-block;border-radius:20px;width:auto"><a href="http://bloomcycling.com/perfil" class="es-button" target="_blank" style="mso-style-priority:100 !important;text-decoration:none;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'source sans pro', 'helvetica neue', helvetica, arial, sans-serif;font-size:18px;color:#FFFFFF;border-style:solid;border-color:#D78676;border-width:10px 20px;display:inline-block;background:#D78676;border-radius:20px;font-weight:bold;font-style:normal;line-height:22px;width:auto;text-align:center">Ir a mi cuenta</a></span></td> 
