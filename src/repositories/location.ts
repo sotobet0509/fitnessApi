@@ -28,7 +28,7 @@ export const LocationRepository = {
             where: {
                 id: room_id
             },
-            relations: ['Schedules','Schedules.Instructor']
+            relations: ['Schedules','Schedules.Instructor','Schedules.Booking']
         })
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         const schedules = room.Schedules
