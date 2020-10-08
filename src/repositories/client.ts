@@ -1,6 +1,6 @@
 import { Booking } from './../entities/Bookings';
 import { Purchase } from './../entities/Purchases';
-import { getRepository, getConnection, Repository } from 'typeorm'
+import { getRepository, getConnection, Repository, Between } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
@@ -126,11 +126,6 @@ export const ClientRepository = {
         updateClient.lastname = data.lastname ? data.lastname : updateClient.lastname
         
         updateClient.password = data.password ? data.password : updateClient.password
-        //Hash Password
-        const passwordService = new PasswordService(updateClient.password)
-        const password = await passwordService.getHashedPassword()
-        updateClient.password = password
-
         updateClient.pictureUrl = data.pictureUrl ? data.pictureUrl : updateClient.pictureUrl
         updateClient.facebookId = data.facebookId ? data.facebookId : updateClient.facebookId
         updateClient.googleId = data.googleId ? data.googleId : updateClient.googleId

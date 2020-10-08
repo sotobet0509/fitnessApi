@@ -82,6 +82,10 @@ LocationRouter.get('/:location_id', h(LocationController.getLocation))
 
 LocationRouter.get('/room/:room_id/year/:year/month/:month/week/:week', h(LocationController.getLocationsByWeek))
 
+
+//LocationRouter.get('/room/:room_id/schedules', h(LocationController.getLocationsByWeek2))
+
+
 LocationRouter.get('/schedules/all',h(checkToken), h(LocationController.getSchedules))
 
 export { LocationRouter }
