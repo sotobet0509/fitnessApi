@@ -57,7 +57,8 @@ export const ClientRepository = {
         const client = await getRepository(User).findOne({
             where: {
                 id: clientId
-            }
+            },
+            relations: ['Purchase','Purchase.Bundle','Purchase.Payment_method','Purchase.Transaction']
         })
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
         delete client.password
