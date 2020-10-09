@@ -22,22 +22,6 @@ export const LocationController ={
 
     async getLocationsByWeek(req: ExtendedRequest, res: Response){
         const roomId = parseInt(req.params.room_id)
-        const year = parseInt(req.params.year)
-        const month = parseInt(req.params.month)
-        const week = parseInt(req.params.week)
-
-        const schedules = await LocationRepository.getLocationsByWeek(roomId, year, month, week)
-        res.json({ success: true, schedules})
-    },
-
-    async getSchedules(req: ExtendedRequest, res: Response){
-        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-        const schedules = await LocationRepository.getSchedules()
-        res.json({ success: true, data: schedules})
-    },
-
-   /* async getLocationsByWeek2(req: ExtendedRequest, res: Response){
-        const roomId = parseInt(req.params.room_id)
         const locationSchema = Joi.object().keys({
             start: Joi.date().required()
         })
@@ -46,7 +30,13 @@ export const LocationController ={
         if (error) throw new DataMissingError()
         const data = <LocationSchema>value
 
-        const schedules = await LocationRepository.getLocationsByWeek2(roomId, data)
+        const schedules = await LocationRepository.getLocationsByWeek(roomId,data)
         res.json({ success: true, schedules})
-    }*/
+    },
+
+    async getSchedules(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const schedules = await LocationRepository.getSchedules()
+        res.json({ success: true, data: schedules})
+    }
 }

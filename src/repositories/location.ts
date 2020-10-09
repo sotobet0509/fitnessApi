@@ -6,6 +6,7 @@ import { Room } from '../entities/Rooms'
 import { Schedule } from '../entities/Schedules'
 import * as moment from 'moment'
 import { LocationSchema } from '../interfaces/location';
+import { endianness } from 'os';
 
 
 moment.locale('en',{
@@ -31,7 +32,7 @@ export const LocationRepository = {
         return locations
     },
 
-    async getLocationsByWeek(room_id: number, year: number, month: number, week: number){
+    async getLocationsByWeek(room_id: number, data: LocationSchema){
         const room = await getRepository(Room).findOne({
             where: {
                 id: room_id
@@ -39,37 +40,25 @@ export const LocationRepository = {
             relations: ['Schedules','Schedules.Instructor','Schedules.Booking']
         })
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
+
         const schedules = room.Schedules
         console.log(schedules)
         const filteredSchedules = schedules.filter((schedule: Schedule) =>{
             const date = moment(schedule.date)
-            const _year = date.year()
-            const _week = date.week()
-            if(year === _year && week === _week) return true
+            const endDate = moment(data.start).add(7,'days')
+
+            if(date.isAfter(data.start) && date.isBefore(endDate)) return true
             return false
         })
+        const currentDay = moment(data.start).isoWeekday() + 1
+
         let days = [ [], [], [], [], [], [], [] ]
-        for (var i in filteredSchedules) {
+        for (var i in filteredSchedules) {          
             const filteredSchedule = filteredSchedules[i]
-            days[moment(filteredSchedule.date).isoWeekday()-1].push(filteredSchedule)
+            let day = moment(filteredSchedule.date).isoWeekday()
+            if(day < currentDay) day = day + 7
+            days[day-currentDay].push(filteredSchedule)
         }
-
-        console.log(schedules)
-
-       /* const filteredSchedules2 = schedules.filter((schedule: Schedule) =>{
-            const date = moment(schedule.date)
-            const _year = date.weekYear()
-            const _week = date.week()
-            console.log(_week, week +1, year, _year )
-            if(year === _year && (week+1) === _week) return true
-            return false
-        })
-        for (var i in filteredSchedules2) {
-            //console.log(filteredSchedules2[i])
-            const filteredSchedule2 = filteredSchedules2[i]
-            filteredSchedule2.date.getDay() == 0 && days[6].push(filteredSchedule2)
-        }*/
-
         return days
     },
     
@@ -78,47 +67,6 @@ export const LocationRepository = {
             relations: ['Instructor','Booking']
         })
         return schedueles
-    },
-    /*async getLocationsByWeek2(room_id: number, data: LocationSchema){
-        const room = await getRepository(Room).findOne({
-            where: {
-                id: room_id
-            },
-            relations: ['Schedules','Schedules.Instructor','Schedules.Booking']
-        })
-        if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
-
-        const schedules = room.Schedules
-        console.log(schedules)
-        const filteredSchedules = schedules.filter((schedule: Schedule) =>{
-            const date = moment(schedule.date)
-            const enDate = moment(data.start).add(7, 'days')
-            if(year === _year && week === _week) return true
-            return false
-        })
-        let days = [ [], [], [], [], [], [], [] ]
-        for (var i in filteredSchedules) {
-            const filteredSchedule = filteredSchedules[i]
-            days[moment(filteredSchedule.date).isoWeekday()-1].push(filteredSchedule)
-        }
-
-        console.log(schedules)
-
-       /* const filteredSchedules2 = schedules.filter((schedule: Schedule) =>{
-            const date = moment(schedule.date)
-            const _year = date.weekYear()
-            const _week = date.week()
-            console.log(_week, week +1, year, _year )
-            if(year === _year && (week+1) === _week) return true
-            return false
-        })
-        for (var i in filteredSchedules2) {
-            //console.log(filteredSchedules2[i])
-            const filteredSchedule2 = filteredSchedules2[i]
-            filteredSchedule2.date.getDay() == 0 && days[6].push(filteredSchedule2)
-        }
-
-        return days
-    },*/
-
+    }
+   
 }

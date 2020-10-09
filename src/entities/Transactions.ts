@@ -18,6 +18,9 @@ export class Transaction {
     @Column('float')
     total: number
 
+    @Column('text',{nullable: true})
+    comments: string
+
     @ManyToOne(type => Purchase, Purchase => Purchase.Transaction)
     @JoinColumn({name: 'purchases_id'})
     Purchase: Purchase

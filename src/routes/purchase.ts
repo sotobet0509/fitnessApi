@@ -44,4 +44,6 @@ const PurchaseRouter = Router({ mergeParams: true })
  */
 PurchaseRouter.post('/client/:client_id', h(checkToken), h(PurchaseController.buy))
 
+PurchaseRouter.patch('/update/:purchase_id/bundle/:bundle_id', h(checkToken), h(PurchaseController.upgradeBundle))
+
 export { PurchaseRouter }
