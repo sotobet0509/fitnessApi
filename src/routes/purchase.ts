@@ -2,7 +2,7 @@ import { Router } from 'express'
 import * as h from 'express-async-handler'
 import { ClientController } from '../controllers/client'
 import { PurchaseController } from '../controllers/purchase'
-import {checkToken} from '../middleware/CheckToken'
+import { checkToken } from '../middleware/CheckToken'
 
 
 const PurchaseRouter = Router({ mergeParams: true })

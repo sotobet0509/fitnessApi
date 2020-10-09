@@ -31,6 +31,10 @@ export const InstructorController ={
         const { error, value } = instructorSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <InstructorSchema>value
+        const url = await handleInstructorProfilePicture(req.files.file)
+        const url2 = await handleInstructorProfilePicture(req.files.file2)
+        data.profilePicture = url
+        data.largePicture =url2
 
         await InstructorRepository.createInstructor(data)
         res.json({ success: true})
@@ -50,6 +54,19 @@ export const InstructorController ={
         if (error) throw new DataMissingError()
         const data = <InstructorSchema>value
 
+        let url = ""
+        let url2 = ""
+        if(req.files && req.files.file){
+            url = await handleInstructorProfilePicture(req.files.file)
+            data.profilePicture = url
+        } 
+
+        if(req.files && req.files.file2){
+            url2 = await handleInstructorProfilePicture(req.files.file2)
+            data.largePicture = url2
+        } 
+
+        
         await InstructorRepository.updateInstructor(data)
         res.json({ success: true})
     },
@@ -66,9 +83,8 @@ export const InstructorController ={
 
     async changeInstructorProfilePicture(req: ExtendedRequest, res: Response){
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-        console.log(req.files)
+       
         const url = await handleInstructorProfilePicture(req.files.file)
-        console.log(url)
         const instructorId = parseInt(req.params.instructor_id)
 
         await InstructorRepository.changeInstructorProfilePicture(url, instructorId)

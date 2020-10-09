@@ -58,7 +58,7 @@ export const ClientRepository = {
             where: {
                 id: clientId
             },
-            relations: ['Purchase','Purchase.Bundle','Purchase.Payment_method','Purchase.Transaction']
+            relations: ['Purchase','Purchase.Bundle','Purchase.Payment_method','Purchase.Transaction','Booking','Booking.Schedule','Booking.Seat','Booking.Schedule.Instructor']
         })
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
         delete client.password

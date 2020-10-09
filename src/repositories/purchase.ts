@@ -69,34 +69,34 @@ export const PurchaseRepository = {
             {
                 where: {
                     id: purchaseId
-                }
+                },
+                relations: ['Bundle']
             }
         )
         if (!purchase) throw new ErrorResponse(404, 14, 'La compra no existe')
 
         const currentBundle = await getRepository(Bundle).findOne({
             where: {
-                id: purchase.Bundle
+                id: purchase.Bundle.id
             }
         })
         if (!currentBundle) throw new ErrorResponse(404, 14, 'El paquete actual no existe')
-
+        if (currentBundle.name == 'Paquete Prueba')  throw new ErrorResponse(404, 14, 'El paquete prueba no puede ser modificado')
         const newBundle = await getRepository(Bundle).findOne({
             where: {
                 id: bundleId
             }
         })
         if (!newBundle) throw new ErrorResponse(404, 14, 'El nuevo paquete no existe')
-
+        if (currentBundle.id == newBundle.id) throw new ErrorResponse(404, 14, 'No se puede cambiar, es el mismo paquete')
         if (currentBundle.price > newBundle.price) throw new ErrorResponse(404, 14, 'No se puede realizar la compra, el paquete actual es mas grande')
 
         const transaction = new Transaction()
-        transaction.voucher= uuidv4()
+        transaction.voucher= currentBundle.name
         transaction.date = new Date()
         transaction.invoice = data.invoice
         transaction.total = newBundle.price - currentBundle.price
         transaction.Purchase = purchase
-        transaction.comments = currentBundle.name
 
         await getRepository(Transaction).save(transaction)
 

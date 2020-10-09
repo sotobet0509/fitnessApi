@@ -31,6 +31,7 @@ export const InstructorRepository = {
         instructor.lastname = data.lastname
         instructor.description = data.description
         instructor.profilePicture = data.profilePicture
+        instructor.largePicture = data.largePicture
 
         instructor = await instructorRepository.save(instructor)
 
@@ -68,7 +69,6 @@ export const InstructorRepository = {
 
 
         instructor.isDeleted = !instructor.isDeleted
-
         await instructorRepository.save(instructor)
 
     },
