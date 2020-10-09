@@ -50,7 +50,7 @@ export const LocationRepository = {
             if(date.isAfter(data.start) && date.isBefore(endDate)) return true
             return false
         })
-        const currentDay = moment(data.start).isoWeekday() + 1
+        const currentDay = moment(data.start).isoWeekday()
 
         let days = [ [], [], [], [], [], [], [] ]
         for (var i in filteredSchedules) {          
