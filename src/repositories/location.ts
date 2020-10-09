@@ -47,7 +47,7 @@ export const LocationRepository = {
             const date = moment(schedule.date)
             const endDate = moment(data.start).add(7,'days')
 
-            if(date.isAfter(data.start) && date.isBefore(endDate)) return true
+            if(date.isSameOrAfter(data.start) && date.isBefore(endDate)) return true
             return false
         })
         const currentDay = moment(data.start).isoWeekday()
