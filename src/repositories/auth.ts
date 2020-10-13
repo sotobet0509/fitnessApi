@@ -49,10 +49,11 @@ export const AuthRepository = {
         name: "Paquete Prueba"
       }
     })
+    // Método de pago: Cortesía
     const paymentMethod = await getRepository(Payment_method).findOne(
       {
         where: {
-          id: 0
+          id: 1
         }
       }
     )
@@ -68,10 +69,10 @@ export const AuthRepository = {
     const _purchase = await getRepository(Purchase).save(purchase)
 
     const transaction = new Transaction()
-    transaction.voucher = uuidv4()
+    transaction.voucher = 'Cortesía de nuevo cliente'
     transaction.date = new Date()
     transaction.invoice = false
-    transaction.total = 0
+    transaction.total = bundleId.price
     transaction.Purchase = _purchase
     await getRepository(Transaction).save(transaction)
 
@@ -119,10 +120,11 @@ export const AuthRepository = {
         name: "Paquete Prueba"
       }
     })
+    // Método de pago: Cortesía
     const paymentMethod = await getRepository(Payment_method).findOne(
       {
         where: {
-          id: 0
+          id: 1
         }
       }
     )
@@ -138,10 +140,10 @@ export const AuthRepository = {
     const _purchase = await getRepository(Purchase).save(purchase)
 
     const transaction = new Transaction()
-    transaction.voucher = uuidv4()
+    transaction.voucher = 'Cortesía de nuevo cliente'
     transaction.date = new Date()
     transaction.invoice = false
-    transaction.total = 0
+    transaction.total = bundleId.price
     transaction.Purchase = _purchase
     await getRepository(Transaction).save(transaction)
 
