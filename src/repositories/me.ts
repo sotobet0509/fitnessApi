@@ -119,8 +119,14 @@ export const MeRepository = {
         let clases = 0
         let passes = 0
         purchases.forEach(purchase => {
-            clases += purchase.Bundle.classNumber
-            passes += purchase.Bundle.passes
+            const bundle = purchase.Bundle
+            const buyedAt = purchase.date
+            // no se añaden clases de paquetes expirados
+            if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+                console.log('clases añadidas', bundle.classNumber)
+                clases = clases + bundle.classNumber
+                passes = passes + bundle.passes
+            }
         })
 
         let takenClases = 0
@@ -135,8 +141,8 @@ export const MeRepository = {
         }
 
 
-        let clasesPendientes = clases - takenClases
-        let pasesPendientes = passes - takenPasses
+        let clasesPendientes = clases - takenClases >= 0 ? clases - takenClases : 0
+        let pasesPendientes = passes - takenPasses >= 0 ? passes - takenPasses : 0
         return {
             bookings,
             taken: takenClases,
