@@ -39,7 +39,7 @@ export const MeRepository = {
             })
             const minutes = moment.duration(end.diff(start))
             if (moment(schedule.date).isBefore(moment()) && start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
-                minutesDone = minutes.asMinutes()
+                minutesDone += minutes.asMinutes()
             }
             const instructor = schedule.Instructor
             let added = false
