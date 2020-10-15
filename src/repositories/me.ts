@@ -38,7 +38,7 @@ export const MeRepository = {
                 seconds: 0
             })
             const minutes = moment.duration(end.diff(start))
-            if (moment(schedule.date).isBefore(moment()) && start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
+            if (start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
                 minutesDone += minutes.asMinutes()
             }
             const instructor = schedule.Instructor
@@ -122,11 +122,13 @@ export const MeRepository = {
             const bundle = purchase.Bundle
             const buyedAt = purchase.date
             // no se añaden clases de paquetes expirados
-            if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
-                console.log('clases añadidas', bundle.classNumber)
-                clases = clases + bundle.classNumber
-                passes = passes + bundle.passes
-            }
+            // if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+            //     console.log('clases añadidas', bundle.classNumber)
+            //     clases = clases + bundle.classNumber
+            //     passes = passes + bundle.passes
+            // }
+            clases = clases + bundle.classNumber
+            passes = passes + bundle.passes
         })
 
         let takenClases = 0
