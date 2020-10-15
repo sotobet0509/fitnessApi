@@ -28,13 +28,13 @@ export const MeRepository = {
             const booking: Booking = bookings[i]
             const schedule = booking.Schedule
             const start = moment(schedule.date).set({
-                hour: new Date(schedule.start).getHours(),
-                minutes: new Date(schedule.start).getMinutes(),
+                hour: new Date(`2020-01-01 ${schedule.start}`).getHours(),
+                minutes: new Date(`2020-01-01 ${schedule.start}`).getMinutes(),
                 seconds: 0
             })
             const end = moment(schedule.date).set({
-                hour: new Date(schedule.end).getHours(),
-                minutes: new Date(schedule.end).getMinutes(),
+                hour: new Date(`2020-01-01 ${schedule.end}`).getHours(),
+                minutes: new Date(`2020-01-01 ${schedule.end}`).getMinutes(),
                 seconds: 0
             })
             console.log('start', start)
