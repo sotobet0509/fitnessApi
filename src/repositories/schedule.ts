@@ -62,11 +62,13 @@ export const ScheduleRepository = {
             const bundle = purchase.Bundle
             const buyedAt = moment(purchase.date)
             // no se añaden clases de paquetes expirados
-            if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
-                console.log('clases añadidas', bundle.classNumber)
-                clases = clases + bundle.classNumber
-                passes = passes + bundle.passes
-            }
+            // if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+            //     console.log('clases añadidas', bundle.classNumber)
+            //     clases = clases + bundle.classNumber
+            //     passes = passes + bundle.passes
+            // }
+            clases = clases + bundle.classNumber
+            passes = passes + bundle.passes
         })
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({

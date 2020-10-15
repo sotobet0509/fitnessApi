@@ -113,13 +113,6 @@ export const ClientRepository = {
             }
         })
         if (!updateClient) throw new ErrorResponse(404, 14, 'El usuario no existe')
-        
-        const clientExist = await getRepository(User).findOne({
-            where: {
-                email: data.email
-            }
-        })
-        if (clientExist) throw new ErrorResponse(404, 14, 'El correo ya esta registrado')
 
         updateClient.name = data.name ? data.name : updateClient.name
         updateClient.email = data.email ? data.email : updateClient.email

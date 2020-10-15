@@ -28,18 +28,21 @@ export const MeRepository = {
             const booking: Booking = bookings[i]
             const schedule = booking.Schedule
             const start = moment(schedule.date).set({
-                hour: new Date(schedule.start).getHours(),
-                minutes: new Date(schedule.start).getMinutes(),
+                hour: new Date(`2020-01-01 ${schedule.start}`).getHours(),
+                minutes: new Date(`2020-01-01 ${schedule.start}`).getMinutes(),
                 seconds: 0
             })
             const end = moment(schedule.date).set({
-                hour: new Date(schedule.start).getHours(),
-                minutes: new Date(schedule.start).getMinutes(),
+                hour: new Date(`2020-01-01 ${schedule.end}`).getHours(),
+                minutes: new Date(`2020-01-01 ${schedule.end}`).getMinutes(),
                 seconds: 0
             })
+            console.log('start', start)
+            console.log('end', end)
             const minutes = moment.duration(end.diff(start))
-            if (moment(schedule.date).isBefore(moment()) && start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
-                minutesDone = minutes.asMinutes()
+            if (start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
+                console.log('done', minutes.asMinutes())
+                minutesDone += minutes.asMinutes()
             }
             const instructor = schedule.Instructor
             let added = false
@@ -119,8 +122,16 @@ export const MeRepository = {
         let clases = 0
         let passes = 0
         purchases.forEach(purchase => {
-            clases += purchase.Bundle.classNumber
-            passes += purchase.Bundle.passes
+            const bundle = purchase.Bundle
+            const buyedAt = purchase.date
+            // no se añaden clases de paquetes expirados
+            // if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
+            //     console.log('clases añadidas', bundle.classNumber)
+            //     clases = clases + bundle.classNumber
+            //     passes = passes + bundle.passes
+            // }
+            clases = clases + bundle.classNumber
+            passes = passes + bundle.passes
         })
 
         let takenClases = 0
@@ -135,8 +146,8 @@ export const MeRepository = {
         }
 
 
-        let clasesPendientes = clases - takenClases
-        let pasesPendientes = passes - takenPasses
+        let clasesPendientes = clases - takenClases >= 0 ? clases - takenClases : 0
+        let pasesPendientes = passes - takenPasses >= 0 ? passes - takenPasses : 0
         return {
             bookings,
             taken: takenClases,
