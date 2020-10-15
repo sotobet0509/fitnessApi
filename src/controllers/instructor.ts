@@ -90,5 +90,9 @@ export const InstructorController ={
         await InstructorRepository.changeInstructorProfilePicture(url, instructorId)
 
         res.json({ success: true})
-   }
+   },
+   async getAllInstructorsWithDeleted(req: ExtendedRequest, res: Response){
+    const instructors = await InstructorRepository.getAllInstructors()
+    res.json({ success: true, data: instructors})
+},
 }

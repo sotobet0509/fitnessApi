@@ -125,6 +125,8 @@ InstructorRouter.post('/create',h(checkToken), h(InstructorController.createInst
 
 InstructorRouter.patch('/update',h(checkToken), h(InstructorController.updateInstructor))
 
+InstructorRouter.get('/list/all', h(InstructorController.getAllInstructorsWithDeleted))
+
 
 InstructorRouter.patch('/delete/:instructor_id',h(checkToken), h(InstructorController.changeInstructorStatus))
 

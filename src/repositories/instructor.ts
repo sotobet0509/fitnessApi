@@ -84,6 +84,13 @@ export const InstructorRepository = {
         instructor.profilePicture = url
         
         await InstructorRepository.save(instructor)
-    }
+    },
+    async getAllInstructorsWithDeleted() {
+        const instructors = await getRepository(Instructor).find({
+
+        })
+        if (!instructors) throw new ErrorResponse(404, 40, 'No hay instructores registrados')
+        return instructors
+    },
 
 }
