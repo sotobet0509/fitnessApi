@@ -33,13 +33,11 @@ export const MeRepository = {
                 seconds: 0
             })
             const end = moment(schedule.date).set({
-                hour: new Date(schedule.start).getHours(),
-                minutes: new Date(schedule.start).getMinutes(),
+                hour: new Date(schedule.end).getHours(),
+                minutes: new Date(schedule.end).getMinutes(),
                 seconds: 0
             })
             const minutes = moment.duration(end.diff(start))
-            console.log('start', start)
-            console.log('end', end)
             if (start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
                 console.log('done', minutes.asMinutes())
                 minutesDone += minutes.asMinutes()
