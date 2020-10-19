@@ -14,8 +14,8 @@ export class Booking {
     @CreateDateColumn()
     createdAt: Date
 
-    @Column()
-    fromBundle: number
+    @Column({nullable: true})
+    fromPurchase: number
 
     @ManyToOne(type => Schedule, Schedule => Schedule.Booking)
     @JoinColumn({name: 'schedules_id'})

@@ -11,6 +11,8 @@ import { Room } from '../entities/Rooms'
 
 import * as moment from 'moment'
 import { sendUpdateBooking, sendDeleteBooking } from '../services/mail'
+import { pendingClasses } from '../interfaces/purchase'
+import { getPendingClasses } from '../utils'
 
 export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
@@ -56,6 +58,30 @@ export const ScheduleRepository = {
             },
             relations: ['Bundle', 'Payment_method']
         })
+
+        
+
+        //nuevo flujo
+        const bookingRepository = getRepository(Booking)
+        const bookings = await getRepository(Booking).find({
+            where: {
+                User: client
+            }
+        })
+         console.log(purchases)
+         console.log("-----------")
+         console.log(bookings)
+         console.log("-----------")
+       
+    
+
+        let classes: pendingClasses[]
+        classes = getPendingClasses(purchases,bookings)
+       console.log(classes)
+          console.log("-----------")
+
+        //viejo flujo
+        /*
         let passes = 0
         let clases = 0
         purchases.forEach(purchase => {
@@ -86,13 +112,24 @@ export const ScheduleRepository = {
             return booking.isPass
         }).length
         console.log('pases tomados', pasesTomados)
-
+        
         let pending = clases - clasesTomadas
         let pendingPasses = passes - pasesTomados
         console.log('clases pendientes', pending)
         if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
+        */
+
+       let pending = classes[classes.length-1].pendingClasses
+       let pendingPasses = classes[classes.length-1].pendingPasses
+
+
+        console.log('clases pendientes', pending, classes[classes.length-1].pendingClasses)
+        console.log('pases pendientes', pendingPasses, classes[classes.length-1].pendingPasses)
+       if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
+
+       if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
 
         const schedule = await bookingRepository.findOne({
             where: {
@@ -107,6 +144,7 @@ export const ScheduleRepository = {
         booking.Seat = seat
         booking.User = client
         booking.isPass = isPass
+        booking.fromPurchase = classes[classes.length-1].purchase.id
 
         await bookingRepository.save(booking)
 
@@ -134,7 +172,7 @@ export const ScheduleRepository = {
             }
         )
         if (!room) throw new ErrorResponse(404, 18, 'La sala no existe')
-        
+
         let tempStart = data.start.toString().substring(16, 24)
         const validateSchedule = await getRepository(Schedule).findOne(
             {

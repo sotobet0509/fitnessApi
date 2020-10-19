@@ -2,7 +2,7 @@ import { getRepository, getConnection, Repository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { CustomerData } from '../interfaces/auth'
-import { Invoice, PurchaseData } from '../interfaces/purchase'
+import { extraPurchaseSchema, Invoice, PurchaseData } from '../interfaces/purchase'
 import { Purchase } from '../entities/Purchases'
 import { Bundle } from '../entities/Bundles'
 import { Transaction } from '../entities/Transactions'
@@ -10,6 +10,11 @@ import { Payment_method } from '../entities/Payment_methods'
 import { format } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { invalid } from 'moment'
+import { inflate } from 'zlib'
+import { id } from 'inversify'
+import { getPendingClasses } from '../utils'
+import { BookingController } from '../controllers/booking'
+import { Booking } from '../entities/Bookings'
 
 export const PurchaseRepository = {
     async buy(data: PurchaseData, clientId: string) {
@@ -51,6 +56,7 @@ export const PurchaseRepository = {
             purchase.Payment_method = paymentMethod
             purchase.Bundle = bundle
 
+
             const _purchase = await getRepository(Purchase).save(purchase)
 
             const transaction = new Transaction()
@@ -64,13 +70,13 @@ export const PurchaseRepository = {
         }
     },
 
-    async upgradeBundle(purchaseId: number, bundleId: number,data: Invoice) {
+    async upgradeBundle(purchaseId: number, bundleId: number, data: Invoice) {
         const purchase = await getRepository(Purchase).findOne(
             {
                 where: {
                     id: purchaseId
                 },
-                relations: ['Bundle']
+                relations: ['Bundle','User']
             }
         )
         if (!purchase) throw new ErrorResponse(404, 14, 'La compra no existe')
@@ -81,28 +87,94 @@ export const PurchaseRepository = {
             }
         })
         if (!currentBundle) throw new ErrorResponse(404, 14, 'El paquete actual no existe')
-        if (currentBundle.name == 'Paquete Prueba')  throw new ErrorResponse(404, 14, 'El paquete prueba no puede ser modificado')
+        if (currentBundle.name == 'Paquete Prueba') throw new ErrorResponse(404, 14, 'El paquete prueba no puede ser modificado')
         const newBundle = await getRepository(Bundle).findOne({
             where: {
                 id: bundleId
             }
         })
         if (!newBundle) throw new ErrorResponse(404, 14, 'El nuevo paquete no existe')
+        if (newBundle.name == 'Paquete Prueba') throw new ErrorResponse(404, 42, 'No se puede cambiar a paquete prueba')
         if (currentBundle.id == newBundle.id) throw new ErrorResponse(404, 14, 'No se puede cambiar, es el mismo paquete')
-        if (currentBundle.price > newBundle.price) throw new ErrorResponse(404, 14, 'No se puede realizar la compra, el paquete actual es mas grande')
 
-        const transaction = new Transaction()
-        transaction.voucher= currentBundle.name
-        transaction.date = new Date()
-        transaction.invoice = data.invoice
-        transaction.total = newBundle.price - currentBundle.price
-        transaction.Purchase = purchase
+        let transaction = new Transaction()
+        if (currentBundle.price < newBundle.price) {
+            transaction.voucher = "Pago Complementario"
+            transaction.date = new Date()
+            transaction.invoice = data.invoice
+            transaction.total = newBundle.price - currentBundle.price
+            transaction.Purchase = purchase
+            await getRepository(Transaction).save(transaction)
 
-        await getRepository(Transaction).save(transaction)
+            purchase.Bundle = newBundle
+            await getRepository(Purchase).save(purchase)
+        } else {
+            //validar las compras y passes correspondientes al paquete
+            const allPurchases = await getRepository(Purchase).find(
+                {
+                    where: {
+                        User: purchase.User
+                    },
+                    relations: ['Bundle','User']
+                }
+            )
+            const allBookings = await getRepository(Booking).find({
+                where:{
+                    User: purchase.User
+                }
+            })
+            
 
-        purchase.Bundle = newBundle
+
+            const hasClasses = getPendingClasses(allPurchases, allBookings)
+
+            const pending = hasClasses.find( x => x.purchase.id == purchase.id)
+
+            console.log( currentBundle.classNumber - pending.pendingClasses, (newBundle.classNumber) )
+
+            if(currentBundle.classNumber - pending.pendingClasses < (newBundle.classNumber) ){
+                transaction.voucher = "Devolución"
+                transaction.date = new Date()
+                transaction.invoice = data.invoice
+                transaction.total = newBundle.price - currentBundle.price
+                transaction.Purchase = purchase
+
+                await getRepository(Transaction).save(transaction)
+
+                purchase.Bundle = newBundle
+                 await getRepository(Purchase).save(purchase)
+            }else throw new ErrorResponse(404, 14, 'El usuario ha tomado mas clases de las permitdas para el cambio')    
+        }
+    },
+
+
+    async buyExtra(data: extraPurchaseSchema, clientId: string, purchaseId: number) {
+        const client = await getRepository(User).findOne(
+            {
+                where: {
+                    id: clientId
+                }
+            }
+        )
+        if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
+
+        console.log(purchaseId)
+        let purchase = await getRepository(Purchase).findOne(
+            {
+                where: {
+                    id: purchaseId
+                }
+            }
+        )
+        if (!purchase) throw new ErrorResponse(404, 41, 'La compra no existe')
+
+        if (data.addedClasses) purchase.addedClasses += data.addedClasses
+        if (data.addedPasses) purchase.addedPasses += data.addedPasses
+
+
         await getRepository(Purchase).save(purchase)
-    
-    }
+
+
+    },
 }
 

@@ -6,6 +6,9 @@ import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
 import * as moment from 'moment'
+import { getPendingClasses } from '../utils';
+import { pendingClasses } from '../interfaces/purchase';
+import { sendActivationUrl } from '../services/mail';
 
 export const ClientRepository = {
     async getAllClients(){
@@ -29,6 +32,7 @@ export const ClientRepository = {
                     User: client
                 }
             })
+            /*
             let classes = 0
             for (var j in purchases) {
                 const purchase = purchases[j]
@@ -41,12 +45,25 @@ export const ClientRepository = {
             let pending = classes - taken
             if (pending < 0) {
                 pending = 0
-            }
+            }*/
+
+            const passes = await getRepository(Booking).find({
+                where: {
+                    User: client,
+                    isPass: true
+                }
+            })
+
+            let classes: pendingClasses[]
+            classes = getPendingClasses(purchases,bookings)
             delete client.password
+            
             data.push({
                 client,
-                pending,
-                taken
+                pending: classes[classes.length-1].pendingClasses,
+                taken: bookings.length,
+                pendingPasses: classes[classes.length-1].pendingPasses,
+                takenPasses: passes.length
             })
         }
         return data
@@ -84,7 +101,7 @@ export const ClientRepository = {
         //Save
         client = await clientRepository.save(client)
     
-        //await sendActivationUrl(client.email, client.tempToken)
+        await sendActivationUrl(client.email, client.tempToken)
         return client
     },
 

@@ -3,7 +3,8 @@ import { User } from '../entities/Users'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Purchase } from '../entities/Purchases'
 import { Booking } from '../entities/Bookings'
-
+import { getPendingClasses, orderByExpirationDay } from "../utils/index"
+import { pendingClasses } from '../interfaces/purchase'
 import * as moment from 'moment'
 
 export const MeRepository = {
@@ -119,6 +120,18 @@ export const MeRepository = {
             },
             relations: ['Bundle', 'Payment_method']
         })
+
+        const passes = await repository.find({
+            where: {
+                User: user,
+                isPass: true
+            },
+            relations: ['Schedule', 'Seat', 'Schedule.Instructor', 'Seat.Room', 'Seat.Room.Location']
+        })
+
+        let classes: pendingClasses[]
+        classes = getPendingClasses(purchases,bookings)
+        /*
         let clases = 0
         let passes = 0
         purchases.forEach(purchase => {
@@ -130,8 +143,8 @@ export const MeRepository = {
             //     clases = clases + bundle.classNumber
             //     passes = passes + bundle.passes
             // }
-            clases = clases + bundle.classNumber
-            passes = passes + bundle.passes
+            clases = clases + bundle.classNumber + purchase.addedClasses
+            passes = passes + bundle.passes + purchase.addedPasses
         })
 
         let takenClases = 0
@@ -147,13 +160,15 @@ export const MeRepository = {
 
 
         let clasesPendientes = clases - takenClases >= 0 ? clases - takenClases : 0
-        let pasesPendientes = passes - takenPasses >= 0 ? passes - takenPasses : 0
+        let pasesPendientes = passes - takenPasses >= 0 ? passes - takenPasses : 0*/
+
         return {
             bookings,
-            taken: takenClases,
-            pending: clasesPendientes,
-            pendingPasses: pasesPendientes,
-            takenPasses
+            taken: bookings.length,
+            pending: classes[classes.length-1].pendingClasses,
+            pendingPasses: classes[classes.length-1].pendingPasses,
+            takenPasse: passes.length,
+            compras: orderByExpirationDay( purchases)
         }
     },
 
