@@ -59,7 +59,7 @@ export const ScheduleRepository = {
             relations: ['Bundle', 'Payment_method']
         })
 
-        
+
 
         //nuevo flujo
         const bookingRepository = getRepository(Booking)
@@ -68,68 +68,31 @@ export const ScheduleRepository = {
                 User: client
             }
         })
-         console.log(purchases)
-         console.log("-----------")
-         console.log(bookings)
-         console.log("-----------")
-       
-    
 
         let classes: pendingClasses[]
-        classes = getPendingClasses(purchases,bookings)
-       console.log(classes)
-          console.log("-----------")
+        classes = getPendingClasses(purchases, bookings)
 
-        //viejo flujo
-        /*
-        let passes = 0
-        let clases = 0
-        purchases.forEach(purchase => {
-            const bundle = purchase.Bundle
-            const buyedAt = moment(purchase.date)
-            // no se añaden clases de paquetes expirados
-            // if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
-            //     console.log('clases añadidas', bundle.classNumber)
-            //     clases = clases + bundle.classNumber
-            //     passes = passes + bundle.passes
-            // }
-            clases = clases + bundle.classNumber
-            passes = passes + bundle.passes
-        })
-        const bookingRepository = getRepository(Booking)
-        const bookings = await bookingRepository.find({
-            where: {
-                User: client
-            }
+
+        classes = classes.filter((p: pendingClasses) => {
+            let expirationDay = moment(p.purchase.date).add(p.purchase.Bundle.expirationDays, "days")
+            if (expirationDay.isBefore(moment())) return false
+            if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
+            return true
         })
 
-        let clasesTomadas = bookings.filter(booking => {
-            return !booking.isPass
-        }).length
-        console.log('clases tomadas', clasesTomadas)
+        let pending = 0
+        let pendingPasses = 0
 
-        let pasesTomados = bookings.filter(booking => {
-            return booking.isPass
-        }).length
-        console.log('pases tomados', pasesTomados)
-        
-        let pending = clases - clasesTomadas
-        let pendingPasses = passes - pasesTomados
-        console.log('clases pendientes', pending)
+        for (var i in classes) {
+            pending += classes[i].pendingClasses
+            pendingPasses += classes[i].pendingPasses
+        }
+
+
+
         if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-        */
-
-       let pending = classes[classes.length-1].pendingClasses
-       let pendingPasses = classes[classes.length-1].pendingPasses
-
-
-        console.log('clases pendientes', pending, classes[classes.length-1].pendingClasses)
-        console.log('pases pendientes', pendingPasses, classes[classes.length-1].pendingPasses)
-       if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
-
-       if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
 
         const schedule = await bookingRepository.findOne({
             where: {
@@ -139,12 +102,20 @@ export const ScheduleRepository = {
         })
         if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
 
+        let idPurchase
+        for (var i in classes) {
+            if (classes[i].pendingClasses != 0) {
+                idPurchase = classes[i].purchase.id
+                break
+            }
+        }
+
         const booking = new Booking()
         booking.Schedule = scheduleExist
         booking.Seat = seat
         booking.User = client
         booking.isPass = isPass
-        booking.fromPurchase = classes[classes.length-1].purchase.id
+        booking.fromPurchase = idPurchase
 
         await bookingRepository.save(booking)
 
@@ -216,13 +187,14 @@ export const ScheduleRepository = {
             relations: ['User']
         })
 
-        for (var i in booking) {
-            if (data.sendEmail) {
-                await sendUpdateBooking(booking[i].User.email)
+        if (data.deleteBookings) {
+            for (var i in booking) {
+                if (data.sendEmail) {
+                    await sendUpdateBooking(booking[i].User.email)
+                }
+                await bookingRepository.remove(booking[i])
             }
-            await bookingRepository.remove(booking[i])
         }
-
 
         let instructor = new Instructor()
         instructor.id = data.instructor_id

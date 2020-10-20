@@ -79,7 +79,8 @@ export const ScheduleController ={
             start: Joi.date(),
             instructor_id: Joi.number(),
             roomsId: Joi.number(),
-            sendEmail: Joi.boolean().required()
+            sendEmail: Joi.boolean().required(),
+            deleteBookings: Joi.boolean().required()
         })
         const { error, value } = scheduleSchema.validate(req.body)
         if (error) throw new DataMissingError()

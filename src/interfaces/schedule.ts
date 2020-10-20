@@ -6,6 +6,7 @@ export interface ScheduleSchema {
     instructor_id?: number
     roomsId?: number
     sendEmail?: boolean
+    deleteBookings?: boolean
 }
 
 export interface ScheduleIsPass{

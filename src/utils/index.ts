@@ -25,24 +25,24 @@ export const getPendingClasses = (purchases: Purchase[], bookings: Booking[]): p
     for (var i in purchases) {
 
         const purchase = purchases[i]
-        
-        let contadorClasses = purchase.Bundle.classNumber + purchase.addedClasses
-        let contdaorPasses = purchase.Bundle.passes + purchase.addedPasses
 
+        let contadorClasses = purchase.Bundle.classNumber + purchase.addedClasses
+        let contadorPasses = purchase.Bundle.passes + purchase.addedPasses
+  
         contadorClasses -= bookings.filter((b: Booking) => {
             return b.fromPurchase === purchase.id && !b.isPass
         }).length
 
-        contdaorPasses -= bookings.filter((b: Booking) => {
+        contadorPasses -= bookings.filter((b: Booking) => {
             return b.fromPurchase === purchase.id && b.isPass
         }).length
 
         results.push({
             purchase: purchase,
             pendingClasses: contadorClasses,
-            pendingPasses: contdaorPasses
+            pendingPasses: contadorPasses
         })
-        if (contadorClasses == 0 && contdaorPasses == 0) results.pop()
+        if (contadorClasses == 0 && contadorPasses == 0) results.pop()
     }
 
     const orderedPurchases = orderPendingClassesByExpirationDay(results)
@@ -53,16 +53,22 @@ export const getPendingClasses = (purchases: Purchase[], bookings: Booking[]): p
         if (booking.fromPurchase == null) {
             for (var j in orderedPurchases) {
                 let orderedPurchase = orderedPurchases[j]
-                if(booking.isPass){
-                    if (orderedPurchase.pendingPasses > 0 && booking.isPass) {orderedPurchase.pendingPasses -= 1} else continue
-                }else{
-                    if (orderedPurchase.pendingClasses > 0 && !booking.isPass){ orderedPurchase.pendingClasses -= 1} else continue
-                }            
+                if (booking.isPass) {
+                    if (orderedPurchase.pendingPasses > 0 && booking.isPass) {
+                        orderedPurchase.pendingPasses -= 1
+                        break
+                    } else continue
+                } else {
+                    if (orderedPurchase.pendingClasses > 0 && !booking.isPass) {
+                        orderedPurchase.pendingClasses -= 1
+                        break
+                    } else continue
+                }
             }
         }
     }
 
-    return results
+    return orderedPurchases
 }
 
 

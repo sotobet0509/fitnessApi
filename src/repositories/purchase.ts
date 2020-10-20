@@ -176,5 +176,42 @@ export const PurchaseRepository = {
 
 
     },
+
+    async cancelPurchase( purchaseId: number) {
+        const purchase = await getRepository(Purchase).findOne({
+            where: {
+                id: purchaseId
+            },
+            relations: ["User"]
+            
+        })
+        if (!purchase) throw new ErrorResponse(404, 44, 'La compra no existe')
+        console.log(purchase)
+        console.log("------------", purchase.User.id)
+
+        const bookings = await getRepository(Booking).find({
+            where: {
+                User: purchase.User,
+                fromPurchase: purchaseId
+            }
+        })
+        console.log(bookings)
+        console.log("------------")
+        for(var i in bookings){
+            await getRepository(Booking).delete(bookings[i].id)
+        }
+
+        const transaction = await getRepository(Transaction).findOne({
+            where: {
+                Purchase: purchase
+            }
+        })
+        console.log(transaction)
+        console.log("------------")
+
+        await getRepository(Transaction).delete(transaction)
+        await getRepository(Purchase).delete(purchase)
+
+    },
 }
 

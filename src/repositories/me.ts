@@ -121,6 +121,13 @@ export const MeRepository = {
             relations: ['Bundle', 'Payment_method']
         })
 
+        const bookingsNoPasses = await getRepository(Booking).find({
+            where: {
+                User: user,
+                isPass: false
+            }
+        })
+
         const passes = await repository.find({
             where: {
                 User: user,
@@ -131,43 +138,27 @@ export const MeRepository = {
 
         let classes: pendingClasses[]
         classes = getPendingClasses(purchases,bookings)
-        /*
-        let clases = 0
-        let passes = 0
-        purchases.forEach(purchase => {
-            const bundle = purchase.Bundle
-            const buyedAt = purchase.date
-            // no se añaden clases de paquetes expirados
-            // if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
-            //     console.log('clases añadidas', bundle.classNumber)
-            //     clases = clases + bundle.classNumber
-            //     passes = passes + bundle.passes
-            // }
-            clases = clases + bundle.classNumber + purchase.addedClasses
-            passes = passes + bundle.passes + purchase.addedPasses
+        
+        classes = classes.filter((p: pendingClasses) => {
+            let expirationDay = moment(p.purchase.date).add(p.purchase.Bundle.expirationDays, "days")
+            if (expirationDay.isBefore(moment())) return false
+            if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
+            return true
         })
 
-        let takenClases = 0
-        let takenPasses = 0
-        for (var i in bookings) {
-            const booking = bookings[i]
-            if (booking.isPass) {
-                takenPasses += 1
-            } else {
-                takenClases += 1
-            }
+        let pendingC = 0
+        let pendingP = 0
+        for( var i in classes){
+            pendingC += classes[i].pendingClasses
+            pendingP += classes[i].pendingPasses
         }
-
-
-        let clasesPendientes = clases - takenClases >= 0 ? clases - takenClases : 0
-        let pasesPendientes = passes - takenPasses >= 0 ? passes - takenPasses : 0*/
-
+        
         return {
             bookings,
-            taken: bookings.length,
-            pending: classes[classes.length-1].pendingClasses,
-            pendingPasses: classes[classes.length-1].pendingPasses,
-            takenPasse: passes.length,
+            taken: bookingsNoPasses.length,
+            pending: pendingC,
+            pendingPasses: pendingP,
+            takenPasses: passes.length,
             compras: orderByExpirationDay( purchases)
         }
     },

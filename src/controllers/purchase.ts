@@ -65,4 +65,16 @@ export const PurchaseController = {
         })
     },
 
+    async cancelPurchase(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+       
+        const purchaseId = parseInt(req.params.purchase_id)
+
+        await PurchaseRepository.cancelPurchase(purchaseId)
+
+        return res.json({
+            success: true,
+        })
+    },
+
 }
