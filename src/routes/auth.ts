@@ -168,8 +168,9 @@ AuthRouter.post('/login', h(AuthController.login))
 
 AuthRouter.patch('/recovery-password', h(AuthController.recoveryPassword))
 
-
 AuthRouter.patch('/change-password', h(AuthController.changePassword))
+
+AuthRouter.get('/verify/:mail', h(AuthController.verifyEmail))
 
 
 

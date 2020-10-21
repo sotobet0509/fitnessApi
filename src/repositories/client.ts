@@ -25,7 +25,7 @@ export const ClientRepository = {
                 where: {
                     User: client
                 },
-                relations: ['Bundle']
+                relations: ['Bundle','Transaction']
             })
             const bookings = await getRepository(Booking).find({
                 where: {
@@ -88,7 +88,7 @@ export const ClientRepository = {
             where: {
                 User: client
             },
-            relations: ['Bundle']
+            relations: ['Bundle','Transaction']
         })
         const bookings = await getRepository(Booking).find({
             where: {

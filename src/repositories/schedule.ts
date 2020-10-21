@@ -56,7 +56,7 @@ export const ScheduleRepository = {
             where: {
                 User: client,
             },
-            relations: ['Bundle', 'Payment_method']
+            relations: ['Bundle', 'Payment_method',"Transaction"]
         })
 
 

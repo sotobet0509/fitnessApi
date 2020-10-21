@@ -82,7 +82,7 @@ export const MeRepository = {
             where: {
                 User: user
             },
-            relations: ['Bundle', 'Payment_method']
+            relations: ['Bundle', 'Payment_method','Transaction']
         })
         let clases = 0
         purchases.forEach(purchase => {
@@ -118,7 +118,7 @@ export const MeRepository = {
             where: {
                 User: user
             },
-            relations: ['Bundle', 'Payment_method']
+            relations: ['Bundle', 'Payment_method','Transaction']
         })
 
         const bookingsNoPasses = await getRepository(Booking).find({

@@ -17,7 +17,7 @@ export const
         lastname: Joi.string().required(),
         password: Joi.string().required(),
       })
-     
+
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalSignUpData>value
@@ -174,25 +174,39 @@ export const
         tempToken: Joi.string().required(),
         password: Joi.string().required()
       })
-      
-    
+
+
       console.log(changePasswordSchema.tempToken, changePasswordSchema.password)
 
       const { error, value } = changePasswordSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <ChangePasswordSchema>value
 
-     const user = await AuthRepository.changePassword(data)
+      const user = await AuthRepository.changePassword(data)
 
-     //Dar acceso
-     const userToken = new TokenService(user.id)
-     const token = await userToken.signToken()
+      //Dar acceso
+      const userToken = new TokenService(user.id)
+      const token = await userToken.signToken()
 
-     delete user.password
+      delete user.password
 
       return res.json({
         success: true,
         user,
-        token})
+        token
+      })
+    },
+    
+    async verifyEmail(req: Request, res: Response) {
+      const mail = req.params.mail
+
+     const available = await AuthRepository.verifyEmail(mail)
+
+      return res.json({
+        success: true,
+        available
+      })
     }
+
+
   }

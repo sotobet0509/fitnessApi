@@ -234,6 +234,22 @@ export const AuthRepository = {
 
     await userRepository.save(user)
     return user
+  },
+
+  async verifyEmail(mail: string) {
+    let available = true
+
+    const emailExist = await getRepository(User).findOne({
+      where: {
+        email: mail
+      }
+    })
+    if(emailExist) available = false
+
+    
+
+    return available
   }
+
 
 }
