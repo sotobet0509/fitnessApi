@@ -6,11 +6,14 @@ export class Bundle {
     @PrimaryGeneratedColumn('increment')
     id: number
 
-    @Column('integer')
-    name: number
+    @Column()
+    name: string
 
     @Column('float')
     price: number
+
+    @Column('float')
+    offer: number
 
     @Column()
     description: string
@@ -20,6 +23,9 @@ export class Bundle {
 
     @Column('integer')
     expirationDays: number
+
+    @Column('integer')
+    passes: number
 
     @Column()
     isDeleted: boolean

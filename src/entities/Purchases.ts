@@ -12,6 +12,12 @@ export class Purchase {
     @Column()
     date: Date
 
+    @Column({default: 0})
+    addedClasses: number
+    
+    @Column({default: 0})
+    addedPasses: number
+
     @ManyToOne(type => Bundle, Bundle => Bundle.purchase)
     @JoinColumn({name: 'bundles_id'})
     Bundle: Bundle

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm'
 import { Schedule} from './Schedules'
 
 @Entity({name: 'instructors'})
@@ -20,6 +20,12 @@ export class Instructor {
 
     @Column('text')
     largePicture: string
+   
+    @Column()
+    isDeleted: boolean
+
+    @CreateDateColumn()
+    createdAt: Date
 
     @OneToMany(type => Schedule, Schedule => Schedule.Instructor)
     Schedule: Schedule

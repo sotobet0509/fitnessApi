@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, PromiseUtils } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated } from 'typeorm'
 import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 import { Booking } from './Bookings'
 import { Purchase } from './Purchases'
@@ -15,14 +15,14 @@ export class User {
     @Column()
     email: string
 
-    @Column()
+    @Column({nullable: true })
     lastname: string
 
     @Column({nullable: true })
     password: string
 
-    @Column('text')
-    pictureurl: string
+    @Column('text',{nullable: true })
+    pictureUrl: string
 
     @Column({nullable: true })
     facebookId: string
@@ -31,7 +31,16 @@ export class User {
     googleId: string
 
     @Column({nullable: true })
-    temptoken: string
+    tempToken: string
+
+    @Column( {default: false})
+    isAdmin: boolean
+    
+    @Column({default: false})
+    isDeleted: boolean
+
+    @CreateDateColumn()
+    createdAt: Date
 
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne, CreateDateColumn } from 'typeorm'
 import { Schedule } from './Schedules'
 import { Seat } from './Seats'
 import { User } from './Users'
@@ -7,6 +7,15 @@ import { User } from './Users'
 export class Booking {
     @PrimaryGeneratedColumn('increment')
     id: number
+
+    @Column({default: false})
+    isPass: boolean
+
+    @CreateDateColumn()
+    createdAt: Date
+
+    @Column({nullable: true})
+    fromPurchase: number
 
     @ManyToOne(type => Schedule, Schedule => Schedule.Booking)
     @JoinColumn({name: 'schedules_id'})
@@ -19,5 +28,7 @@ export class Booking {
     @ManyToOne(type => User, User => User.Booking)
     @JoinColumn({name: 'user_id'})
     User: User
+
+
 
 }

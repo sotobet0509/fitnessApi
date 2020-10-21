@@ -4,7 +4,7 @@ import { Purchase } from './Purchases'
 
 export enum type {
     EFECTIVO = 'efectivo',
-    TARJETA = 'tarjeta',
+    TARJETA = 'tarjeta'
   }
 
 @Entity({name: 'payment_methods'})

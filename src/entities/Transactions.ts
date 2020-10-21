@@ -4,7 +4,10 @@ import { Purchase } from './Purchases'
 @Entity({name: 'transactions'})
 export class Transaction {
     @PrimaryGeneratedColumn('uuid')
-    id: number
+    id: string
+
+    @Column({nullable: true})
+    voucher: string
 
     @Column()
     date: Date
@@ -14,6 +17,9 @@ export class Transaction {
 
     @Column('float')
     total: number
+
+    @Column('text',{nullable: true})
+    comments: string
 
     @ManyToOne(type => Purchase, Purchase => Purchase.Transaction)
     @JoinColumn({name: 'purchases_id'})

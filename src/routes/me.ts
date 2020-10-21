@@ -1,0 +1,117 @@
+import { Router } from 'express'
+import { MeController } from '../controllers/me'
+import * as h from 'express-async-handler'
+import {checkToken} from '../middleware/CheckToken'
+
+const MeRouter = Router({ mergeParams: true })
+
+/**
+ * @swagger
+ * /me/:
+ *   get:
+ *     description: Obtiene los datos de un usuario logueado (requiere token)
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Consulta correcta
+ *         schema:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               example: af3c57a3-82d2-40eb-a360-db603a661c41
+ *             name:
+ *              type: string
+ *              example: joel   
+ *             email:
+ *               type: string
+ *               example: joel@dominio.com
+ *             lastname:
+ *               type: string
+ *               example: pintor
+ *             picturUrl:
+ *               type: string
+ *               example: ruta/pictureUrl
+ *             facebookId:
+ *               type: string
+ *               example: null
+ *             googleId:
+ *               type: string
+ *               example: null
+ *             tempToken:
+ *               type: string
+ *               example: null        
+ *       500:
+ *         description: Server error
+ */
+MeRouter.get('/', h(checkToken), h(MeController.profile))
+
+/**
+ * @swagger
+ * /me/history:
+ *   get:
+ *     description: Obtiene el historial de compras del usuario (requiere token)
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: Consulta correcta
+ *         schema:
+ *           type: object
+ *           properties:
+ *             purchases:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                  id:
+ *                    type: integer
+ *                    example: 1
+ *                  date:
+ *                    type: string
+ *                    example: 2020-09-01T16:18:28.000Z
+ *                  Bundle:
+ *                    type: object
+ *                    properties:
+ *                      id:
+ *                        type: integer
+ *                        example: 1
+ *                      name:
+ *                        type: string
+ *                        example: paquetaxo  
+ *                      price:
+ *                        type: integer
+ *                        example: 100
+ *                      offer:
+ *                        type: integer
+ *                        example: 90
+ *                      description:
+ *                        type: string
+ *                        example: paquete para empezar
+ *                      classnumber:
+ *                        type: integer
+ *                        example: 1
+ *                      expirationDays:
+ *                        type: integer
+ *                        example: 7
+ *                      passes:
+ *                        type: integer
+ *                        example: 1
+ *                      isDeleted:
+ *                        type: boolean
+ *                        example: false
+ *                      isRecurrent:
+ *                        type: boolean       
+ *       500:
+ *         description: Server error
+ */
+MeRouter.get('/history', h(checkToken), h(MeController.history))
+
+MeRouter.get('/classes', h(checkToken), h(MeController.classes))
+
+MeRouter.patch('/changeProfilePicture', h(checkToken), h(MeController.uploadProfilePicture))
+
+export { MeRouter }
