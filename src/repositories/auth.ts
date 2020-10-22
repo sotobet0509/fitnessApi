@@ -65,6 +65,7 @@ export const AuthRepository = {
     purchase.date = new Date()
     purchase.Payment_method = paymentMethod
     purchase.Bundle = bundleId
+    purchase.expirationDate = new Date()
 
     const _purchase = await getRepository(Purchase).save(purchase)
 
@@ -136,6 +137,7 @@ export const AuthRepository = {
     purchase.date = new Date()
     purchase.Payment_method = paymentMethod
     purchase.Bundle = bundleId
+    purchase.expirationDate = new Date()
 
     const _purchase = await getRepository(Purchase).save(purchase)
 
@@ -145,6 +147,7 @@ export const AuthRepository = {
     transaction.invoice = false
     transaction.total = bundleId.price
     transaction.Purchase = _purchase
+
     await getRepository(Transaction).save(transaction)
 
     await sendActivationUrl(customer.email, customer.tempToken)
