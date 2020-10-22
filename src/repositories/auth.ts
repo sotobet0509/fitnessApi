@@ -11,6 +11,7 @@ import { Purchase } from '../entities/Purchases'
 import { Payment_method } from '../entities/Payment_methods'
 import { Transaction } from '../entities/Transactions'
 import { v4 as uuidv4 } from 'uuid'
+import * as moment from 'moment'
 
 
 export const AuthRepository = {
@@ -65,7 +66,7 @@ export const AuthRepository = {
     purchase.date = new Date()
     purchase.Payment_method = paymentMethod
     purchase.Bundle = bundleId
-    purchase.expirationDate = new Date()
+    purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
 
     const _purchase = await getRepository(Purchase).save(purchase)
 
@@ -137,7 +138,7 @@ export const AuthRepository = {
     purchase.date = new Date()
     purchase.Payment_method = paymentMethod
     purchase.Bundle = bundleId
-    purchase.expirationDate = new Date()
+    purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
 
     const _purchase = await getRepository(Purchase).save(purchase)
 
