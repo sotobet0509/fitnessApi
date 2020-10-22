@@ -18,6 +18,12 @@ export class Purchase {
     @Column({default: 0})
     addedPasses: number
 
+    @Column({default: false})
+    isCanceled : boolean
+
+    @Column({nullable: true, default: "1990-01-01 00:00:00"})
+    expirationDate: Date
+
     @ManyToOne(type => Bundle, Bundle => Bundle.purchase)
     @JoinColumn({name: 'bundles_id'})
     Bundle: Bundle

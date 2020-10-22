@@ -48,10 +48,10 @@ export const ClientRepository = {
             })
 
             let classes: pendingClasses[]
-            classes = getPendingClasses(purchases, bookings)
+            classes = await getPendingClasses(purchases, bookings)
             delete client.password
             classes = classes.filter((p: pendingClasses) => {
-                let expirationDay = moment(p.purchase.date).add(p.purchase.Bundle.expirationDays, "days")
+                let expirationDay = moment(p.purchase.expirationDate)
                 if (expirationDay.isBefore(moment())) return false
                 if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
                 return true
@@ -111,10 +111,10 @@ export const ClientRepository = {
         })
 
         let classes: pendingClasses[]
-        classes = getPendingClasses(purchases, bookings)
+        classes =  await getPendingClasses(purchases, bookings)
         delete client.password
         classes = classes.filter((p: pendingClasses) => {
-            let expirationDay = moment(p.purchase.date).add(p.purchase.Bundle.expirationDays, "days")
+            let expirationDay = moment(p.purchase.expirationDate)
             if (expirationDay.isBefore(moment())) return false
             if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
             return true

@@ -61,7 +61,8 @@ export const BookingRepository = {
                 seat: booking.Seat.number,
                 date: schedule.date,
                 start: schedule.start,
-                end: schedule.end
+                end: schedule.end,
+                isPass: booking.isPass 
             })
         }
 

@@ -2,7 +2,7 @@ import { getRepository, getConnection, Repository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { CustomerData } from '../interfaces/auth'
-import { extraPurchaseSchema, Invoice, PurchaseData } from '../interfaces/purchase'
+import { Comments, extraPurchaseSchema, Invoice, PurchaseData } from '../interfaces/purchase'
 import { Purchase } from '../entities/Purchases'
 import { Bundle } from '../entities/Bundles'
 import { Transaction } from '../entities/Transactions'
@@ -15,6 +15,8 @@ import { id } from 'inversify'
 import { getPendingClasses } from '../utils'
 import { BookingController } from '../controllers/booking'
 import { Booking } from '../entities/Bookings'
+import * as moment from "moment"
+import { findConfigFile } from 'typescript'
 
 export const PurchaseRepository = {
     async buy(data: PurchaseData, clientId: string) {
@@ -55,6 +57,7 @@ export const PurchaseRepository = {
             purchase.date = new Date()
             purchase.Payment_method = paymentMethod
             purchase.Bundle = bundle
+            purchase.expirationDate = moment().add(bundle.expirationDays,'days').toDate()
 
 
             const _purchase = await getRepository(Purchase).save(purchase)
@@ -65,6 +68,7 @@ export const PurchaseRepository = {
             transaction.invoice = false
             transaction.total = bundle.price
             transaction.Purchase = _purchase
+            
             await getRepository(Transaction).save(transaction)
 
         }
@@ -76,7 +80,7 @@ export const PurchaseRepository = {
                 where: {
                     id: purchaseId
                 },
-                relations: ['Bundle','User']
+                relations: ['Bundle', 'User']
             }
         )
         if (!purchase) throw new ErrorResponse(404, 14, 'La compra no existe')
@@ -104,9 +108,11 @@ export const PurchaseRepository = {
             transaction.invoice = data.invoice
             transaction.total = newBundle.price - currentBundle.price
             transaction.Purchase = purchase
+            if(data.comment) transaction.comments = data.comment
             await getRepository(Transaction).save(transaction)
 
             purchase.Bundle = newBundle
+            purchase.expirationDate = moment().add(newBundle.expirationDays,"days").toDate()
             await getRepository(Purchase).save(purchase)
         } else {
             //validar las compras y passes correspondientes al paquete
@@ -115,35 +121,36 @@ export const PurchaseRepository = {
                     where: {
                         User: purchase.User
                     },
-                    relations: ['Bundle','User']
+                    relations: ['Bundle', 'User']
                 }
             )
             const allBookings = await getRepository(Booking).find({
-                where:{
+                where: {
                     User: purchase.User
                 }
             })
-            
 
 
-            const hasClasses = getPendingClasses(allPurchases, allBookings)
 
-            const pending = hasClasses.find( x => x.purchase.id == purchase.id)
+            const hasClasses = await getPendingClasses(allPurchases, allBookings)
 
-            console.log( currentBundle.classNumber - pending.pendingClasses, (newBundle.classNumber) )
+            const pending = hasClasses.find(x => x.purchase.id == purchase.id)
 
-            if(currentBundle.classNumber - pending.pendingClasses < (newBundle.classNumber) ){
+            console.log(currentBundle.classNumber - pending.pendingClasses, (newBundle.classNumber))
+
+            if (currentBundle.classNumber - pending.pendingClasses < (newBundle.classNumber)) {
                 transaction.voucher = "Devolución"
                 transaction.date = new Date()
                 transaction.invoice = data.invoice
                 transaction.total = newBundle.price - currentBundle.price
                 transaction.Purchase = purchase
-
+                if(data.comment) transaction.comments = data.comment
                 await getRepository(Transaction).save(transaction)
 
                 purchase.Bundle = newBundle
-                 await getRepository(Purchase).save(purchase)
-            }else throw new ErrorResponse(404, 14, 'El usuario ha tomado mas clases de las permitdas para el cambio')    
+                purchase.expirationDate = moment().add(newBundle.expirationDays,"days").toDate()
+                await getRepository(Purchase).save(purchase)
+            } else throw new ErrorResponse(404, 14, 'El usuario ha tomado mas clases de las permitdas para el cambio')
         }
     },
 
@@ -177,16 +184,16 @@ export const PurchaseRepository = {
 
     },
 
-    async cancelPurchase( purchaseId: number) {
+    async cancelPurchase(purchaseId: number, data: Comments) {
         const purchase = await getRepository(Purchase).findOne({
             where: {
                 id: purchaseId
             },
             relations: ["User"]
-            
+
         })
         if (!purchase) throw new ErrorResponse(404, 44, 'La compra no existe')
-        
+
         const bookings = await getRepository(Booking).find({
             where: {
                 User: purchase.User,
@@ -194,19 +201,63 @@ export const PurchaseRepository = {
             }
         })
 
-        for(var i in bookings){
+        for (var i in bookings) {
             await getRepository(Booking).delete(bookings[i].id)
         }
 
-        const transaction = await getRepository(Transaction).findOne({
+        const transactions = await getRepository(Transaction).find({
             where: {
                 Purchase: purchase
             }
         })
 
-        await getRepository(Transaction).delete(transaction)
-        await getRepository(Purchase).delete(purchase)
 
+        let amount = 0
+        for (var i in transactions) {
+            amount += transactions[i].total
+        }
+
+        let newTransaction = new Transaction()
+        newTransaction.voucher = "Cancelación"
+        newTransaction.date = new Date()
+        newTransaction.invoice = false
+        newTransaction.total = amount * (-1)
+        newTransaction.Purchase = purchase
+        if (data.comment) newTransaction.comments = data.comment
+
+        await getRepository(Transaction).save(newTransaction)
+        purchase.isCanceled = true
+        await getRepository(Purchase).save(purchase)
+
+    },
+
+    async updateAll() {
+        let purchases = await getRepository(Purchase).find({
+            relations: ['Transaction','Bundle']
+        })
+
+        for (var i in purchases) {
+
+            let transactions = await getRepository(Transaction).find({
+                where:{
+                    Purchase: purchases[i]
+                }
+            })
+
+            let orderedPurchases: Transaction[]
+            orderedPurchases = transactions.sort((a: Transaction, b: Transaction) => {
+                let date = moment(a.date)
+                let date2 = moment(b.date)
+                if (date.isBefore(date2)) return -1
+                if (date.isAfter(date2)) return 1
+                return 0
+            })
+            console.log(orderedPurchases)
+            if(orderedPurchases.length > 0){
+            purchases[i].expirationDate = moment(orderedPurchases[orderedPurchases.length - 1].date).add(purchases[i].Bundle.expirationDays,"days").toDate()
+
+            await getRepository(Purchase).save(purchases[i])}
+        }
     },
 }
 

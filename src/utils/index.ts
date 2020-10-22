@@ -1,4 +1,5 @@
 import * as moment from "moment"
+import { getRepository } from "typeorm"
 import { Booking } from "../entities/Bookings"
 import { Purchase } from "../entities/Purchases"
 import { pendingClasses } from "../interfaces/purchase"
@@ -8,24 +9,22 @@ export const orderByExpirationDay = (purchases: Purchase[]): Purchase[] => {
     let orderedPurchases = []
 
     orderedPurchases = purchases.sort((a: Purchase, b: Purchase) => {
-        let date = moment(a.date)
-        let date2 = moment(b.date)
-        let dayExpiration = date.add(a.Bundle.expirationDays, "days")
-        let dayExpiration2 = date2.add(b.Bundle.expirationDays, "days")
-        if (dayExpiration.isBefore(dayExpiration2)) return -1
-        if (dayExpiration.isAfter(dayExpiration2)) return 1
+        let date = moment(a.expirationDate)
+        let date2 = moment(b.expirationDate)
+        if (date.isBefore(date2)) return -1
+        if (date.isAfter(date2)) return 1
         return 0
     })
 
     return orderedPurchases
 }
 
-export const getPendingClasses = (purchases: Purchase[], bookings: Booking[]): pendingClasses[] => {
+export const getPendingClasses = async (purchases: Purchase[], bookings: Booking[]): Promise<pendingClasses[]> => {
     let results: pendingClasses[] = []
     for (var i in purchases) {
 
         const purchase = purchases[i]
-
+        if(purchase.isCanceled) continue
         let contadorClasses = purchase.Bundle.classNumber + purchase.addedClasses
         let contadorPasses = purchase.Bundle.passes + purchase.addedPasses
   
@@ -49,6 +48,12 @@ export const getPendingClasses = (purchases: Purchase[], bookings: Booking[]): p
 
     for (var i in bookings) {
         let booking = bookings[i]
+        const validatePurchase = await getRepository(Purchase).findOne({
+            where:{
+                id: booking.fromPurchase
+            }
+        })
+        if( validatePurchase && validatePurchase.isCanceled ) continue
 
         if (booking.fromPurchase == null) {
             for (var j in orderedPurchases) {
@@ -76,12 +81,10 @@ export const orderPendingClassesByExpirationDay = (purchases: pendingClasses[]):
     let orderedPurchases = []
 
     orderedPurchases = purchases.sort((a: pendingClasses, b: pendingClasses) => {
-        let date = moment(a.purchase.date)
-        let date2 = moment(b.purchase.date)
-        let dayExpiration = date.add(a.purchase.Bundle.expirationDays, "days")
-        let dayExpiration2 = date2.add(b.purchase.Bundle.expirationDays, "days")
-        if (dayExpiration.isBefore(dayExpiration2)) return -1
-        if (dayExpiration.isAfter(dayExpiration2)) return 1
+        let date = moment(a.purchase.expirationDate)
+        let date2 = moment(b.purchase.expirationDate)
+        if (date.isBefore(date2)) return -1
+        if (date.isAfter(date2)) return 1
         return 0
     })
 

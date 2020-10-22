@@ -50,5 +50,6 @@ PurchaseRouter.patch('/client/:client_id/purchase/:purchase_id', h(checkToken), 
 
 PurchaseRouter.delete('/:purchase_id', h(checkToken), h(PurchaseController.cancelPurchase))
 
+PurchaseRouter.patch('/updateall', h(checkToken), h(PurchaseController.updateAll))
 
 export { PurchaseRouter }

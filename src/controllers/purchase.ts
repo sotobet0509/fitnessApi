@@ -4,7 +4,7 @@ import { ExtendedRequest } from '../../types'
 import { PurchaseRepository } from '../repositories/purchase'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
-import { extraPurchaseSchema, Invoice, PurchaseData } from '../interfaces/purchase'
+import { Comments, extraPurchaseSchema, Invoice, PurchaseData } from '../interfaces/purchase'
 import { join } from 'path'
 import { JoinAttribute } from 'typeorm/query-builder/JoinAttribute'
 
@@ -34,7 +34,8 @@ export const PurchaseController = {
         const bundleId = parseInt(req.params.bundle_id)
 
         const isInvoice = Joi.object().keys({
-            invoice: Joi.boolean().required()
+            invoice: Joi.boolean().required(),
+            comment: Joi.string()
         })
         const { error, value } = isInvoice.validate(req.body)
         if (error) throw new DataMissingError()
@@ -67,10 +68,26 @@ export const PurchaseController = {
 
     async cancelPurchase(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-       
+    
         const purchaseId = parseInt(req.params.purchase_id)
+        const comment = Joi.object().keys({
+            comment: Joi.string()
+        })
+        const { error, value } = comment.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <Comments>value
 
-        await PurchaseRepository.cancelPurchase(purchaseId)
+        await PurchaseRepository.cancelPurchase(purchaseId, data)
+
+        return res.json({
+            success: true,
+        })
+    },
+
+    async updateAll(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+
+        await PurchaseRepository.updateAll()
 
         return res.json({
             success: true,

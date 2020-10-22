@@ -7,6 +7,7 @@ export interface PurchaseData {
 
 export interface Invoice{
     invoice: boolean
+    comment?: string
 }
 
 export interface extraPurchaseSchema{
@@ -19,4 +20,8 @@ export interface pendingClasses{
     purchase: Purchase
     pendingClasses: number
     pendingPasses: number
+}
+
+export interface Comments{
+    comment: string
 }
