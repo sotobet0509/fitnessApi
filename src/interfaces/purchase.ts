@@ -25,3 +25,7 @@ export interface pendingClasses{
 export interface Comments{
     comment: string
 }
+
+export interface Voucher{
+    voucher: string
+}

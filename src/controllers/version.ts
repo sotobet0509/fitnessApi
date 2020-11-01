@@ -1,17 +1,15 @@
 import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
-import { BundleRepository } from '../repositories/bundle'
-import { ErrorResponse } from '../errors/ErrorResponse'
-import { BookingRepository } from '../repositories/booking'
 import { VersionRepository } from '../repositories/version'
 
 export const VersionController ={
 
     async getLastVersion(req: ExtendedRequest, res: Response){
-        
+        const frontVersion = parseInt(req.params.version)
+        const token = req.header('Authorization')
 
-        const version = await VersionRepository.getLastVersion()
+        const version = await VersionRepository.getLastVersion(frontVersion, token)
         res.json({ success: true, version})
     },
 

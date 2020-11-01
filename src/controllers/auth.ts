@@ -8,6 +8,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { AuthRepository } from '../repositories/auth'
 import { TokenService } from '../services/token'
 
+
 export const
   AuthController = {
     async signUp(req: Request, res: Response) {
@@ -17,7 +18,7 @@ export const
         lastname: Joi.string().required(),
         password: Joi.string().required(),
       })
-
+      
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalSignUpData>value
@@ -206,7 +207,6 @@ export const
         success: true,
         available
       })
-    }
-
+    },
 
   }

@@ -172,7 +172,4 @@ AuthRouter.patch('/change-password', h(AuthController.changePassword))
 
 AuthRouter.get('/verify/:mail', h(AuthController.verifyEmail))
 
-
-
-
 export { AuthRouter }

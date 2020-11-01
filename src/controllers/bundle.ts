@@ -15,5 +15,10 @@ export const BundleController ={
     async getAllBundles(req: ExtendedRequest, res: Response){
         const bundles = await BundleRepository.getAllBundles()
         res.json({ success: true, data: bundles})
+    },
+
+    async updatePasses(req: ExtendedRequest, res: Response){
+        await BundleRepository.updatePasses()
+        res.json({ success: true})
     }
 }

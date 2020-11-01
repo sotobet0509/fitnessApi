@@ -4,7 +4,7 @@ import { ExtendedRequest } from '../../types'
 import { PurchaseRepository } from '../repositories/purchase'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
-import { Comments, extraPurchaseSchema, Invoice, PurchaseData } from '../interfaces/purchase'
+import { Comments, extraPurchaseSchema, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
 import { join } from 'path'
 import { JoinAttribute } from 'typeorm/query-builder/JoinAttribute'
 
@@ -28,6 +28,7 @@ export const PurchaseController = {
             success: true,
         })
     },
+
     async upgradeBundle(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
         const purchaseId = parseInt(req.params.purchase_id)
@@ -44,7 +45,7 @@ export const PurchaseController = {
         await PurchaseRepository.upgradeBundle(purchaseId, bundleId, data)
         return res.json({
             success: true
-        })       
+        })
     },
 
     async buyExtra(req: ExtendedRequest, res: Response) {
@@ -68,7 +69,7 @@ export const PurchaseController = {
 
     async cancelPurchase(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-    
+
         const purchaseId = parseInt(req.params.purchase_id)
         const comment = Joi.object().keys({
             comment: Joi.string()
@@ -94,4 +95,23 @@ export const PurchaseController = {
         })
     },
 
+    async buyClient(req: ExtendedRequest, res: Response) {
+        if (req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+        const userId = req.user.id
+        console.log(userId)
+        const bundleId = parseInt(req.params.bundle_id)
+        
+        const voucher = Joi.object().keys({
+            voucher: Joi.string().required()
+        })
+        const { error, value } = voucher.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <Voucher>value
+
+        await PurchaseRepository.buyClient(userId, bundleId,data)
+        
+        return res.json({
+            success: true,
+        })
+    },
 }

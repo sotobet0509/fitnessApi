@@ -5,13 +5,13 @@ import { PasswordService } from '../services/password'
 import { TokenService } from '../services/token'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { sendActivationUrl, sendRecoveryPasswordMail } from '../services/mail'
-import { BundleRepository } from './bundle'
-import { Bundle } from '../entities/Bundles'
-import { Purchase } from '../entities/Purchases'
-import { Payment_method } from '../entities/Payment_methods'
-import { Transaction } from '../entities/Transactions'
+// import { BundleRepository } from './bundle'
+// import { Bundle } from '../entities/Bundles'
+// import { Purchase } from '../entities/Purchases'
+// import { Payment_method } from '../entities/Payment_methods'
+// import { Transaction } from '../entities/Transactions'
 import { v4 as uuidv4 } from 'uuid'
-import * as moment from 'moment'
+// import * as moment from 'moment'
 
 
 export const AuthRepository = {
@@ -43,40 +43,40 @@ export const AuthRepository = {
     //Save
     const newCustomer = await customerRepository.save(customer)
 
-    const bundleRepository = getRepository(Bundle)
+    // const bundleRepository = getRepository(Bundle)
 
-    const bundleId = await bundleRepository.findOne({
-      where: {
-        name: "Paquete Prueba"
-      }
-    })
-    // Método de pago: Cortesía
-    const paymentMethod = await getRepository(Payment_method).findOne(
-      {
-        where: {
-          id: 1
-        }
-      }
-    )
-    if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
+    // const bundleId = await bundleRepository.findOne({
+    //   where: {
+    //     name: "Paquete Prueba"
+    //   }
+    // })
+    // // Método de pago: Cortesía
+    // const paymentMethod = await getRepository(Payment_method).findOne(
+    //   {
+    //     where: {
+    //       id: 1
+    //     }
+    //   }
+    // )
+    // if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
 
 
-    const purchase = new Purchase()
-    purchase.User = newCustomer
-    purchase.date = new Date()
-    purchase.Payment_method = paymentMethod
-    purchase.Bundle = bundleId
-    purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
+    // const purchase = new Purchase()
+    // purchase.User = newCustomer
+    // purchase.date = new Date()
+    // purchase.Payment_method = paymentMethod
+    // purchase.Bundle = bundleId
+    // purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
 
-    const _purchase = await getRepository(Purchase).save(purchase)
+    // const _purchase = await getRepository(Purchase).save(purchase)
 
-    const transaction = new Transaction()
-    transaction.voucher = 'Cortesía de nuevo cliente'
-    transaction.date = new Date()
-    transaction.invoice = false
-    transaction.total = bundleId.price
-    transaction.Purchase = _purchase
-    await getRepository(Transaction).save(transaction)
+    // const transaction = new Transaction()
+    // transaction.voucher = 'Cortesía de nuevo cliente'
+    // transaction.date = new Date()
+    // transaction.invoice = false
+    // transaction.total = bundleId.price
+    // transaction.Purchase = _purchase
+    // await getRepository(Transaction).save(transaction)
 
     await sendActivationUrl(customer.email, customer.tempToken)
     return customer
@@ -115,41 +115,41 @@ export const AuthRepository = {
 
     customer = await customerRepository.save(customer)
 
-    const bundleRepository = getRepository(Bundle)
+    // const bundleRepository = getRepository(Bundle)
 
-    const bundleId = await bundleRepository.findOne({
-      where: {
-        name: "Paquete Prueba"
-      }
-    })
-    // Método de pago: Cortesía
-    const paymentMethod = await getRepository(Payment_method).findOne(
-      {
-        where: {
-          id: 1
-        }
-      }
-    )
-    if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
+    // const bundleId = await bundleRepository.findOne({
+    //   where: {
+    //     name: "Paquete Prueba"
+    //   }
+    // })
+    // // Método de pago: Cortesía
+    // const paymentMethod = await getRepository(Payment_method).findOne(
+    //   {
+    //     where: {
+    //       id: 1
+    //     }
+    //   }
+    // )
+    // if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
 
 
-    const purchase = new Purchase()
-    purchase.User = customer
-    purchase.date = new Date()
-    purchase.Payment_method = paymentMethod
-    purchase.Bundle = bundleId
-    purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
+    // const purchase = new Purchase()
+    // purchase.User = customer
+    // purchase.date = new Date()
+    // purchase.Payment_method = paymentMethod
+    // purchase.Bundle = bundleId
+    // purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
 
-    const _purchase = await getRepository(Purchase).save(purchase)
+    // const _purchase = await getRepository(Purchase).save(purchase)
 
-    const transaction = new Transaction()
-    transaction.voucher = 'Cortesía de nuevo cliente'
-    transaction.date = new Date()
-    transaction.invoice = false
-    transaction.total = bundleId.price
-    transaction.Purchase = _purchase
+    // const transaction = new Transaction()
+    // transaction.voucher = 'Cortesía de nuevo cliente'
+    // transaction.date = new Date()
+    // transaction.invoice = false
+    // transaction.total = bundleId.price
+    // transaction.Purchase = _purchase
 
-    await getRepository(Transaction).save(transaction)
+    // await getRepository(Transaction).save(transaction)
 
     await sendActivationUrl(customer.email, customer.tempToken)
 
@@ -250,10 +250,6 @@ export const AuthRepository = {
     })
     if(emailExist) available = false
 
-    
-
     return available
   }
-
-
 }

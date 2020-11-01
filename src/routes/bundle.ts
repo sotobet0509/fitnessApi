@@ -105,4 +105,6 @@ BundleRouter.get('/', h(BundleController.getAllBundles))
 
 BundleRouter.get('/:bundle_id', h(BundleController.getBundle))
 
+BundleRouter.patch('/updateall', h(BundleController.updatePasses))
+
 export { BundleRouter }

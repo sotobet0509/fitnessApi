@@ -4,6 +4,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { getRepository } from 'typeorm'
 import { User } from '../entities/Users'
 import { ExtendedRequest } from '../../types'
+import { BlackList } from '../entities/BlackList'
 export async function checkToken(req: ExtendedRequest, res: Response, next: NextFunction) {
   //
   const token = req.header('Authorization')
@@ -15,6 +16,13 @@ export async function checkToken(req: ExtendedRequest, res: Response, next: Next
     //Somebody came with a signed token of a non existent user WTF
     throw new ErrorResponse(403, 8, 'Forbidden')
   }
+  const blackListToken = await getRepository(BlackList).findOne({
+    where:{
+      token: token
+    }
+  })
+  if(blackListToken) throw new ErrorResponse(403, 48, 'El token se encuentra en la BlackList') 
+
   req.user = user
 
   next()
