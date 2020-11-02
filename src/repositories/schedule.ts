@@ -57,7 +57,7 @@ export const ScheduleRepository = {
                 User: client,
                 isCanceled: false
             },
-            relations: ['Bundle', 'Payment_method',"Transaction"]
+            relations: ['Bundle', 'Payment_method', "Transaction"]
         })
 
 
@@ -103,13 +103,22 @@ export const ScheduleRepository = {
         })
         if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
 
-        let idPurchase
+        let idPurchase = null
+        const currentDate = moment(scheduleExist.date)
+        
         for (var i in classes) {
             if (classes[i].pendingClasses != 0) {
-                idPurchase = classes[i].purchase.id
-                break
+                
+                if(currentDate.isSameOrBefore(moment(classes[i].purchase.expirationDate))){
+                    console.log(currentDate, moment(classes[i].purchase.expirationDate))
+                    idPurchase = classes[i].purchase.id
+                    break
+                }
             }
         }
+
+        if(idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
+
 
         const booking = new Booking()
         booking.Schedule = scheduleExist
@@ -117,6 +126,15 @@ export const ScheduleRepository = {
         booking.User = client
         booking.isPass = isPass
         booking.fromPurchase = idPurchase
+
+        const currentPurchase = await getRepository(Purchase).findOne({
+            where: {
+                id: idPurchase
+            }
+        })
+
+
+
 
         await bookingRepository.save(booking)
 
