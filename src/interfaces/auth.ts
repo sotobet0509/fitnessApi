@@ -46,3 +46,9 @@ export interface ChangePasswordSchema {
  tempToken: string
  password: string
 }
+
+
+export interface ChangePasswordManualSchema {
+  password: string
+  clientId: string
+ }

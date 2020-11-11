@@ -2,11 +2,13 @@ import { Request, Response } from 'express'
 import axios from 'axios'
 import Joi = require('@hapi/joi')
 import config from '../config'
-import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema } from '../interfaces/auth'
+import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema, ChangePasswordManualSchema } from '../interfaces/auth'
 import { DataMissingError } from '../errors/DataMissingError'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { AuthRepository } from '../repositories/auth'
 import { TokenService } from '../services/token'
+import { ExtendedRequest } from '../../types'
+import { join } from 'path'
 
 
 export const
@@ -18,7 +20,7 @@ export const
         lastname: Joi.string().required(),
         password: Joi.string().required(),
       })
-      
+
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalSignUpData>value
@@ -197,11 +199,11 @@ export const
         token
       })
     },
-    
+
     async verifyEmail(req: Request, res: Response) {
       const mail = req.params.mail
 
-     const available = await AuthRepository.verifyEmail(mail)
+      const available = await AuthRepository.verifyEmail(mail)
 
       return res.json({
         success: true,
@@ -209,4 +211,23 @@ export const
       })
     },
 
+
+    async changePasswordManual(req: ExtendedRequest, res: Response) {
+      if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+      const changePasswordSchema = Joi.object().keys({
+        password: Joi.string().required(),
+        clientId: Joi.string().required()
+      })
+
+      const { error, value } = changePasswordSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <ChangePasswordManualSchema>value
+
+      await AuthRepository.changePasswordManual(data)
+
+
+      return res.json({
+        success: true,
+      })
+    }
   }

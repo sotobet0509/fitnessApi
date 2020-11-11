@@ -82,7 +82,7 @@ export const MeRepository = {
             where: {
                 User: user
             },
-            relations: ['Bundle', 'Payment_method','Transaction']
+            relations: ['Bundle', 'Payment_method', 'Transaction']
         })
         let clases = 0
         purchases.forEach(purchase => {
@@ -118,7 +118,7 @@ export const MeRepository = {
             where: {
                 User: user
             },
-            relations: ['Bundle', 'Payment_method','Transaction']
+            relations: ['Bundle', 'Payment_method', 'Transaction']
         })
 
         const bookingsNoPasses = await getRepository(Booking).find({
@@ -137,8 +137,8 @@ export const MeRepository = {
         })
 
         let classes: pendingClasses[]
-        classes = await getPendingClasses(purchases,bookings)
-        
+        classes = await getPendingClasses(purchases, bookings)
+
         classes = classes.filter((p: pendingClasses) => {
             let expirationDay = moment(p.purchase.expirationDate)
             if (expirationDay.isBefore(moment())) return false
@@ -148,22 +148,37 @@ export const MeRepository = {
 
         let pendingC = 0
         let pendingP = 0
-        for( var i in classes){
+        for (var i in classes) {
             pendingC += classes[i].pendingClasses
             pendingP += classes[i].pendingPasses
         }
-        
+        let isUnlimited = false
+        for (var i in classes) {
+            if (classes[i].purchase.Bundle.isUnlimited) {
+                isUnlimited = true
+                break
+            }
+        }
+
+        let nextExpirationDate: Date
+        if (classes.length == 0) {
+            nextExpirationDate = null
+        } else {
+            nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
+        }
         return {
             bookings,
             taken: bookingsNoPasses.length,
             pending: pendingC,
             pendingPasses: pendingP,
             takenPasses: passes.length,
-            compras: orderByExpirationDay( purchases)
+            compras: orderByExpirationDay(purchases),
+            isUnlimited,
+            nextExpirationDate
         }
     },
 
-    async uploadProfilePicture(url: string, user: User){
+    async uploadProfilePicture(url: string, user: User) {
         const userRepository = getRepository(User)
         user.pictureUrl = url
         await userRepository.save(user)

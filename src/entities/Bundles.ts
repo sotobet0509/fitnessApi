@@ -33,6 +33,9 @@ export class Bundle {
     @Column()
     isRecurrent: boolean
 
+    @Column({default: false})
+    isUnlimited: boolean
+
     @OneToMany(type => Purchase, purchase => purchase.Bundle)
     purchase: Purchase
 

@@ -1,6 +1,6 @@
 import { getRepository, getConnection } from 'typeorm'
 import { User } from '../entities/Users'
-import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema } from '../interfaces/auth'
+import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema, ChangePasswordManualSchema } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
 import { TokenService } from '../services/token'
 import { ErrorResponse } from '../errors/ErrorResponse'
@@ -251,5 +251,22 @@ export const AuthRepository = {
     if(emailExist) available = false
 
     return available
-  }
+  },
+
+  async changePasswordManual(data: ChangePasswordManualSchema) {
+    const userRepository = getRepository(User)
+    let user = await userRepository.findOne({
+      where: {
+        id: data.clientId
+      }
+    })
+    if (!user) throw new ErrorResponse(404, 14, 'El usuario no existe')
+
+    //Hash Password
+    const passwordService = new PasswordService(data.password)
+    const password = await passwordService.getHashedPassword()
+
+    user.password = password
+    await userRepository.save(user)
+  },
 }

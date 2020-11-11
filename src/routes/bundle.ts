@@ -51,6 +51,9 @@ const BundleRouter = Router({ mergeParams: true })
  *               isRecurrent:
  *                 type: boolean 
  *                 example: false
+ *               isUnlimited:
+ *                 type: boolean 
+ *                 example: false 
  *       500:
  *         description: Server error
  */
@@ -97,6 +100,9 @@ BundleRouter.get('/', h(BundleController.getAllBundles))
 *                type: boolean
 *                example: false
 *              isRecurrent:
+*                type: boolean 
+*                example: false 
+*              isUnlimited:
 *                type: boolean 
 *                example: false     
  *       500:

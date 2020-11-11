@@ -19,13 +19,14 @@ export const ClientRepository = {
             relations: ['Booking', 'Booking.Schedule']
         })
         let data = []
+        let nextExpirationDate: Date
         for (var i in clients) {
             const client = clients[i]
             const purchases = await getRepository(Purchase).find({
                 where: {
                     User: client
                 },
-                relations: ['Bundle','Transaction']
+                relations: ['Bundle', 'Transaction']
             })
             const bookings = await getRepository(Booking).find({
                 where: {
@@ -63,13 +64,29 @@ export const ClientRepository = {
                 pendingC += classes[i].pendingClasses
                 pendingP += classes[i].pendingPasses
             }
+            let isUnlimited = false
+            for (var i in classes) {
+                if (classes[i].purchase.Bundle.isUnlimited) {
+                    isUnlimited = true
+                    break
+                }
+            }
 
+            if (classes.length == 0) {
+                nextExpirationDate = null
+            } else {
+                nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
+            }
+
+           
             data.push({
                 client,
                 pending: pendingC,
                 taken: bookingsNoPasses.length,
                 pendingPasses: pendingP,
-                takenPasses: passes.length
+                takenPasses: passes.length,
+                isUnlimited,
+                nextExpirationDate
             })
         }
         return data
@@ -81,14 +98,14 @@ export const ClientRepository = {
             where: {
                 id: clientId
             },
-            relations: ['Purchase','Purchase.Bundle','Purchase.Payment_method','Purchase.Transaction','Booking','Booking.Schedule','Booking.Seat','Booking.Schedule.Instructor']
+            relations: ['Purchase', 'Purchase.Bundle', 'Purchase.Payment_method', 'Purchase.Transaction', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor']
         })
 
         const purchases = await getRepository(Purchase).find({
             where: {
                 User: client
             },
-            relations: ['Bundle','Transaction']
+            relations: ['Bundle', 'Transaction']
         })
         const bookings = await getRepository(Booking).find({
             where: {
@@ -111,7 +128,7 @@ export const ClientRepository = {
         })
 
         let classes: pendingClasses[]
-        classes =  await getPendingClasses(purchases, bookings)
+        classes = await getPendingClasses(purchases, bookings)
         delete client.password
         classes = classes.filter((p: pendingClasses) => {
             let expirationDay = moment(p.purchase.expirationDate)
@@ -126,14 +143,29 @@ export const ClientRepository = {
             pendingC += classes[i].pendingClasses
             pendingP += classes[i].pendingPasses
         }
+        let isUnlimited = false
+        for (var i in classes) {
+            if (classes[i].purchase.Bundle.isUnlimited) {
+                isUnlimited = true
+                break
+            }
+        }
 
+        let nextExpirationDate: Date
+        if (classes.length == 0) {
+            nextExpirationDate = null
+        } else {
+            nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
+        }
 
         return {
             ...client,
             pending: pendingC,
             taken: bookingsNoPasses.length,
             pendingPasses: pendingP,
-            takenPasses: passes.length
+            takenPasses: passes.length,
+            isUnlimited,
+            nextExpirationDate
         }
     },
 

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { AuthController } from '../controllers/auth'
 import * as h from 'express-async-handler'
+import { checkToken } from '../middleware/CheckToken'
 
 const AuthRouter = Router({ mergeParams: true })
 
@@ -171,5 +172,9 @@ AuthRouter.patch('/recovery-password', h(AuthController.recoveryPassword))
 AuthRouter.patch('/change-password', h(AuthController.changePassword))
 
 AuthRouter.get('/verify/:mail', h(AuthController.verifyEmail))
+
+AuthRouter.patch('/change-password-manual', h(checkToken), h(AuthController.changePasswordManual))
+
+
 
 export { AuthRouter }
