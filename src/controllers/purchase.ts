@@ -7,6 +7,9 @@ import { DataMissingError } from '../errors/DataMissingError'
 import { Comments, extraPurchaseSchema, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
 import { join } from 'path'
 import { JoinAttribute } from 'typeorm/query-builder/JoinAttribute'
+import { URLSearchParams } from 'url'
+
+const fetch = require('node-fetch')
 
 export const PurchaseController = {
 
@@ -100,7 +103,7 @@ export const PurchaseController = {
         const userId = req.user.id
         console.log(userId)
         const bundleId = parseInt(req.params.bundle_id)
-        
+
         const voucher = Joi.object().keys({
             voucher: Joi.string().required()
         })
@@ -108,10 +111,31 @@ export const PurchaseController = {
         if (error) throw new DataMissingError()
         const data = <Voucher>value
 
-        await PurchaseRepository.buyClient(userId, bundleId,data)
-        
+        await PurchaseRepository.buyClient(userId, bundleId, data)
+
         return res.json({
             success: true,
         })
     },
+
+    async createSession(req: ExtendedRequest, res: Response) {
+        const body = req.body
+        const b = new URLSearchParams()
+        for(var i in Object.keys(body)) {
+            b.append(Object.keys(body)[i], body[Object.keys(body)[i]])
+        }
+        // b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
+        b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
+        b.append('apiUsername', 'merchant.1146286')
+        b.append('merchant', '1146286')
+        const response = await fetch('https://evopaymentsmexico.gateway.mastercard.com/api/nvp/version/57', {
+            method: 'POST',
+            body: b,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            }
+        })
+        const responseText = await response.text()
+        res.send(responseText)
+    }
 }

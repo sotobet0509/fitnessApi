@@ -53,5 +53,6 @@ PurchaseRouter.delete('/:purchase_id', h(checkToken), h(PurchaseController.cance
 PurchaseRouter.patch('/updateall', h(checkToken), h(PurchaseController.updateAll))
 
 PurchaseRouter.post('/bundle/:bundle_id', h(checkToken), h(PurchaseController.buyClient))
+PurchaseRouter.post('/createSession', h(PurchaseController.createSession))
 
 export { PurchaseRouter }
