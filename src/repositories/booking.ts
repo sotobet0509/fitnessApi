@@ -62,7 +62,7 @@ export const BookingRepository = {
                 date: schedule.date,
                 start: schedule.start,
                 end: schedule.end,
-                isPass: booking.isPass 
+                isPass: booking.isPass
             })
         }
 
