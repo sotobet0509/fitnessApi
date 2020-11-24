@@ -24,9 +24,9 @@ export const MeController ={
     },
 
     async uploadProfilePicture(req: ExtendedRequest, res: Response){
-        console.log(req.files)
+        //console.log(req.files)
         const url = await handleProfilePicture(req.files.file)
-        console.log(url)
+        //console.log(url)
         const user = req.user
 
         await MeRepository.uploadProfilePicture(url, user)

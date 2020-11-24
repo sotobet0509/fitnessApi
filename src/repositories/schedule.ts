@@ -20,9 +20,22 @@ export const ScheduleRepository = {
             where: {
                 id: scheduleId
             },
-            relations: ['Booking', 'Booking.Seat']
+            relations: ['Booking', 'Booking.Seat','Booking.User']
         })
         if (schedule.length == 0) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
+        
+        for(var i in schedule){
+            for(var j in schedule[i].Booking){
+             delete schedule[i].Booking[j].User.email
+            delete schedule[i].Booking[j].User.createdAt
+            delete schedule[i].Booking[j].User.facebookId
+            delete schedule[i].Booking[j].User.googleId
+            delete schedule[i].Booking[j].User.password
+            delete schedule[i].Booking[j].User.isAdmin
+            delete schedule[i].Booking[j].User.isDeleted
+            delete schedule[i].Booking[j].User.tempToken
+            } 
+        }
 
         return schedule
     },
@@ -110,7 +123,7 @@ export const ScheduleRepository = {
             if (classes[i].pendingClasses != 0) {
                 
                 if(currentDate.isSameOrBefore(moment(classes[i].purchase.expirationDate))){
-                    console.log(currentDate, moment(classes[i].purchase.expirationDate))
+                    //console.log(currentDate, moment(classes[i].purchase.expirationDate))
                     idPurchase = classes[i].purchase.id
                     break
                 }

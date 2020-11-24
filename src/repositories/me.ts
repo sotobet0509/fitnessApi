@@ -24,7 +24,7 @@ export const MeRepository = {
         })
         let minutesDone = 0
         let favorites = []
-        console.log(bookings, profile)
+        //console.log(bookings, profile)
         for (var i in bookings) {
             const booking: Booking = bookings[i]
             const schedule = booking.Schedule
@@ -38,11 +38,11 @@ export const MeRepository = {
                 minutes: new Date(`2020-01-01 ${schedule.end}`).getMinutes(),
                 seconds: 0
             })
-            console.log('start', start)
-            console.log('end', end)
+            //console.log('start', start)
+            //console.log('end', end)
             const minutes = moment.duration(end.diff(start))
             if (start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
-                console.log('done', minutes.asMinutes())
+                //console.log('done', minutes.asMinutes())
                 minutesDone += minutes.asMinutes()
             }
             const instructor = schedule.Instructor

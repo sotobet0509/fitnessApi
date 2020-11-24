@@ -16,13 +16,16 @@ export const ClientRepository = {
             where: {
                 isAdmin: false
             },
-            relations: ['Booking', 'Booking.Schedule']
+            relations: ['Booking', 'Booking.Schedule', 'Purchase','Purchase.Bundle'],
+           // take: 10,
+            //skip: 3
         })
         let data = []
         let nextExpirationDate: Date
         for (var i in clients) {
             const client = clients[i]
-            const purchases = await getRepository(Purchase).find({
+            
+           /* const purchases = await getRepository(Purchase).find({
                 where: {
                     User: client
                 },
@@ -32,7 +35,7 @@ export const ClientRepository = {
                 where: {
                     User: client
                 }
-            })
+            })*/
 
             const bookingsNoPasses = await getRepository(Booking).find({
                 where: {
@@ -49,7 +52,7 @@ export const ClientRepository = {
             })
 
             let classes: pendingClasses[]
-            classes = await getPendingClasses(purchases, bookings)
+            classes = await getPendingClasses(client.Purchase, client.Booking)
             delete client.password
             classes = classes.filter((p: pendingClasses) => {
                 let expirationDay = moment(p.purchase.expirationDate)
@@ -78,7 +81,6 @@ export const ClientRepository = {
                 nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
             }
 
-           
             data.push({
                 client,
                 pending: pendingC,

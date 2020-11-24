@@ -219,7 +219,7 @@ export const AuthRepository = {
   },
 
   async changePassword(data: ChangePasswordSchema) {
-    console.log(data)
+    //console.log(data)
     const userRepository = getRepository(User)
     let user = await userRepository.findOne({
 

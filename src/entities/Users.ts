@@ -43,8 +43,8 @@ export class User {
     createdAt: Date
 
     @OneToMany(type => Booking, Booking => Booking.User)
-    Booking: Booking
+    Booking: Booking[]
     
     @OneToMany(type => Purchase, Purchase => Purchase.User)
-    Purchase: Purchase
+    Purchase: Purchase[]
 }

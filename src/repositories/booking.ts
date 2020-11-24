@@ -27,7 +27,7 @@ export const BookingRepository = {
             seconds: 0
         })
         const duration = moment.duration(start.diff(moment())).asHours() + 5
-        console.log(duration, start)
+        //console.log(duration, start)
         if (duration >= 8) {
             await bookingRepository.remove(booking)
         } else {

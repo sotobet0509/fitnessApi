@@ -48,12 +48,14 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
 
     for (var i in bookings) {
         let booking = bookings[i]
-        const validatePurchase = await getRepository(Purchase).findOne({
-            where:{
-                id: booking.fromPurchase
-            }
-        })
-        if( validatePurchase && validatePurchase.isCanceled ) continue
+       // console.log(booking)
+
+        // const validatePurchase = await getRepository(Purchase).findOne({
+        //     where:{
+        //         id: booking.fromPurchase
+        //     }
+        // })
+        // if( validatePurchase && validatePurchase.isCanceled ) continue
 
         if (booking.fromPurchase == null) {
             for (var j in orderedPurchases) {
@@ -70,6 +72,13 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
                     } else continue
                 }
             }
+        }else{
+            const validatePurchase = await getRepository(Purchase).findOne({
+                where:{
+                    id: booking.fromPurchase
+                }
+            })
+            if( validatePurchase && validatePurchase.isCanceled ) continue
         }
     }
 

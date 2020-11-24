@@ -42,7 +42,7 @@ export const LocationRepository = {
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
 
         const schedules = room.Schedules
-        console.log(schedules)
+        //console.log(schedules)
         const filteredSchedules = schedules.filter((schedule: Schedule) =>{
             const date = moment(schedule.date)
             const endDate = moment(data.start).add(7,'days')

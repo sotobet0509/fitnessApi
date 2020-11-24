@@ -128,7 +128,7 @@ export const PurchaseRepository = {
 
             const pending = hasClasses.find(x => x.purchase.id == purchase.id)
 
-            console.log(currentBundle.classNumber - pending.pendingClasses, (newBundle.classNumber))
+            //console.log(currentBundle.classNumber - pending.pendingClasses, (newBundle.classNumber))
 
             if (currentBundle.classNumber - pending.pendingClasses < (newBundle.classNumber)) {
                 transaction.voucher = "Devolución"
@@ -157,7 +157,7 @@ export const PurchaseRepository = {
         )
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
 
-        console.log(purchaseId)
+        //console.log(purchaseId)
         let purchase = await getRepository(Purchase).findOne(
             {
                 where: {
@@ -244,7 +244,7 @@ export const PurchaseRepository = {
                 if (date.isAfter(date2)) return 1
                 return 0
             })
-            console.log(orderedPurchases)
+            //console.log(orderedPurchases)
             if (orderedPurchases.length > 0) {
                 purchases[i].expirationDate = moment(orderedPurchases[orderedPurchases.length - 1].date).add(purchases[i].Bundle.expirationDays, "days").toDate()
 

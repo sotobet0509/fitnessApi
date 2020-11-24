@@ -101,7 +101,7 @@ export const PurchaseController = {
     async buyClient(req: ExtendedRequest, res: Response) {
         if (req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
         const userId = req.user.id
-        console.log(userId)
+        //console.log(userId)
         const bundleId = parseInt(req.params.bundle_id)
 
         const voucher = Joi.object().keys({

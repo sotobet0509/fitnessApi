@@ -179,7 +179,7 @@ export const
       })
 
 
-      console.log(changePasswordSchema.tempToken, changePasswordSchema.password)
+      //console.log(changePasswordSchema.tempToken, changePasswordSchema.password)
 
       const { error, value } = changePasswordSchema.validate(req.body)
       if (error) throw new DataMissingError()

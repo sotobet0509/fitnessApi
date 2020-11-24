@@ -28,7 +28,4 @@ export class Booking {
     @ManyToOne(type => User, User => User.Booking)
     @JoinColumn({name: 'user_id'})
     User: User
-
-
-
 }

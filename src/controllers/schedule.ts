@@ -65,7 +65,7 @@ export const ScheduleController ={
         const { error, value } = scheduleSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <ScheduleSchema>value
-        console.log(data)
+        //console.log(data)
         await ScheduleRepository.createSchedule(data)
         res.json({ success: true})
     },
