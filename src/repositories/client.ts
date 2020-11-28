@@ -9,6 +9,7 @@ import * as moment from 'moment'
 import { getPendingClasses } from '../utils';
 import { pendingClasses } from '../interfaces/purchase';
 import { sendActivationUrl } from '../services/mail';
+import { Bundle } from '../entities/Bundles';
 
 export const ClientRepository = {
     async getAllClients() {
@@ -16,26 +17,28 @@ export const ClientRepository = {
             where: {
                 isAdmin: false
             },
-            relations: ['Booking', 'Booking.Schedule', 'Purchase','Purchase.Bundle'],
-           // take: 10,
+            relations: ['Booking', 'Booking.Schedule', 'Purchase', 'Purchase.Bundle'],
+            // take: 10,
             //skip: 3
         })
         let data = []
         let nextExpirationDate: Date
         for (var i in clients) {
             const client = clients[i]
-            
-           /* const purchases = await getRepository(Purchase).find({
-                where: {
-                    User: client
-                },
-                relations: ['Bundle', 'Transaction']
-            })
-            const bookings = await getRepository(Booking).find({
-                where: {
-                    User: client
-                }
-            })*/
+
+            /* const purchases = await getRepository(Purchase).find({
+                 where: {
+                     User: client
+                 },
+                 relations: ['Bundle', 'Transaction']
+             })
+             const bookings = await getRepository(Booking).find({
+                 where: {
+                     User: client
+                 }
+             })*/
+
+
 
             const bookingsNoPasses = await getRepository(Booking).find({
                 where: {
@@ -232,5 +235,23 @@ export const ClientRepository = {
         updateClient.createdAt = data.createdAt ? data.createdAt : updateClient.createdAt
 
         await clientRepository.save(updateClient)
+    },
+    async pruebas() {
+        const currentDate = new Date()
+        console.log(currentDate)
+        //const clients = await getRepository(User).createQueryBuilder().select("users").from(User,"users").where("users.name = :name", {name:"Andres"}).getMany()
+
+        const clients = await getRepository(User).createQueryBuilder()
+        .select("*")
+            .innerJoin("User.Booking", "Bookings")
+            .innerJoin("User.Purchase", "Purchases")
+            .where("User.id = :id", { id: "ee7d1d85-d185-4004-84bd-6cce7dc9420d" })
+            .getMany
+
+        //const clients = await getRepository(Purchase).createQueryBuilder().innerJoinAndSelect("Purchase.Bundle","Bundles").where("Purchase.expirationDate >= :date",{date: currentDate}).getMany()
+        //console.log(clients)
+
+
+        return clients
     }
 }
