@@ -229,5 +229,55 @@ export const
       return res.json({
         success: true,
       })
-    }
+    },
+
+    async loginColaborador(req: Request, res: Response) {
+      const localLoginSchema = Joi.object().keys({
+        email: Joi.string().required(),
+        password: Joi.string().required(),
+      })
+
+      const { error, value } = localLoginSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <LocalLoginData>value
+
+      const user = await AuthRepository.authenticateColaborador(data)
+
+      //Dar acceso
+      const userToken = new TokenService(user.id)
+      const token = await userToken.signToken()
+
+      delete user.password
+
+      return res.json({
+        success: true,
+        token,
+        user,
+      })
+    },
+
+    async loginInstructor(req: Request, res: Response) {
+      const localLoginSchema = Joi.object().keys({
+        email: Joi.string().required(),
+        password: Joi.string().required(),
+      })
+
+      const { error, value } = localLoginSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <LocalLoginData>value
+
+      const instructor = await AuthRepository.authenticateInstructor(data)
+
+      //Dar acceso
+      const instructorToken = new TokenService(instructor.id.toString())
+      const token = await instructorToken.signToken()
+
+      delete instructor.password
+
+      return res.json({
+        success: true,
+        token,
+        instructor,
+      })
+    },
   }

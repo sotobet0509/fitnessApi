@@ -23,7 +23,7 @@ export const BundleController = {
         if (token) {
             const payload = await TokenService.verifyToken(token)
             const userRepository = getRepository(User)
-             user = await userRepository.findOne(payload.sub)
+            user = await userRepository.findOne(payload.sub)
             const blackListToken = await getRepository(BlackList).findOne({
                 where: {
                     token: token
@@ -39,5 +39,9 @@ export const BundleController = {
     async updatePasses(req: ExtendedRequest, res: Response) {
         await BundleRepository.updatePasses()
         res.json({ success: true })
+    },
+    async getAllDiscounts(req: ExtendedRequest, res: Response) {
+        const discount = await BundleRepository.getAllDiscounts()
+        res.json({ success: true, discount })
     }
 }

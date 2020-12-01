@@ -9,6 +9,9 @@ import { Payment_method } from '../entities/Payment_methods'
 import { getPendingClasses } from '../utils'
 import { Booking } from '../entities/Bookings'
 import * as moment from "moment"
+import { Folios } from '../entities/Folios'
+import { Alternate_users } from '../entities/alternateUsers'
+import { v4 as uuidv4 } from 'uuid'
 
 export const PurchaseRepository = {
     async buy(data: PurchaseData, clientId: string) {
@@ -43,25 +46,77 @@ export const PurchaseRepository = {
         if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
 
         for (var i in bundles) {
-            const bundle = bundles[i]
-            const purchase = new Purchase()
-            purchase.User = client
-            purchase.date = new Date()
-            purchase.Payment_method = paymentMethod
-            purchase.Bundle = bundle
-            purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+
+            if (bundles[i].isEspecial) {
+                const bundle = bundles[i]
+                const purchase = new Purchase()
+                purchase.User = client
+                purchase.date = new Date()
+                purchase.Payment_method = paymentMethod
+                purchase.Bundle = bundle
+                purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
 
 
-            const _purchase = await getRepository(Purchase).save(purchase)
+                const _purchase = await getRepository(Purchase).save(purchase)
 
-            const transaction = new Transaction()
-            transaction.voucher = data.transactionId
-            transaction.date = new Date()
-            transaction.invoice = false
-            transaction.total = bundle.price
-            transaction.Purchase = _purchase
+                const transaction = new Transaction()
+                transaction.voucher = data.transactionId
+                transaction.date = new Date()
+                transaction.invoice = false
+                if (data.discount) {
+                    transaction.total = bundle.price * (1 - data.discount)
+                } else {
+                    transaction.total = bundle.price
+                }
+                transaction.Purchase = _purchase
+                if (data.comments) transaction.comments = data.comments
 
-            await getRepository(Transaction).save(transaction)
+                await getRepository(Transaction).save(transaction)
+
+                const colaborador = await getRepository(Alternate_users).findOne({
+                    where: {
+                        id: bundle.altermateUserId
+                    }
+                })
+                const shortColaborador = colaborador.name.substr(0, 3).toUpperCase()
+                let shortUuid = uuidv4().substr(0, 6)
+
+                let folio = new Folios()
+                folio.Alternate_users = colaborador
+                folio.clientName = client.name + " " + client.lastname
+                folio.folio = shortColaborador + "-" + shortUuid
+                folio.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
+                folio.purchase = purchase.id
+
+                await getRepository(Folios).save(folio)
+
+            } else {
+
+                const bundle = bundles[i]
+                const purchase = new Purchase()
+                purchase.User = client
+                purchase.date = new Date()
+                purchase.Payment_method = paymentMethod
+                purchase.Bundle = bundle
+                purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+
+
+                const _purchase = await getRepository(Purchase).save(purchase)
+
+                const transaction = new Transaction()
+                transaction.voucher = data.transactionId
+                transaction.date = new Date()
+                transaction.invoice = false
+                if (data.discount) {
+                    transaction.total = bundle.price * (1 - data.discount)
+                } else {
+                    transaction.total = bundle.price
+                }
+                transaction.Purchase = _purchase
+                if (data.comments) transaction.comments = data.comments
+
+                await getRepository(Transaction).save(transaction)
+            }
 
         }
     },
@@ -277,15 +332,53 @@ export const PurchaseRepository = {
         )
         if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe')
 
+        if (bundle.isEspecial) {
+            let purchase = new Purchase()
+            purchase.User = user
+            purchase.Bundle = bundle
+            purchase.date = new Date()
+            purchase.Payment_method = paymentMethod
+            purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+
+            await getRepository(Purchase).save(purchase)
+
+            const transaction = new Transaction()
+            transaction.voucher = data.voucher
+            transaction.date = new Date()
+            transaction.invoice = false
+            transaction.total = bundle.price
+            transaction.Purchase = purchase
+
+            await getRepository(Transaction).save(transaction)
+
+            const colaborador = await getRepository(Alternate_users).findOne({
+                where: {
+                    id: bundle.altermateUserId
+                }
+            })
+            const shortColaborador = colaborador.name.substr(0, 3).toUpperCase()
+            let shortUuid = uuidv4().substr(0, 6)
+            let folio = new Folios()
+            folio.Alternate_users = colaborador
+            folio.clientName = user.name + " " + user.lastname
+            folio.folio = shortColaborador + "-" + shortUuid
+            folio.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
+            folio.purchase = purchase.id
+
+            await getRepository(Folios).save(folio)
+            return folio
+        }
+
+
         let purchase = new Purchase()
         purchase.User = user
         purchase.Bundle = bundle
         purchase.date = new Date()
         purchase.Payment_method = paymentMethod
         purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
-    
+
         await getRepository(Purchase).save(purchase)
-        
+
         const transaction = new Transaction()
         transaction.voucher = data.voucher
         transaction.date = new Date()
@@ -295,7 +388,7 @@ export const PurchaseRepository = {
 
         await getRepository(Transaction).save(transaction)
 
-    
+
     },
 }
 

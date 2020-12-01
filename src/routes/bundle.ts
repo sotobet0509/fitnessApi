@@ -114,4 +114,6 @@ BundleRouter.get('/:bundle_id', h(BundleController.getBundle))
 
 BundleRouter.patch('/updateall', h(BundleController.updatePasses))
 
+BundleRouter.get('/discount/all', h(BundleController.getAllDiscounts))
+
 export { BundleRouter }

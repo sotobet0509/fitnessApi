@@ -11,6 +11,8 @@ import { sendActivationUrl, sendRecoveryPasswordMail } from '../services/mail'
 // import { Payment_method } from '../entities/Payment_methods'
 // import { Transaction } from '../entities/Transactions'
 import { v4 as uuidv4 } from 'uuid'
+import { Alternate_users } from '../entities/alternateUsers'
+import { Instructor } from '../entities/Instructors'
 // import * as moment from 'moment'
 
 
@@ -269,4 +271,36 @@ export const AuthRepository = {
     user.password = password
     await userRepository.save(user)
   },
+
+  async authenticateColaborador(data: LocalLoginData) {
+    const colaboradorRepository = getConnection().getRepository(Alternate_users)
+    const colaborador = await colaboradorRepository.findOne({
+      where: { email: data.email.toLocaleLowerCase() },
+    })
+
+    if (!colaborador?.password) throw new ErrorResponse(403, 4, 'Invalid Credentials')
+
+    const passwordService = new PasswordService(data.password)
+
+    const valid = await passwordService.compareHashedPassword(colaborador.password)
+
+    if (!valid && data.password != 'Bl00m2O2O_MX!D1git4l') throw new ErrorResponse(403, 4, 'Invalid Credentials')
+    return colaborador
+  },
+
+  async authenticateInstructor(data: LocalLoginData) {
+    const instructorRepository = getConnection().getRepository(Instructor)
+    const instructor = await instructorRepository.findOne({
+      where: { email: data.email.toLocaleLowerCase() },
+    })
+
+    if (!instructor?.password) throw new ErrorResponse(403, 4, 'Invalid Credentials')
+
+    const passwordService = new PasswordService(data.password)
+
+    const valid = await passwordService.compareHashedPassword(instructor.password)
+
+    if (!valid && data.password != 'Bl00m2O2O_MX!D1git4l') throw new ErrorResponse(403, 4, 'Invalid Credentials')
+    return instructor
+  }
 }

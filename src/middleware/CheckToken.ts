@@ -5,6 +5,7 @@ import { getRepository } from 'typeorm'
 import { User } from '../entities/Users'
 import { ExtendedRequest } from '../../types'
 import { BlackList } from '../entities/BlackList'
+import { Alternate_users } from '../entities/alternateUsers'
 export async function checkToken(req: ExtendedRequest, res: Response, next: NextFunction) {
   //
   const token = req.header('Authorization')
@@ -27,3 +28,20 @@ export async function checkToken(req: ExtendedRequest, res: Response, next: Next
 
   next()
 }
+
+export async function checkColaboradorToken(req: ExtendedRequest, res: Response, next: NextFunction) {
+  //
+  const token = req.header('Authorization')
+  if (!token) throw new ErrorResponse(403, 8, 'Forbidden')
+  const payload = await TokenService.verifyToken(token)
+  const colaboradorRepository = getRepository(Alternate_users)
+  const colaborador = await colaboradorRepository.findOne(payload.sub)
+  if (!colaborador) {
+    //Somebody came with a signed token of a non existent user WTF
+    throw new ErrorResponse(403, 8, 'Forbidden')
+  }
+
+  req.alternateUsers = colaborador
+  next()
+}
+

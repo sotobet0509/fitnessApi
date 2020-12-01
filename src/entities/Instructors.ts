@@ -27,6 +27,12 @@ export class Instructor {
     @CreateDateColumn()
     createdAt: Date
 
+    @Column({nullable: true})
+    email: string
+
+    @Column({nullable: true })
+    password: string
+    
     @OneToMany(type => Schedule, Schedule => Schedule.Instructor)
     Schedule: Schedule
     

@@ -3,6 +3,8 @@ import { Purchase } from "../entities/Purchases";
 export interface PurchaseData {
     bundles: number[]
     transactionId: string
+    comments?: string
+    discount?: number
 }
 
 export interface Invoice{

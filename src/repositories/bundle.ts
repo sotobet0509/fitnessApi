@@ -3,6 +3,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { Bundle } from '../entities/Bundles'
 import { Purchase } from '../entities/Purchases'
 import { User } from '../entities/Users'
+import { Discounts } from '../entities/Discounts'
 
 
 export const BundleRepository = {
@@ -64,6 +65,12 @@ export const BundleRepository = {
             bundles[i].passes = 0
             await getRepository(Bundle).save(bundles[i])
         }
-    }
+    },
+    async getAllDiscounts() {
+        const discounts = await getRepository(Discounts).find({
 
+        })
+        if (!discounts) throw new ErrorResponse(404, 53, 'No hay descuentos disponibles')
+        return discounts
+    }
 }

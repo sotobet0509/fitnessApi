@@ -20,6 +20,8 @@ export const PurchaseController = {
                 Joi.number()
             ).required(),
             transactionId: Joi.string().required(),
+            comments: Joi.string(),
+            discount: Joi.number()
         })
         const { error, value } = purchaseSchema.validate(req.body)
         if (error) throw new DataMissingError()
@@ -111,10 +113,10 @@ export const PurchaseController = {
         if (error) throw new DataMissingError()
         const data = <Voucher>value
 
-        await PurchaseRepository.buyClient(userId, bundleId, data)
+        const folio = await PurchaseRepository.buyClient(userId, bundleId, data)
 
         return res.json({
-            success: true,
+            success: true, folio
         })
     },
 
@@ -124,7 +126,7 @@ export const PurchaseController = {
         for(var i in Object.keys(body)) {
             b.append(Object.keys(body)[i], body[Object.keys(body)[i]])
         }
-        // b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
+        //b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
         b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
         b.append('apiUsername', 'merchant.1146286')
         b.append('merchant', '1146286')

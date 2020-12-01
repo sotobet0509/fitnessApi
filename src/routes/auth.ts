@@ -175,6 +175,7 @@ AuthRouter.get('/verify/:mail', h(AuthController.verifyEmail))
 
 AuthRouter.patch('/change-password-manual', h(checkToken), h(AuthController.changePasswordManual))
 
+AuthRouter.post('/colaborador', h(AuthController.loginColaborador))
 
-
+AuthRouter.post('/instructor', h(AuthController.loginInstructor))
 export { AuthRouter }

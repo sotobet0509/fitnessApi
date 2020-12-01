@@ -36,8 +36,21 @@ export class Bundle {
     @Column({default: false})
     isUnlimited: boolean
 
-    @OneToMany(type => Purchase, purchase => purchase.Bundle)
-    purchase: Purchase
+    @Column({default: false})
+    isEspecial: boolean
 
-    
+    @Column({nullable: true})
+    especialDescription: string
+
+    @Column('integer', {nullable: true})
+    promotionExpirationDays: number
+
+    @Column({nullable: true})
+    pictureUrl: string
+
+    @Column('integer')
+    altermateUserId: number
+
+    @OneToMany(type => Purchase, purchase => purchase.Bundle)
+    purchase: Purchase    
 }

@@ -241,17 +241,17 @@ export const ClientRepository = {
         console.log(currentDate)
         //const clients = await getRepository(User).createQueryBuilder().select("users").from(User,"users").where("users.name = :name", {name:"Andres"}).getMany()
 
-        const clients = await getRepository(User).createQueryBuilder()
-        .select("*")
-            .innerJoin("User.Booking", "Bookings")
-            .innerJoin("User.Purchase", "Purchases")
-            .where("User.id = :id", { id: "ee7d1d85-d185-4004-84bd-6cce7dc9420d" })
-            .getMany
+        // const clients = await getRepository(User).createQueryBuilder()
+        // .select("*")
+        //     .innerJoin("User.Booking", "Bookings")
+        //     .innerJoin("User.Purchase", "Purchases")
+        //     .where("User.id = :id", { id: "ee7d1d85-d185-4004-84bd-6cce7dc9420d" })
+        //     .getMany
 
         //const clients = await getRepository(Purchase).createQueryBuilder().innerJoinAndSelect("Purchase.Bundle","Bundles").where("Purchase.expirationDate >= :date",{date: currentDate}).getMany()
         //console.log(clients)
 
 
-        return clients
+//        return clients
     }
 }

@@ -22,6 +22,7 @@ import { ClientRouter } from '../routes/client'
 import { PurchaseRouter } from '../routes/purchase'
 import { BookingRouter } from '../routes/booking'
 import { VersionRouter } from '../routes/version'
+import { FolioRouter } from '../routes/folio'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -76,6 +77,7 @@ export default class ExpressApp {
     this.application.use('/purchase', PurchaseRouter)
     this.application.use('/bookings', BookingRouter)
     this.application.use('/versions', VersionRouter)
+    this.application.use('/folios', FolioRouter)
   }
 
   private loadErrorHandlers(): void {
