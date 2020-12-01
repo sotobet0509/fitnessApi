@@ -358,14 +358,22 @@ export const PurchaseRepository = {
             })
             const shortColaborador = colaborador.name.substr(0, 3).toUpperCase()
             let shortUuid = uuidv4().substr(0, 6)
-            let folio = new Folios()
-            folio.Alternate_users = colaborador
-            folio.clientName = user.name + " " + user.lastname
-            folio.folio = shortColaborador + "-" + shortUuid
-            folio.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
-            folio.purchase = purchase.id
+            let folioSave = new Folios()
+            folioSave.Alternate_users = colaborador
+            folioSave.clientName = user.name + " " + user.lastname
+            folioSave.folio = shortColaborador + "-" + shortUuid
+            folioSave.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
+            folioSave.purchase = purchase.id
+            
+            await getRepository(Folios).save(folioSave)
 
-            await getRepository(Folios).save(folio)
+            const folio = await getRepository(Folios).findOne({
+                where:{
+                    id: folioSave
+                },
+                relations: ["Alternate_users"]
+            })
+
             return folio
         }
 

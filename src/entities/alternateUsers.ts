@@ -16,6 +16,9 @@ export class Alternate_users {
     @Column()
     name: string
 
+    @Column({nullable: true})
+    contact: string
+
     @OneToMany(type => Folios, Folios => Folios.Alternate_users)
     Folios: Folios
 }

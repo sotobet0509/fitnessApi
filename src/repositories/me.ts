@@ -7,6 +7,7 @@ import { getPendingClasses, orderByExpirationDay } from "../utils/index"
 import { pendingClasses } from '../interfaces/purchase'
 import * as moment from 'moment'
 import { Folios } from '../entities/Folios'
+import { Alternate_users } from '../entities/alternateUsers'
 
 export const MeRepository = {
     async getProfile(id: string) {
@@ -86,20 +87,25 @@ export const MeRepository = {
             relations: ['Bundle', 'Payment_method', 'Transaction']
         })
         let clases = 0
-        let folio = new Folios ()
-        purchases.forEach(async purchase =>  {
-            const bundle = purchase.Bundle
-            const buyedAt = moment(purchase.date)
+
+
+        for (var i in purchases) {
+            const bundle = purchases[i].Bundle
+            const buyedAt = moment(purchases[i].date)
             // no se añaden clases de paquetes expirados
             if (moment().diff(buyedAt, 'days') <= bundle.expirationDays) {
-                clases += purchase.Bundle.classNumber
+                clases += purchases[i].Bundle.classNumber
             }
-            folio = await getRepository(Folios).findOne({
-                purchase: purchase.id
+            let folio = await getRepository(Folios).findOne({
+                where: {
+                    purchase: purchases[i].id
+                },
+                relations: ["Alternate_users"]
             })
-            purchase['folio'] = folio
-            
-        })
+            purchases[i]['folio'] = folio
+
+        }
+
         const bookingRepository = getRepository(Booking)
         const bookings = await bookingRepository.find({
             where: {
