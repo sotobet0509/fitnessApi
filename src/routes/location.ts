@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { BundleController } from '../controllers/bundle'
 import * as h from 'express-async-handler'
 import { LocationController } from '../controllers/location'
-import { checkToken } from '../middleware/CheckToken'
+import { checkInstructorToken, checkToken } from '../middleware/CheckToken'
 //import {checkToken} from '../middleware/CheckToken'
 
 const LocationRouter = Router({ mergeParams: true })
@@ -83,5 +83,7 @@ LocationRouter.get('/:location_id', h(LocationController.getLocation))
 LocationRouter.post('/room/:room_id/schedules', h(LocationController.getLocationsByWeek))
 
 LocationRouter.get('/schedules/all',h(checkToken), h(LocationController.getSchedules))
+
+LocationRouter.get('/instructor/all',h(checkInstructorToken), h(LocationController.getInstructorSchedules))
 
 export { LocationRouter }
