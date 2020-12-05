@@ -34,25 +34,22 @@ export const LocationRepository = {
     },
 
     async getLocationsByWeek(room_id: number, data: LocationSchema) {
-        const room = await getRepository(Room).findOne({
-            where: {
-                id: room_id
-            },
-            relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking']
+        const room = await getRepository(Room).find({
+            relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking', 'Schedules.Rooms']
         })
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
+        let filteredSchedules = []
+        for (var i in room) {
+            const schedules = room[i].Schedules
+            filteredSchedules = filteredSchedules.concat(schedules.filter((schedule: Schedule) => {
+                const date = moment(schedule.date)
+                const endDate = moment(data.start).add(7, 'days')
 
-        const schedules = room.Schedules
-        //console.log(schedules)
-        const filteredSchedules = schedules.filter((schedule: Schedule) => {
-            const date = moment(schedule.date)
-            const endDate = moment(data.start).add(7, 'days')
-
-            if (date.isSameOrAfter(data.start) && date.isBefore(endDate)) return true
-            return false
-        })
+                if (date.isSameOrAfter(data.start) && date.isBefore(endDate)) return true
+                return false
+            }))
+        }
         const currentDay = moment(data.start).isoWeekday()
-
         let days = [[], [], [], [], [], [], []]
         for (var i in filteredSchedules) {
             const filteredSchedule = filteredSchedules[i]
@@ -65,27 +62,35 @@ export const LocationRepository = {
 
     async getSchedules() {
         const schedueles = await getRepository(Schedule).find({
-            relations: ['Instructor', 'Booking']
+            relations: ['Instructor', 'Booking', 'Rooms']
         })
         return schedueles
     },
 
-    async getInstructorSchedules(instructor: Instructor) {
+    async getInstructorSchedules(instructor: Instructor, data: LocationSchema) {
         const schedules = await getRepository(Schedule).find({
-            relations: ['Instructor', 'Booking']
+            relations: ['Instructor', 'Booking', 'Rooms']
+        })
+
+        const filteredSchedules = schedules.filter((schedule: Schedule) => {
+            const date = moment(schedule.date)
+            const endDate = moment(data.start).add(7, 'days')
+
+            if (date.isSameOrAfter(data.start) && date.isBefore(endDate)) return true
+            return false
         })
 
         let filterSchedules: Schedule[] = []
 
-        for (var i in schedules) {
-            if (schedules[i].Instructor.id === instructor.id) {
-                filterSchedules.push(schedules[i])
+        for (var i in filteredSchedules) {
+            if (filteredSchedules[i].Instructor.id === instructor.id) {
+                filterSchedules.push(filteredSchedules[i])
             }
-            else if (schedules[i].Instructor.isDeleted) {
-                let names = schedules[i].Instructor.name.split(" ")
+            else if (filteredSchedules[i].Instructor.isDeleted) {
+                let names = filteredSchedules[i].Instructor.name.split(" ")
                 for (var j in names) {
                     if (names[j].toLowerCase() == instructor.name.toLowerCase()) {
-                        filterSchedules.push(schedules[i])
+                        filterSchedules.push(filteredSchedules[i])
                     }
                 }
             }

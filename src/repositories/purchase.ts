@@ -46,7 +46,6 @@ export const PurchaseRepository = {
         if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
 
         for (var i in bundles) {
-
             if (bundles[i].isEspecial) {
                 const bundle = bundles[i]
                 const purchase = new Purchase()

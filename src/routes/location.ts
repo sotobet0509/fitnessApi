@@ -84,6 +84,6 @@ LocationRouter.post('/room/:room_id/schedules', h(LocationController.getLocation
 
 LocationRouter.get('/schedules/all',h(checkToken), h(LocationController.getSchedules))
 
-LocationRouter.get('/instructor/all',h(checkInstructorToken), h(LocationController.getInstructorSchedules))
+LocationRouter.patch('/instructor/all',h(checkInstructorToken), h(LocationController.getInstructorSchedules))
 
 export { LocationRouter }

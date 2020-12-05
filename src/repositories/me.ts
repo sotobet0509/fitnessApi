@@ -8,6 +8,12 @@ import { pendingClasses } from '../interfaces/purchase'
 import * as moment from 'moment'
 import { Folios } from '../entities/Folios'
 import { Alternate_users } from '../entities/alternateUsers'
+import { ClientData } from '../interfaces/auth'
+import { PasswordService } from '../services/password'
+import { Categories } from '../entities/categories'
+import { User_items } from '../entities/User_items'
+import { User_categories } from '../entities/UserCategories'
+import { EditItems } from '../interfaces/items'
 
 export const MeRepository = {
     async getProfile(id: string) {
@@ -15,7 +21,8 @@ export const MeRepository = {
         const profile = await repository.findOne({
             where: {
                 id: id
-            }
+            },
+            relations: ["User_categories","User_categories.Categories", "User_categories.Categories.User_items" ]
         })
         if (!profile) throw new ErrorResponse(404, 10, 'El usuario no existe')
         const bookings = await getRepository(Booking).find({
@@ -71,6 +78,7 @@ export const MeRepository = {
             }
         }
         delete profile.password
+
         return {
             profile,
             minutesDone,
@@ -195,5 +203,75 @@ export const MeRepository = {
         const userRepository = getRepository(User)
         user.pictureUrl = url
         await userRepository.save(user)
+    },
+
+    async updateUserData(userdata: User, data: ClientData) {
+        const updateUser = userdata
+        if (data.password) {
+            const passwordService = new PasswordService(data.password)
+            const password = await passwordService.getHashedPassword()
+            updateUser.password = data.password ? password : updateUser.password
+        }
+        updateUser.name = data.name ? data.name : updateUser.name
+        updateUser.email = data.email ? data.email : updateUser.email
+        updateUser.lastname = data.lastname ? data.lastname : updateUser.lastname
+
+
+        await getRepository(User).save(updateUser)
+    },
+
+    async getItems(userdata: User) {
+
+        const items = await getRepository(User_categories).find({
+            where: {
+                User: userdata
+            },
+            relations: ["Categories"]
+        })
+        return items
+    },
+
+    async getItemCategories(itemId: number) {
+        const categories = await getRepository(Categories).find({
+            where: {
+                User_items: itemId
+            }
+        })
+
+        return categories
+    },
+
+    async getAllItems() {
+        const items = await getRepository(User_items).find({
+         relations:["Categories"]
+        })
+        return items
+    },
+
+    async editItems(data: EditItems, userdata: User){
+        const deleteItems = await getRepository(User_categories).find({
+            where: {
+                User: userdata
+            }
+        })
+
+        for(var i in deleteItems){
+            await getRepository(User_categories).delete(deleteItems[i])
+        }
+        
+      
+        for (var j in data.categories){
+            let newUserCategory = new User_categories
+            const newCategory = await getRepository(Categories).findOne({
+                where:{
+                    id: data.categories[j]
+                }
+            })
+            console.log(data.categories[j])
+
+            newUserCategory.User = userdata
+            newUserCategory.Categories = newCategory
+            await getRepository(User_categories).save(newUserCategory)
+        }
     }
 }

@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class addContact1606837461593 implements MigrationInterface {
-    name = 'addContact1606837461593'
+export class addMaxToBundle1607128457588 implements MigrationInterface {
+    name = 'addMaxToBundle1607128457588'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query("CREATE TABLE `folios` (`id` int NOT NULL AUTO_INCREMENT, `folio` varchar(255) NOT NULL, `isAviable` tinyint NOT NULL DEFAULT 1, `purchase` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `redeemAt` datetime NULL, `expirationDate` datetime NOT NULL, `clientName` varchar(255) NOT NULL, `alternate_users_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
@@ -11,14 +11,18 @@ export class addContact1606837461593 implements MigrationInterface {
         await queryRunner.query("CREATE TABLE `locations` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `address` text NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `seats` (`id` int NOT NULL AUTO_INCREMENT, `number` varchar(255) NOT NULL, `rooms_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `rooms` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` text NOT NULL, `locations_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
-        await queryRunner.query("CREATE TABLE `schedules` (`id` int NOT NULL AUTO_INCREMENT, `date` datetime NOT NULL, `end` time NOT NULL, `start` time NOT NULL, `instructors_id` int NULL, `roomsId` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
-        await queryRunner.query("CREATE TABLE `bundles` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `price` float NOT NULL, `offer` float NOT NULL, `description` varchar(255) NOT NULL, `classNumber` int NOT NULL, `expirationDays` int NOT NULL, `passes` int NOT NULL, `isDeleted` tinyint NOT NULL, `isRecurrent` tinyint NOT NULL, `isUnlimited` tinyint NOT NULL DEFAULT 0, `isEspecial` tinyint NOT NULL DEFAULT 0, `especialDescription` varchar(255) NULL, `promotionExpirationDays` int NULL, `pictureUrl` varchar(255) NULL, `altermateUserId` int NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `schedules` (`id` int NOT NULL AUTO_INCREMENT, `date` datetime NOT NULL, `end` time NOT NULL, `start` time NOT NULL, `theme` varchar(255) NULL, `instructors_id` int NULL, `roomsId` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `bundles` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `price` float NOT NULL, `offer` float NOT NULL, `description` varchar(255) NOT NULL, `classNumber` int NOT NULL, `expirationDays` int NOT NULL, `passes` int NOT NULL, `isDeleted` tinyint NOT NULL, `isRecurrent` tinyint NOT NULL, `isUnlimited` tinyint NOT NULL DEFAULT 0, `isEspecial` tinyint NOT NULL DEFAULT 0, `especialDescription` varchar(255) NULL, `promotionExpirationDays` int NULL, `pictureUrl` varchar(255) NULL, `altermateUserId` int NOT NULL, `max` int NOT NULL DEFAULT 1, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `transactions` (`id` varchar(36) NOT NULL, `voucher` varchar(255) NULL, `date` datetime NOT NULL, `invoice` tinyint NOT NULL, `total` float NOT NULL, `comments` text NULL, `purchases_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `payment_methods` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `type` enum ('efectivo', 'tarjeta') NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `purchases` (`id` int NOT NULL AUTO_INCREMENT, `date` datetime NOT NULL, `addedClasses` int NOT NULL DEFAULT 0, `addedPasses` int NOT NULL DEFAULT 0, `isCanceled` tinyint NOT NULL DEFAULT 0, `expirationDate` datetime NULL DEFAULT '1990-01-01 00:00:00', `bundles_id` int NULL, `payment_metods_id` int NULL, `users_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `user_items` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` varchar(255) NULL, `pictureUrl` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `categories` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` varchar(255) NULL, `type` varchar(255) NOT NULL, `user_items_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `user_categories` (`id` int NOT NULL AUTO_INCREMENT, `User_id` varchar(36) NULL, `Categories_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `users` (`id` varchar(36) NOT NULL, `name` varchar(255) NOT NULL, `email` varchar(255) NOT NULL, `lastname` varchar(255) NULL, `password` varchar(255) NULL, `pictureUrl` text NULL, `facebookId` varchar(255) NULL, `googleId` varchar(255) NULL, `tempToken` varchar(255) NULL, `isAdmin` tinyint NOT NULL DEFAULT 0, `isDeleted` tinyint NOT NULL DEFAULT 0, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB");
-        await queryRunner.query("CREATE TABLE `bookings` (`id` int NOT NULL AUTO_INCREMENT, `isPass` tinyint NOT NULL DEFAULT 0, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `fromPurchase` int NULL, `schedules_id` int NULL, `seats_id` int NULL, `user_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `bookings` (`id` int NOT NULL AUTO_INCREMENT, `isPass` tinyint NOT NULL DEFAULT 0, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `fromPurchase` int NULL, `assistance` tinyint NOT NULL DEFAULT 0, `schedules_id` int NULL, `seats_id` int NULL, `user_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `discounts` (`id` int NOT NULL AUTO_INCREMENT, `description` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `images` (`id` int NOT NULL AUTO_INCREMENT, `url` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `versions` (`id` int NOT NULL AUTO_INCREMENT, `version` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("ALTER TABLE `folios` ADD CONSTRAINT `FK_eef86d0781caf0af53c7b36bc17` FOREIGN KEY (`alternate_users_id`) REFERENCES `alternate_Users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `seats` ADD CONSTRAINT `FK_fb50bf5e21a79337fa688489cf9` FOREIGN KEY (`rooms_id`) REFERENCES `rooms`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
@@ -29,6 +33,9 @@ export class addContact1606837461593 implements MigrationInterface {
         await queryRunner.query("ALTER TABLE `purchases` ADD CONSTRAINT `FK_55c02fe57a6390a2a922a502439` FOREIGN KEY (`bundles_id`) REFERENCES `bundles`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `purchases` ADD CONSTRAINT `FK_bd94b6931ce72cce6cc3bed2605` FOREIGN KEY (`payment_metods_id`) REFERENCES `payment_methods`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `purchases` ADD CONSTRAINT `FK_0ffd5cad11314f31a377e0a060c` FOREIGN KEY (`users_id`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
+        await queryRunner.query("ALTER TABLE `categories` ADD CONSTRAINT `FK_9b7d3d8bc0ed7588cf344746100` FOREIGN KEY (`user_items_id`) REFERENCES `user_items`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
+        await queryRunner.query("ALTER TABLE `user_categories` ADD CONSTRAINT `FK_011a48c21d9c70cab6ea18b120f` FOREIGN KEY (`User_id`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
+        await queryRunner.query("ALTER TABLE `user_categories` ADD CONSTRAINT `FK_13a509fe06beaa47f74f71254ea` FOREIGN KEY (`Categories_id`) REFERENCES `categories`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `bookings` ADD CONSTRAINT `FK_b520d11ac6fd38ae4bcbaedf576` FOREIGN KEY (`schedules_id`) REFERENCES `schedules`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `bookings` ADD CONSTRAINT `FK_295d6175faf90cbd3e0060f8eb5` FOREIGN KEY (`seats_id`) REFERENCES `seats`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `bookings` ADD CONSTRAINT `FK_64cd97487c5c42806458ab5520c` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
@@ -38,6 +45,9 @@ export class addContact1606837461593 implements MigrationInterface {
         await queryRunner.query("ALTER TABLE `bookings` DROP FOREIGN KEY `FK_64cd97487c5c42806458ab5520c`");
         await queryRunner.query("ALTER TABLE `bookings` DROP FOREIGN KEY `FK_295d6175faf90cbd3e0060f8eb5`");
         await queryRunner.query("ALTER TABLE `bookings` DROP FOREIGN KEY `FK_b520d11ac6fd38ae4bcbaedf576`");
+        await queryRunner.query("ALTER TABLE `user_categories` DROP FOREIGN KEY `FK_13a509fe06beaa47f74f71254ea`");
+        await queryRunner.query("ALTER TABLE `user_categories` DROP FOREIGN KEY `FK_011a48c21d9c70cab6ea18b120f`");
+        await queryRunner.query("ALTER TABLE `categories` DROP FOREIGN KEY `FK_9b7d3d8bc0ed7588cf344746100`");
         await queryRunner.query("ALTER TABLE `purchases` DROP FOREIGN KEY `FK_0ffd5cad11314f31a377e0a060c`");
         await queryRunner.query("ALTER TABLE `purchases` DROP FOREIGN KEY `FK_bd94b6931ce72cce6cc3bed2605`");
         await queryRunner.query("ALTER TABLE `purchases` DROP FOREIGN KEY `FK_55c02fe57a6390a2a922a502439`");
@@ -48,9 +58,13 @@ export class addContact1606837461593 implements MigrationInterface {
         await queryRunner.query("ALTER TABLE `seats` DROP FOREIGN KEY `FK_fb50bf5e21a79337fa688489cf9`");
         await queryRunner.query("ALTER TABLE `folios` DROP FOREIGN KEY `FK_eef86d0781caf0af53c7b36bc17`");
         await queryRunner.query("DROP TABLE `versions`");
+        await queryRunner.query("DROP TABLE `images`");
         await queryRunner.query("DROP TABLE `discounts`");
         await queryRunner.query("DROP TABLE `bookings`");
         await queryRunner.query("DROP TABLE `users`");
+        await queryRunner.query("DROP TABLE `user_categories`");
+        await queryRunner.query("DROP TABLE `categories`");
+        await queryRunner.query("DROP TABLE `user_items`");
         await queryRunner.query("DROP TABLE `purchases`");
         await queryRunner.query("DROP TABLE `payment_methods`");
         await queryRunner.query("DROP TABLE `transactions`");

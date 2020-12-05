@@ -103,7 +103,7 @@ export const ClientRepository = {
             where: {
                 id: clientId
             },
-            relations: ['Purchase', 'Purchase.Bundle', 'Purchase.Payment_method', 'Purchase.Transaction', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor']
+            relations: ['Purchase', 'Purchase.Bundle', 'Purchase.Payment_method', 'Purchase.Transaction', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor', 'User_categories', 'User_categories.Categories','User_categories.Categories.User_items']
         })
 
         const purchases = await getRepository(Purchase).find({
@@ -235,23 +235,5 @@ export const ClientRepository = {
         updateClient.createdAt = data.createdAt ? data.createdAt : updateClient.createdAt
 
         await clientRepository.save(updateClient)
-    },
-    async pruebas() {
-        const currentDate = new Date()
-        console.log(currentDate)
-        //const clients = await getRepository(User).createQueryBuilder().select("users").from(User,"users").where("users.name = :name", {name:"Andres"}).getMany()
-
-        // const clients = await getRepository(User).createQueryBuilder()
-        // .select("*")
-        //     .innerJoin("User.Booking", "Bookings")
-        //     .innerJoin("User.Purchase", "Purchases")
-        //     .where("User.id = :id", { id: "ee7d1d85-d185-4004-84bd-6cce7dc9420d" })
-        //     .getMany
-
-        //const clients = await getRepository(Purchase).createQueryBuilder().innerJoinAndSelect("Purchase.Bundle","Bundles").where("Purchase.expirationDate >= :date",{date: currentDate}).getMany()
-        //console.log(clients)
-
-
-//        return clients
     }
 }

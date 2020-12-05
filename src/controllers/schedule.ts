@@ -5,6 +5,8 @@ import { ScheduleRepository } from '../repositories/schedule'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { ScheduleIsPass, ScheduleSchema } from '../interfaces/schedule'
 import { DataMissingError } from '../errors/DataMissingError'
+import { getRepository } from 'typeorm'
+import { BookingRepository } from '../repositories/booking'
 
 
 export const ScheduleController ={
@@ -60,7 +62,8 @@ export const ScheduleController ={
             end: Joi.date().required(),
             start: Joi.date().required(),
             instructor_id: Joi.number().required(),
-            roomsId: Joi.number().required()
+            roomsId: Joi.number().required(),
+            theme: Joi.string()
         })
         const { error, value } = scheduleSchema.validate(req.body)
         if (error) throw new DataMissingError()
@@ -80,7 +83,8 @@ export const ScheduleController ={
             instructor_id: Joi.number(),
             roomsId: Joi.number(),
             sendEmail: Joi.boolean().required(),
-            deleteBookings: Joi.boolean().required()
+            deleteBookings: Joi.boolean().required(),
+            theme: Joi.string()
         })
         const { error, value } = scheduleSchema.validate(req.body)
         if (error) throw new DataMissingError()
@@ -98,8 +102,13 @@ export const ScheduleController ={
 
         await ScheduleRepository.deleteSchedule(scheduleId)
         res.json({ success: true})
+    },
+
+    async setAssistance(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const bookingId = parseInt(req.params.booking_id)
+        await ScheduleRepository.setAssistance(bookingId)
+        res.json({ success: true})
     }
-
-
 
 }

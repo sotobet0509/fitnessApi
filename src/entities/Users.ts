@@ -1,7 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated } from 'typeorm'
+import { type } from 'os'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated, ManyToMany } from 'typeorm'
 import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 import { Booking } from './Bookings'
+import { Categories } from './categories'
 import { Purchase } from './Purchases'
+import { User_categories } from './UserCategories'
 
 
 @Entity({name: 'users'})
@@ -47,4 +50,7 @@ export class User {
     
     @OneToMany(type => Purchase, Purchase => Purchase.User)
     Purchase: Purchase[]
+
+    @OneToMany(type => User_categories, User_categories => User_categories.User)
+    User_categories: User_categories[]
 }

@@ -7,6 +7,7 @@ export interface ScheduleSchema {
     roomsId?: number
     sendEmail?: boolean
     deleteBookings?: boolean
+    theme?: string
 }
 
 export interface ScheduleIsPass{

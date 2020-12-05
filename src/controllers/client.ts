@@ -73,12 +73,5 @@ export const ClientController = {
 
         await ClientRepository.changeClientStatus(clientId)
         res.json({ success: true})
-    },
-
-    async pruebas(req: ExtendedRequest, res: Response) {
-        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-        const clients = await ClientRepository.pruebas()
-
-        res.json({ success: true, data: clients })
-    },
+    }
 }

@@ -23,6 +23,8 @@ import { PurchaseRouter } from '../routes/purchase'
 import { BookingRouter } from '../routes/booking'
 import { VersionRouter } from '../routes/version'
 import { FolioRouter } from '../routes/folio'
+import { ImageRouter } from '../routes/image'
+import { RoomRouter } from '../routes/room'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -78,6 +80,8 @@ export default class ExpressApp {
     this.application.use('/bookings', BookingRouter)
     this.application.use('/versions', VersionRouter)
     this.application.use('/folios', FolioRouter)
+    this.application.use('/images', ImageRouter)
+    this.application.use('/rooms', RoomRouter)
   }
 
   private loadErrorHandlers(): void {

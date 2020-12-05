@@ -42,8 +42,16 @@ export const LocationController ={
 
     async getInstructorSchedules(req: ExtendedRequest, res: Response){
         if (!req.instructor) throw new ErrorResponse(401, 15, "No autorizado")
+        const locationSchema = Joi.object().keys({
+            start: Joi.date().required()
+        })
 
-        const schedules = await LocationRepository.getInstructorSchedules(req.instructor)
+        const { error, value } = locationSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <LocationSchema>value
+
+
+        const schedules = await LocationRepository.getInstructorSchedules(req.instructor, data)
         res.json({ success: true, data: schedules})
     }
 

@@ -17,6 +17,9 @@ export class Booking {
     @Column({nullable: true})
     fromPurchase: number
 
+    @Column({default: false})
+    assistance: boolean
+
     @ManyToOne(type => Schedule, Schedule => Schedule.Booking)
     @JoinColumn({name: 'schedules_id'})
     Schedule: Schedule

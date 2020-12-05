@@ -48,7 +48,7 @@ export const BookingRepository = {
             where: {
                 Schedule: schedule
             },
-            relations: ['Seat', 'User']
+            relations: ['Seat', 'User','User.User_categories','User.User_categories.Categories','User.User_categories.Categories.User_items']
         })
 
         let data = []
@@ -62,11 +62,11 @@ export const BookingRepository = {
                 date: schedule.date,
                 start: schedule.start,
                 end: schedule.end,
-                isPass: booking.isPass
+                isPass: booking.isPass,
+                items: booking.User,
+                assistance: booking.assistance
             })
         }
-
         return data
-
-    }
+    },
 }

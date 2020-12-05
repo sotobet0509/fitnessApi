@@ -197,6 +197,4 @@ ClientRouter.patch('/update',h(checkToken), h(ClientController.updateClient))
 
 ClientRouter.patch('/delete/:client_id',h(checkToken), h(ClientController.changeClientStatus))
 
-ClientRouter.get('/pruebas/pruebas', h(checkToken), h(ClientController.pruebas) )
-
 export { ClientRouter }

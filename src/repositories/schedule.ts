@@ -20,7 +20,7 @@ export const ScheduleRepository = {
             where: {
                 id: scheduleId
             },
-            relations: ['Booking', 'Booking.Seat', 'Booking.User']
+            relations: ['Booking', 'Booking.Seat','Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories","Booking.User.User_categories.Categories"]
         })
         if (schedule.length == 0) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
@@ -206,7 +206,10 @@ export const ScheduleRepository = {
         schedule.start = new Date(data.start)
         schedule.Instructor = instructor
         schedule.Rooms = room
-
+        if(data.theme){
+            schedule.theme = data.theme
+        }
+       console.log(schedule.theme)
         await scheduleRepository.save(schedule)
 
         return schedule
@@ -249,7 +252,7 @@ export const ScheduleRepository = {
         updateSchedule.start = data.start ? data.start : updateSchedule.start
         updateSchedule.Instructor = instructor ? instructor : updateSchedule.Instructor
         updateSchedule.Rooms = room ? room : updateSchedule.Rooms
-
+        updateSchedule.theme = room ? data.theme : updateSchedule.theme
         await scheduleRepository.save(updateSchedule)
     },
 
@@ -278,5 +281,17 @@ export const ScheduleRepository = {
         }
 
         await scheduleRepository.remove(schedule)
+    },
+
+    async setAssistance(bookingId: number){
+        let booking = await getRepository(Booking).findOne({
+            where: {
+                id: bookingId
+            }
+        })
+
+        booking.assistance = !booking.assistance
+
+        await getRepository(Booking).save(booking)
     }
 }

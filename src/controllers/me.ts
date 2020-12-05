@@ -3,27 +3,31 @@ import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { MeRepository } from '../repositories/me'
 import { handleProfilePicture } from '../services/files'
+import { DataMissingError } from '../errors/DataMissingError'
+import { ClientData } from '../interfaces/auth'
+import { getRepository } from 'typeorm'
+import { EditItems } from '../interfaces/items'
 
-export const MeController ={
+export const MeController = {
 
-    async profile(req: ExtendedRequest, res: Response){
+    async profile(req: ExtendedRequest, res: Response) {
         const user = req.user
         const profile = await MeRepository.getProfile(user.id)
-        res.json({ success: true, data: profile})
-        
+        res.json({ success: true, data: profile })
+
     },
 
-    async history(req: ExtendedRequest, res: Response){
+    async history(req: ExtendedRequest, res: Response) {
         const history = await MeRepository.getHistory(req.user)
-        res.json({ success: true, data: history})
+        res.json({ success: true, data: history })
     },
 
-    async classes(req: ExtendedRequest, res: Response){
+    async classes(req: ExtendedRequest, res: Response) {
         const classes = await MeRepository.getClasses(req.user)
-        res.json({ success: true, data: classes})
+        res.json({ success: true, data: classes })
     },
 
-    async uploadProfilePicture(req: ExtendedRequest, res: Response){
+    async uploadProfilePicture(req: ExtendedRequest, res: Response) {
         //console.log(req.files)
         const url = await handleProfilePicture(req.files.file)
         //console.log(url)
@@ -31,6 +35,57 @@ export const MeController ={
 
         await MeRepository.uploadProfilePicture(url, user)
 
+        res.json({ success: true })
+    },
+
+    async editUsers(req: ExtendedRequest, res: Response) {
+        const userSchema = Joi.object().keys({
+            name: Joi.string(),
+            lastname: Joi.string(),
+            email: Joi.string(),
+            password: Joi.string()
+        })
+        const { error, value } = userSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ClientData>value
+
+
+        const classes = await MeRepository.updateUserData(req.user, data)
+        res.json({ success: true, data: classes })
+    },
+
+    async editItems(req: ExtendedRequest, res: Response) {
+        const editItems = Joi.object().keys({
+            categories: Joi.array().items(
+                Joi.number()
+            ).required()
+        })
+
+        const { error, value } = editItems.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <EditItems>value
+
+        await MeRepository. editItems(data, req.user)
         res.json({ success: true})
-   }
+    },
+
+    async getItems(req: ExtendedRequest, res: Response) {
+        const user = req.user
+        const items = await MeRepository.getItems(user)
+        res.json({ success: true, data: items })
+
+    },
+
+    async getItemCategories(req: ExtendedRequest, res: Response) {
+        const itemId = parseInt( req.params.item_id)
+        const categories = await MeRepository.getItemCategories(itemId)
+        res.json({ success: true, data: categories })
+
+    },
+
+    async getAllItems(req: ExtendedRequest, res: Response) {
+        const items = await MeRepository.getAllItems()
+        res.json({ success: true, data: items })
+
+    }
 }

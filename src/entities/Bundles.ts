@@ -51,6 +51,9 @@ export class Bundle {
     @Column('integer')
     altermateUserId: number
 
+    @Column({default: 1})
+    max: number
+
     @OneToMany(type => Purchase, purchase => purchase.Bundle)
     purchase: Purchase    
 }
