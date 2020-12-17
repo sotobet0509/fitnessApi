@@ -1,6 +1,6 @@
 import { type } from 'os'
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne, JoinColumn, ManyToMany } from 'typeorm'
-import { Categories } from './categories'
+import { Categories } from './Categories'
 import { User } from './Users'
 
 @Entity({name: 'user_categories'})

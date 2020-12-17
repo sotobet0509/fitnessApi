@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne, JoinColumn, ManyToMany } from 'typeorm'
-import { Categories } from './categories'
+import { Categories } from './Categories'
 
 @Entity({name: 'user_items'})
 export class User_items {
