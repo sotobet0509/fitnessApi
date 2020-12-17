@@ -244,7 +244,7 @@ export const
       const user = await AuthRepository.authenticateColaborador(data)
 
       //Dar acceso
-      const userToken = new TokenService(user.id)
+      const userToken = new TokenService(user.id.toString())
       const token = await userToken.signToken()
 
       delete user.password

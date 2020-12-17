@@ -28,7 +28,7 @@ export const BookingRepository = {
         })
         const duration = moment.duration(start.diff(moment())).asHours() + 5
         //console.log(duration, start)
-        if (duration >= 8) {
+        if (duration >= 3) {
             await bookingRepository.remove(booking)
         } else {
             throw new ErrorResponse(409, 18, 'La reservacion ya no se puede eliminar')

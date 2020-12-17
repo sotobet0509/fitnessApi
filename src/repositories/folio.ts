@@ -5,7 +5,7 @@ import * as moment from 'moment'
 
 
 export const FolioRepository = {
-    async getFolios(colaboradorId: string) {
+    async getFolios(colaboradorId: number) {
         const folios = await getRepository(Folios).find({
             where: {
                 Alternate_users: colaboradorId

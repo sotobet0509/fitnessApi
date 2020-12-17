@@ -7,6 +7,10 @@ import { TokenService } from '../services/token'
 import { User } from '../entities/Users'
 import { getRepository } from 'typeorm'
 import { BlackList } from '../entities/BlackList'
+import { DataMissingError } from '../errors/DataMissingError'
+import { BundleSchema, UpdateBundleSchema } from '../interfaces/bundle'
+import { stringify } from 'querystring'
+import { handleProfilePicture } from '../services/files'
 
 export const BundleController = {
 
@@ -43,5 +47,79 @@ export const BundleController = {
     async getAllDiscounts(req: ExtendedRequest, res: Response) {
         const discount = await BundleRepository.getAllDiscounts()
         res.json({ success: true, discount })
-    }
+    },
+
+    async createBundle(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const userSchema = Joi.object().keys({
+            name: Joi.string().required(),
+            price: Joi.number().required(),
+            description: Joi.string().required(),
+            classNumber: Joi.number(),
+            expirationDays: Joi.number().required(),
+            passes: Joi.number(),
+            isUnlimited: Joi.boolean(),
+            isSpecial: Joi.boolean(),
+            especialDescription: Joi.string(),
+            promotionExpirationDays: Joi.number(),
+            pictureUrl: Joi.string(),
+            alternateUserId: Joi.string(),
+            email: Joi.string(),
+            password: Joi.string(),
+            collaboratorName: Joi.string(),
+            contact: Joi.string()
+        })
+        const { error, value } = userSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <BundleSchema>value
+        console.log(req.files)
+        if(req.files){
+            const url = await handleProfilePicture(req.files.file)
+            data.pictureUrl= url
+        }
+        console.log("paso por el controller")
+        await BundleRepository.createBundle(data)
+        res.json({ success: true })
+
+    },
+
+    async changeBundleStatus(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const bundleId = parseInt(req.params.bundle_id)
+
+        await BundleRepository.changeBundleStatus(bundleId)
+        res.json({ success: true })
+
+    },
+
+    async updateBundle(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        
+        const bundleId = parseInt(req.params.bundle_id)
+        const userSchema = Joi.object().keys({
+            name: Joi.string(),
+            price: Joi.number(),
+            description: Joi.string(),
+            classNumber: Joi.number(),
+            expirationDays: Joi.number(),
+            passes: Joi.number(),
+            isUnlimited: Joi.boolean(),
+            isSpecial: Joi.boolean(),
+            especialDescription: Joi.string(),
+            promotionExpirationDays: Joi.number(),
+            pictureUrl: Joi.string(),
+            alternateUserId: Joi.string(),
+            email: Joi.string(),
+            password: Joi.string(),
+            collaboratorName: Joi.string(),
+            contact: Joi.string()
+        })
+        const { error, value } = userSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <UpdateBundleSchema>value
+
+        await BundleRepository.updateBundle(data, bundleId)
+        res.json({ success: true })
+
+    },
 }

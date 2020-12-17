@@ -9,7 +9,7 @@ import { FolioRepository } from '../repositories/folio'
 
 export const FolioController = {
     async getFolios(req: ExtendedRequest, res: Response) {
-        const colaboradorId = req.alternateUsers.id
+        const colaboradorId = parseInt(req.alternateUsers.id)
         const folios = await FolioRepository.getFolios(colaboradorId)
         res.json({ success: true, folios })
     },

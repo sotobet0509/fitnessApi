@@ -116,4 +116,10 @@ BundleRouter.patch('/updateall', h(BundleController.updatePasses))
 
 BundleRouter.get('/discount/all', h(BundleController.getAllDiscounts))
 
+BundleRouter.post('/create',h(checkToken), h(BundleController.createBundle))
+
+BundleRouter.patch('/activate/:bundle_id',h(checkToken), h(BundleController.changeBundleStatus))
+
+BundleRouter.patch('/edit/:bundle_id',h(checkToken), h(BundleController.updateBundle))
+
 export { BundleRouter }

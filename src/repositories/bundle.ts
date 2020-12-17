@@ -4,6 +4,9 @@ import { Bundle } from '../entities/Bundles'
 import { Purchase } from '../entities/Purchases'
 import { User } from '../entities/Users'
 import { Discounts } from '../entities/Discounts'
+import { BundleSchema, UpdateBundleSchema} from '../interfaces/bundle'
+import { Alternate_users } from '../entities/alternateUsers'
+import { PasswordService } from '../services/password'
 
 
 export const BundleRepository = {
@@ -72,5 +75,123 @@ export const BundleRepository = {
         })
         if (!discounts) throw new ErrorResponse(404, 53, 'No hay descuentos disponibles')
         return discounts
-    }
+    },
+
+    async createBundle(data: BundleSchema) {
+        let collaborator = new Alternate_users()
+        if (!data.alternateUserId && data.isSpecial) {
+            collaborator.email = data.email
+
+            if(data.password){
+                const passwordService = new PasswordService(data.password)
+                const password = await passwordService.getHashedPassword()
+                collaborator.password = password
+            }
+
+            collaborator.name = data.collaboratorName
+            collaborator.contact = data.contact
+
+            let collaboratorId = new Date().toLocaleDateString()
+            collaboratorId = collaboratorId.split("/").join("")
+            collaboratorId = collaboratorId.split("-").join("")
+            const temp = Math.floor((Math.random() * (1000 - 0)) + 0).toString()
+            collaboratorId = collaboratorId + temp
+            collaboratorId = collaboratorId.substring(2,collaboratorId.length-1)
+            collaborator.id = collaboratorId
+
+            if(data.email)await getRepository(Alternate_users).save(collaborator)
+        }
+
+        let newBundle = new Bundle()
+        newBundle.name = data.name ? data.name : newBundle.name
+        newBundle.price = data.price ? data.price : newBundle.price
+        newBundle.description = data.description ? data.description : newBundle.description
+        newBundle.classNumber = data.classNumber ? data.classNumber : 100
+        if (data.isUnlimited) newBundle.classNumber = 100
+        newBundle.expirationDays = data.expirationDays ? data.expirationDays : newBundle.expirationDays
+        newBundle.passes = data.passes ? data.passes : 0
+        newBundle.isUnlimited = data.isUnlimited ? data.isUnlimited : newBundle.isUnlimited
+        if (data.isSpecial) {
+            newBundle.isEspecial = data.isSpecial ? data.isSpecial : newBundle.isEspecial
+            newBundle.especialDescription = data.especialDescription ? data.especialDescription : newBundle.especialDescription
+            newBundle.promotionExpirationDays = data.promotionExpirationDays ? data.promotionExpirationDays : newBundle.promotionExpirationDays
+            newBundle.pictureUrl = data.pictureUrl ? data.pictureUrl : newBundle.pictureUrl
+            if (!data.alternateUserId) {
+                newBundle.altermateUserId = parseInt(collaborator.id)
+            } else {
+                newBundle.altermateUserId =  parseInt(data.alternateUserId)
+            }
+        }
+
+        await getRepository(Bundle).save(newBundle)
+    },
+    async changeBundleStatus(bundleId: number) {
+        const bundle = await getRepository(Bundle).findOne({
+            where: {
+                id: bundleId
+            }
+        })
+        if (!bundle) throw new ErrorResponse(404, 56, 'El paquete no existe')
+
+        bundle.isDeleted = !bundle.isDeleted
+
+        await getRepository(Bundle).save(bundle)
+    },
+
+    async updateBundle(data: UpdateBundleSchema, bundleId: number) {
+        let updateBundle = await getRepository(Bundle).findOne({
+            where: {
+                id: bundleId
+            }
+        })
+        if (!updateBundle) throw new ErrorResponse(404, 56, 'El paquete no existe')
+
+        let collaborator = new Alternate_users()
+        if (!data.alternateUserId) {
+            collaborator.email = data.email
+
+            if(data.password){
+                const passwordService = new PasswordService(data.password)
+                const password = await passwordService.getHashedPassword()
+                collaborator.password = password
+            }
+
+            collaborator.name = data.collaboratorName
+            collaborator.contact = data.contact
+
+            let collaboratorId = new Date().toLocaleDateString()
+            collaboratorId = collaboratorId.split("/").join("")
+            collaboratorId = collaboratorId.split("-").join("")
+            const temp = Math.floor((Math.random() * (1000 - 0)) + 0).toString()
+            collaboratorId = collaboratorId + temp
+            collaboratorId = collaboratorId.substring(2,collaboratorId.length-1)
+            collaborator.id = collaboratorId
+
+            if(data.email)await getRepository(Alternate_users).save(collaborator)
+        }
+
+        updateBundle.name = data.name ? data.name : updateBundle.name
+        updateBundle.price = data.price ? data.price : updateBundle.price
+        updateBundle.description = data.description ? data.description : updateBundle.description
+        updateBundle.classNumber = data.classNumber ? data.classNumber : updateBundle.classNumber
+        updateBundle.expirationDays = data.expirationDays ? data.expirationDays : updateBundle.expirationDays
+        updateBundle.passes = data.passes ? data.passes : updateBundle.passes
+        if(data.isUnlimited){
+            updateBundle.isEspecial = true
+            updateBundle.classNumber = 100
+        }else if (data.isUnlimited === false){
+            updateBundle.isEspecial = false
+        }
+        updateBundle.isEspecial = data.isSpecial ? data.isSpecial : updateBundle.isEspecial
+        updateBundle.especialDescription = data.especialDescription ? data.especialDescription : updateBundle.especialDescription
+        updateBundle.promotionExpirationDays = data.promotionExpirationDays ? data.promotionExpirationDays : updateBundle.promotionExpirationDays
+        if(!data.alternateUserId){
+            updateBundle.altermateUserId = parseInt(collaborator.id)
+        }else{
+            updateBundle.altermateUserId = parseInt(data.alternateUserId) ? parseInt(data.alternateUserId) : updateBundle.altermateUserId
+        }
+        
+        
+        await getRepository(Bundle).save(updateBundle)
+    },
 }
