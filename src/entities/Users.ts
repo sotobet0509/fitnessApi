@@ -1,8 +1,5 @@
-import { type } from 'os'
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated, ManyToMany } from 'typeorm'
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 import { Booking } from './Bookings'
-import { Categories } from './Categories'
 import { Purchase } from './Purchases'
 import { User_categories } from './UserCategories'
 

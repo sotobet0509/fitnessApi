@@ -1,4 +1,3 @@
-import { join } from 'path'
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne, JoinColumn, ManyToMany } from 'typeorm'
 import { Categories } from './Categories'
 

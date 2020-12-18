@@ -363,11 +363,11 @@ export const PurchaseRepository = {
             folioSave.folio = shortColaborador + "-" + shortUuid
             folioSave.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
             folioSave.purchase = purchase.id
-            
+
             await getRepository(Folios).save(folioSave)
 
             const folio = await getRepository(Folios).findOne({
-                where:{
+                where: {
                     id: folioSave
                 },
                 relations: ["Alternate_users"]
@@ -396,6 +396,19 @@ export const PurchaseRepository = {
         await getRepository(Transaction).save(transaction)
 
 
+    },
+    async updateExpirationDate() {
+        const purchases = await getRepository(Purchase).find()
+        const date = moment()
+        let purchase = new Purchase()
+        for (var i in purchases){
+            if(moment(purchases[i].expirationDate).isAfter(date)){
+                purchase = purchases[i]
+                purchase.expirationDate =  moment(purchase.expirationDate).add(23,'days').toDate()
+                await getRepository(Purchase).save(purchase)
+            }
+        }
+        
     },
 }
 

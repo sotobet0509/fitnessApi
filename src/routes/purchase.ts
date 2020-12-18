@@ -56,4 +56,6 @@ PurchaseRouter.post('/bundle/:bundle_id', h(checkToken), h(PurchaseController.bu
 
 PurchaseRouter.post('/createSession', h(PurchaseController.createSession))
 
+PurchaseRouter.patch('/update-expiration-date',h(checkToken), h(PurchaseController.updateExpiarationDate))
+
 export { PurchaseRouter }

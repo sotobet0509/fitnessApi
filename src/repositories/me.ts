@@ -7,7 +7,6 @@ import { getPendingClasses, orderByExpirationDay } from "../utils/index"
 import { pendingClasses } from '../interfaces/purchase'
 import * as moment from 'moment'
 import { Folios } from '../entities/Folios'
-import { Alternate_users } from '../entities/alternateUsers'
 import { ClientData } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
 import { Categories } from '../entities/Categories'

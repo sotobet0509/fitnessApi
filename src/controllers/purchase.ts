@@ -8,6 +8,7 @@ import { Comments, extraPurchaseSchema, Invoice, PurchaseData, Voucher } from '.
 import { join } from 'path'
 import { JoinAttribute } from 'typeorm/query-builder/JoinAttribute'
 import { URLSearchParams } from 'url'
+import { getRepository } from 'typeorm'
 
 const fetch = require('node-fetch')
 
@@ -123,7 +124,7 @@ export const PurchaseController = {
     async createSession(req: ExtendedRequest, res: Response) {
         const body = req.body
         const b = new URLSearchParams()
-        for(var i in Object.keys(body)) {
+        for (var i in Object.keys(body)) {
             b.append(Object.keys(body)[i], body[Object.keys(body)[i]])
         }
         //b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
@@ -139,5 +140,12 @@ export const PurchaseController = {
         })
         const responseText = await response.text()
         res.send(responseText)
-    }
+    },
+    async updateExpiarationDate(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+        await PurchaseRepository.updateExpirationDate()
+        return res.json({
+            success: true
+        })
+    },
 }

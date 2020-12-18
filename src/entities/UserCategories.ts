@@ -1,5 +1,4 @@
-import { type } from 'os'
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne, JoinColumn, ManyToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm'
 import { Categories } from './Categories'
 import { User } from './Users'
 
