@@ -276,7 +276,7 @@ export const ScheduleRepository = {
         })
 
         for (var i in booking) {
-            await sendDeleteBooking(booking[i].User.email)
+            //await sendDeleteBooking(booking[i].User.email)
             await bookingRepository.remove(booking[i])
         }
 
