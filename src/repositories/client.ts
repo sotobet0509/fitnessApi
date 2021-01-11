@@ -1,6 +1,6 @@
 import { Booking } from './../entities/Bookings';
 import { Purchase } from './../entities/Purchases';
-import { getRepository, getConnection, Repository, Between } from 'typeorm'
+import { getRepository, getConnection, Repository, Between, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
@@ -13,40 +13,30 @@ import { Bundle } from '../entities/Bundles';
 
 export const ClientRepository = {
     async getAllClients() {
-        const clients = await getRepository(User).find({
-            where: {
-                isAdmin: false
-            },
-            relations: ['Booking', 'Booking.Schedule', 'Purchase', 'Purchase.Bundle'],
-            // take: 10,
-            //skip: 3
-        })
+        let clients = await createQueryBuilder(User)
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('Bundle.isGroup=:isGroup', { isGroup: false })
+        .getMany();
+        let clientsGroup = await createQueryBuilder(User)
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+        .getMany();
+        
         let data = []
         let nextExpirationDate: Date
+        
         for (var i in clients) {
             const client = clients[i]
-
-            /* const purchases = await getRepository(Purchase).find({
-                 where: {
-                     User: client
-                 },
-                 relations: ['Bundle', 'Transaction']
-             })
-             const bookings = await getRepository(Booking).find({
-                 where: {
-                     User: client
-                 }
-             })*/
-
-
-
+            
             const bookingsNoPasses = await getRepository(Booking).find({
                 where: {
                     User: client,
                     isPass: false
                 }
             })
-
+            
             const passes = await getRepository(Booking).find({
                 where: {
                     User: client,
@@ -54,8 +44,12 @@ export const ClientRepository = {
                 }
             })
 
+            let boookingsArray : Booking[] = []
+            boookingsArray = bookingsNoPasses.concat(passes)
+            
             let classes: pendingClasses[]
-            classes = await getPendingClasses(client.Purchase, client.Booking)
+            
+            classes = await getPendingClasses(client.Purchase, boookingsArray)
             delete client.password
             classes = classes.filter((p: pendingClasses) => {
                 let expirationDay = moment(p.purchase.expirationDate)
@@ -63,7 +57,7 @@ export const ClientRepository = {
                 if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
                 return true
             })
-
+            
             let pendingC = 0
             let pendingP = 0
             for (var i in classes) {
@@ -77,13 +71,13 @@ export const ClientRepository = {
                     break
                 }
             }
-
+            
             if (classes.length == 0) {
                 nextExpirationDate = null
             } else {
                 nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
             }
-
+            
             data.push({
                 client,
                 pending: pendingC,
@@ -91,33 +85,189 @@ export const ClientRepository = {
                 pendingPasses: pendingP,
                 takenPasses: passes.length,
                 isUnlimited,
-                nextExpirationDate
+                nextExpirationDate,
+                pendingGroup: 0,
+                takenGroup: 0,
+                pendingPassesGroup: 0,
+                takenPassesGroup: 0
             })
         }
+        
+        for (const key in clientsGroup) {
+            const client = clientsGroup[key]
+
+            const members = await getRepository(User).find({
+                where: [
+                    {
+                        fromGroup: client.id
+                    },
+                    {
+                        id: client.id
+                    }
+                ]
+            })
+            let boookingsArrayTotal : Booking[] = []
+            let boookingsArray : Booking[] = []
+            let boookingsPassesArray : Booking[] = []
+            for (const i in client.Purchase) {
+                let bookingsPurchases = await getRepository(Booking).find({
+                    where: 
+                        {
+                            fromPurchase: client.Purchase[i].id,
+                            isPass: false
+                        }
+                })
+                let bookingsPassesPurchases = await getRepository(Booking).find({
+                    where: 
+                        {
+                            fromPurchase: client.Purchase[i].id,
+                            isPass: true
+                        }
+                })
+                for (const j in bookingsPurchases) {
+                    boookingsArray.push(bookingsPurchases[j])
+                    boookingsArrayTotal.push(bookingsPurchases[j])
+                }
+                for (const j in bookingsPassesPurchases) {
+                    boookingsPassesArray.push(bookingsPassesPurchases[j])
+                    boookingsArrayTotal.push(bookingsPassesPurchases[j])
+                }
+            }
+
+            
+            let classes: pendingClasses[]
+            classes = await getPendingClasses(client.Purchase, boookingsArrayTotal)
+            classes = classes.filter((p: pendingClasses) => {
+                let expirationDay = moment(p.purchase.expirationDate)
+                if (expirationDay.isBefore(moment())) return false
+                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
+                return true
+            })
+
+            
+            let pendingC = 0
+            let pendingP = 0
+            for (var i in classes) {
+                pendingC += classes[i].pendingClasses
+                pendingP += classes[i].pendingPasses
+            }
+            let isUnlimited = false
+            for (var i in classes) {
+                if (classes[i].purchase.Bundle.isUnlimited) {
+                    isUnlimited = true
+                    break
+                }
+            }
+            
+            if (classes.length == 0) {
+                nextExpirationDate = null
+            } else {
+                nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
+            }
+            console.log(pendingC);
+            
+            for (const k in members) {
+                for (const l in data) {
+                    if (data[l].client.id === members[k].id) {
+                        data[l].pendingGroup = pendingC
+                        data[l].pendingPassesGroup = pendingP
+                        data[l].takenGroup = boookingsArray.length
+                        data[l].takenPassesGroup = boookingsPassesArray.length
+                        console.log(data[l]);
+                    }
+                    
+                }
+            }
+        }
+
         return data
 
     },
 
     async getClient(clientId: string) {
-        const client = await getRepository(User).findOne({
-            where: {
-                id: clientId
-            },
-            relations: ['Purchase', 'Purchase.Bundle', 'Purchase.Payment_method', 'Purchase.Transaction', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor', 'User_categories', 'User_categories.Categories','User_categories.Categories.User_items']
-        })
+        let client = await createQueryBuilder(User)
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .leftJoinAndSelect('User.Booking', 'Booking')
+        .leftJoinAndSelect('User.User_categories', 'User_categories')
+        .leftJoinAndSelect('User_categories.Categories', 'Categories')
+        .leftJoinAndSelect('Categories.User_items', 'User_items')
+        .leftJoinAndSelect('Booking.Schedule', 'Schedule')
+        .leftJoinAndSelect('Booking.Seat', 'Seat')
+        .leftJoinAndSelect('Schedule.Instructor', 'Instructor')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
+        .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
+        .where('User.id=:idUser', { idUser: clientId })
+        .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+        .getOne();
 
-        const purchases = await getRepository(Purchase).find({
-            where: {
-                User: client
-            },
-            relations: ['Bundle', 'Transaction']
-        })
-        const bookings = await getRepository(Booking).find({
-            where: {
-                User: client
+        let mainUser
+        if (client.fromGroup) {
+            mainUser = client.fromGroup
+        } else {
+            mainUser = client.id
+        }
+
+        let clientGroup = await createQueryBuilder(User)
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+        .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
+        .getOne();
+
+        let boookingsArrayTotal : Booking[] = []
+        let boookingsArray : Booking[] = []
+        let boookingsPassesArray : Booking[] = []
+        for (const i in clientGroup.Purchase) {
+            let bookingsPurchases = await getRepository(Booking).find({
+                where: 
+                    {
+                        fromPurchase: clientGroup.Purchase[i].id,
+                        isPass: false
+                    }
+            })
+            let bookingsPassesPurchases = await getRepository(Booking).find({
+                where: 
+                    {
+                        fromPurchase: clientGroup.Purchase[i].id,
+                        isPass: true
+                    }
+            })
+            for (const j in bookingsPurchases) {
+                boookingsArray.push(bookingsPurchases[j])
+                boookingsArrayTotal.push(bookingsPurchases[j])
             }
+            for (const j in bookingsPassesPurchases) {
+                boookingsPassesArray.push(bookingsPassesPurchases[j])
+                boookingsArrayTotal.push(bookingsPassesPurchases[j])
+            }
+        }
+
+        
+        let classesGroup: pendingClasses[]
+        classesGroup = await getPendingClasses(clientGroup.Purchase, boookingsArrayTotal)
+        classesGroup = classesGroup.filter((p: pendingClasses) => {
+            let expirationDay = moment(p.purchase.expirationDate)
+            if (expirationDay.isBefore(moment())) return false
+            if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
+            return true
         })
 
+         
+        let pendingGroupC = 0
+        let pendingGroupP = 0
+        for (var i in classesGroup) {
+            pendingGroupC += classesGroup[i].pendingClasses
+            pendingGroupP += classesGroup[i].pendingPasses
+        }
+        let isUnlimitedGroup = false
+        for (var i in classesGroup) {
+            if (classesGroup[i].purchase.Bundle.isUnlimited) {
+                isUnlimitedGroup = true
+                break
+            }
+        }
+        
         const bookingsNoPasses = await getRepository(Booking).find({
             where: {
                 User: client,
@@ -133,7 +283,7 @@ export const ClientRepository = {
         })
 
         let classes: pendingClasses[]
-        classes = await getPendingClasses(purchases, bookings)
+        classes = await getPendingClasses(client.Purchase, client.Booking)
         delete client.password
         classes = classes.filter((p: pendingClasses) => {
             let expirationDay = moment(p.purchase.expirationDate)
@@ -170,8 +320,13 @@ export const ClientRepository = {
             pendingPasses: pendingP,
             takenPasses: passes.length,
             isUnlimited,
-            nextExpirationDate
+            nextExpirationDate,
+            pendingGroup: pendingGroupC,
+            takenGroup: boookingsArray.length,
+            pendingPassesGroup: pendingGroupP,
+            takenPassesGroup: boookingsPassesArray.length
         }
+        //return clientGroup;
     },
 
     async createClient(data: CustomerData) {

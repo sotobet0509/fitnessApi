@@ -54,6 +54,12 @@ export class Bundle {
     @Column({default: 1})
     max: number
 
+    @Column('integer', {default: 0})
+    memberLimit: number
+
+    @Column({default: false})
+    isGroup: boolean
+
     @OneToMany(type => Purchase, purchase => purchase.Bundle)
     purchase: Purchase    
 }

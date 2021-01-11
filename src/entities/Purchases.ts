@@ -3,6 +3,7 @@ import { Bundle } from './Bundles'
 import { Transaction } from './Transactions'
 import { Payment_method } from './Payment_methods'
 import { User } from './Users'
+import { Booking } from './Bookings'
 
 @Entity({name: 'purchases'})
 export class Purchase {
@@ -38,4 +39,7 @@ export class Purchase {
     @ManyToOne(type => User, User => User.Purchase)
     @JoinColumn({name: 'users_id'})
     User: User
+
+    @OneToMany(type => Booking, Booking => Booking.fromPurchase)
+    Booking: Booking
 }

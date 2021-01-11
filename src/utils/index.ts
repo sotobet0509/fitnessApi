@@ -29,11 +29,15 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
         let contadorPasses = purchase.Bundle.passes + purchase.addedPasses
   
         contadorClasses -= bookings.filter((b: Booking) => {
-            return b.fromPurchase === purchase.id && !b.isPass
+            let auxBooking = new Booking()
+            auxBooking.fromPurchase = purchase
+            return b.fromPurchase === auxBooking.fromPurchase && !b.isPass
         }).length
 
         contadorPasses -= bookings.filter((b: Booking) => {
-            return b.fromPurchase === purchase.id && b.isPass
+            let auxBooking = new Booking()
+            auxBooking.fromPurchase = purchase
+            return b.fromPurchase === auxBooking.fromPurchase && b.isPass
         }).length
 
         results.push({

@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class addMaxToBundle1607128446265 implements MigrationInterface {
+export class Bloom1610150143127 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
     }

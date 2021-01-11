@@ -42,6 +42,12 @@ export class User {
     @CreateDateColumn()
     createdAt: Date
 
+    @Column({default: false})
+    isLeader: boolean
+
+    @Column( {nullable: true })
+    fromGroup: string
+
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking[]
     

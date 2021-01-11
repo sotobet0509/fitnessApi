@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne, CreateDateColumn } from 'typeorm'
+import { Purchase } from './Purchases'
 import { Schedule } from './Schedules'
 import { Seat } from './Seats'
 import { User } from './Users'
@@ -14,8 +15,8 @@ export class Booking {
     @CreateDateColumn()
     createdAt: Date
 
-    @Column({nullable: true})
-    fromPurchase: number
+    /* @Column({nullable: true})
+    fromPurchase: number */
 
     @Column({default: false})
     assistance: boolean
@@ -31,4 +32,8 @@ export class Booking {
     @ManyToOne(type => User, User => User.Booking)
     @JoinColumn({name: 'user_id'})
     User: User
+
+    @ManyToOne(type => Purchase, Purchase => Purchase.Booking)
+    @JoinColumn({name: 'fromPurchase'})
+    fromPurchase: Purchase
 }
