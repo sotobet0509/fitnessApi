@@ -31,3 +31,7 @@ export interface Comments{
 export interface Voucher{
     voucher: string
 }
+
+export interface MemberEmail {
+    email: string
+}

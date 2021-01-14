@@ -4,7 +4,7 @@ import { ExtendedRequest } from '../../types'
 import { ClientRepository } from '../repositories/client'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
-import { CustomerData } from '../interfaces/auth'
+import { ClientId, CustomerData } from '../interfaces/auth'
 import { ClientData } from '../interfaces/auth'
 
 
@@ -73,5 +73,22 @@ export const ClientController = {
 
         await ClientRepository.changeClientStatus(clientId)
         res.json({ success: true})
+    },
+
+    async inviteClientToGroup(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        
+        const email = req.params.email
+
+        const clientIdJoi = Joi.object().keys({
+            client_id: Joi.string().required()
+        })
+
+        const { error, value } = clientIdJoi.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ClientId>value
+
+        const token = await ClientRepository.inviteClientToGroup(data.client_id, email)
+        res.json({ success: true, data: token })
     }
 }

@@ -197,4 +197,6 @@ ClientRouter.patch('/update',h(checkToken), h(ClientController.updateClient))
 
 ClientRouter.patch('/delete/:client_id',h(checkToken), h(ClientController.changeClientStatus))
 
+ClientRouter.post('/member/:email',h(checkToken), h(ClientController.inviteClientToGroup))
+
 export { ClientRouter }

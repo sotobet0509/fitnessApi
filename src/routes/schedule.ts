@@ -94,6 +94,10 @@ ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id',h(checkToken
 
 ScheduleRouter.post('/:schedule_id/seat/:seat_id',h(checkToken), h(ScheduleController.bookingClient))
 
+ScheduleRouter.post('/:schedule_id/seat/:seat_id/member',h(checkToken), h(ScheduleController.bookingClientGroupByAdmin))
+
+ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id/member',h(checkToken), h(ScheduleController.bookingClientGroup))
+
 /**
  * @swagger
  * /schedules/create:

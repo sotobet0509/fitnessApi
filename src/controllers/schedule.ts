@@ -3,7 +3,7 @@ import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { ScheduleRepository } from '../repositories/schedule'
 import { ErrorResponse } from '../errors/ErrorResponse'
-import { ScheduleIsPass, ScheduleSchema } from '../interfaces/schedule'
+import { ScheduleIsPass, ScheduleSchema, ScheduleClientId } from '../interfaces/schedule'
 import { DataMissingError } from '../errors/DataMissingError'
 import { getRepository } from 'typeorm'
 import { BookingRepository } from '../repositories/booking'
@@ -51,6 +51,43 @@ export const ScheduleController ={
         const data = <ScheduleIsPass>value
 
         const passes = await ScheduleRepository.setBooking(scheduleId, seatId, clientId, data.isPass)
+
+        res.json({ success: true, passes})
+    },
+    
+    async bookingClientGroupByAdmin(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const scheduleId = parseInt(req.params.schedule_id)
+        const seatId = parseInt(req.params.seat_id)
+
+        const clientIdJoi = Joi.object().keys({
+            client_id: Joi.string().required(),
+            isPass: Joi.boolean().required()
+        })
+
+        const { error, value } = clientIdJoi.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ScheduleClientId>value
+
+        const passes = await ScheduleRepository.setBookingGroupByAdmin(scheduleId, seatId, data.client_id, data.isPass)
+
+        res.json({ success: true, passes})
+    },
+
+    async bookingClientGroup(req: ExtendedRequest, res: Response){
+        const scheduleId = parseInt(req.params.schedule_id)
+        const seatId = parseInt(req.params.seat_id)
+        const clientId = req.params.client_id
+        const user = req.user
+
+        const scheduleSchema = Joi.object().keys({
+            isPass: Joi.boolean().required()
+        })
+        const { error, value } = scheduleSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ScheduleIsPass>value
+
+        const passes = await ScheduleRepository.setBookingGroup(scheduleId, seatId, clientId, data.isPass, user)
 
         res.json({ success: true, passes})
     },

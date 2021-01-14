@@ -6,10 +6,11 @@ import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
 import * as moment from 'moment'
-import { getPendingClasses } from '../utils';
+import { getPendingClasses, orderLiderPurchasesByExpirationDay } from '../utils';
 import { pendingClasses } from '../interfaces/purchase';
 import { sendActivationUrl } from '../services/mail';
 import { Bundle } from '../entities/Bundles';
+import { TokenService } from '../services/token';
 
 export const ClientRepository = {
     async getAllClients() {
@@ -268,7 +269,7 @@ export const ClientRepository = {
             }
         }
         
-        const bookingsNoPasses = await getRepository(Booking).find({
+        /* const bookingsNoPasses = await getRepository(Booking).find({
             where: {
                 User: client,
                 isPass: false
@@ -280,7 +281,25 @@ export const ClientRepository = {
                 User: client,
                 isPass: true
             }
-        })
+        }) */
+
+        const bookingsNoPasses = await createQueryBuilder(Booking)
+        .leftJoinAndSelect('Booking.User', 'User')
+        .leftJoinAndSelect('User.Purchase', 'Purchase')
+        .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('User.id=:idUser', { idUser: client.id })
+        .andWhere('Booking.isPass=:isPass', { isPass: false })
+        .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+        .getMany();
+
+        const passes = await createQueryBuilder(Booking)
+        .leftJoinAndSelect('Booking.User', 'User')
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('Bundle.isGroup=:isGroup', { isGroup: false })
+        .andWhere('Booking.isPass=:isPass', { isPass: true })
+        .andWhere('User.id=:idUser', { idUser: client.id })
+        .getMany();
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(client.Purchase, client.Booking)
@@ -366,6 +385,60 @@ export const ClientRepository = {
 
         client.isDeleted = !client.isDeleted
         await clientRepository.save(client)
+
+    },
+
+    async inviteClientToGroup(clientId: string, email: string) {
+        const clientRepository = getRepository(User)
+
+        const lider = await clientRepository.findOne({
+            where: {
+                id: clientId
+            }
+        })
+        if (!lider) throw new ErrorResponse(404, 14, 'El usuario lider no existe')
+        if (!lider.isLeader) throw new ErrorResponse(404, 61, 'El usuario no es lider')
+
+        const member = await clientRepository.findOne({
+            where: {
+                email: email
+            }
+        })
+        
+        const members = await getRepository(User).find({
+            where: [
+                {
+                    fromGroup: lider.id
+                },
+                {
+                    id: lider.id
+                }
+            ]
+        })
+        
+        const liderPurchases = await createQueryBuilder(User)
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+        .andWhere('Purchase.users_id=:idUser', { idUser: lider.id })
+        .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+        .getOne();
+        
+        const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
+        
+        if ( members.length >= orderedPurchases[0].Bundle.memberLimit) throw new ErrorResponse(404, 63, 'El grupo ya está lleno')
+
+        if (member) {
+            if (member.fromGroup) throw new ErrorResponse(404, 62, 'El miembro ya cuenta con un grupo')
+            member.fromGroup = lider.id
+            await clientRepository.save(member)
+        } else {
+            const userToken = new TokenService(lider.id)
+            const token = await userToken.signTokenLider()
+
+            return token
+        }
+        
 
     },
 
