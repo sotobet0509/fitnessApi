@@ -16,6 +16,14 @@ export class TokenService {
     return token
   }
 
+  async signTokenLider() {
+    const payload = { sub: this.customerId }
+    const token = await TokenService.generateAndSign(payload, {
+      expiresIn: '12h',
+    })
+    return token
+  }
+
   private static generateAndSign(payload: object, signOptions: SignOptions): Promise<string> {
     return new Promise((resolve, reject) => {
       jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { ...signOptions, algorithm: 'RS256' }, (err, token) => {

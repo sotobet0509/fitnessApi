@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository } from 'typeorm'
+import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { Comments, extraPurchaseSchema, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
@@ -6,7 +6,7 @@ import { Purchase } from '../entities/Purchases'
 import { Bundle } from '../entities/Bundles'
 import { Transaction } from '../entities/Transactions'
 import { Payment_method } from '../entities/Payment_methods'
-import { getPendingClasses } from '../utils'
+import { createBundlePurchase, getPendingClasses, orderLiderPurchasesByExpirationDay } from '../utils'
 import { Booking } from '../entities/Bookings'
 import * as moment from "moment"
 import { Folios } from '../entities/Folios'
@@ -331,70 +331,43 @@ export const PurchaseRepository = {
         )
         if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe')
 
-        if (bundle.isEspecial) {
-            let purchase = new Purchase()
-            purchase.User = user
-            purchase.Bundle = bundle
-            purchase.date = new Date()
-            purchase.Payment_method = paymentMethod
-            purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+        if (bundle.isGroup) {
+            if (user.fromGroup) throw new ErrorResponse(404, 58, 'Usuario de tipo miembro')
+            else {
+                if (!user.isLeader) {
+                    const clientRepository = getRepository(User)
+                    const updateClient = await getRepository(User).findOne({
+                        where: {
+                            id: user.id
+                        }
+                    })
 
-            await getRepository(Purchase).save(purchase)
-
-            const transaction = new Transaction()
-            transaction.voucher = data.voucher
-            transaction.date = new Date()
-            transaction.invoice = false
-            transaction.total = bundle.price
-            transaction.Purchase = purchase
-
-            await getRepository(Transaction).save(transaction)
-
-            const colaborador = await getRepository(Alternate_users).findOne({
-                where: {
-                    id: bundle.altermateUserId
+                    updateClient.isLeader = true
+                    await clientRepository.save(updateClient)
+                    return createBundlePurchase(bundle, user, paymentMethod, data)
                 }
-            })
-            const shortColaborador = colaborador.name.substr(0, 3).toUpperCase()
-            let shortUuid = uuidv4().substr(0, 6)
-            let folioSave = new Folios()
-            folioSave.Alternate_users = colaborador
-            folioSave.clientName = user.name + " " + user.lastname
-            folioSave.folio = shortColaborador + "-" + shortUuid
-            folioSave.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
-            folioSave.purchase = purchase.id
+                else{
 
-            await getRepository(Folios).save(folioSave)
+                    const liderPurchases = await createQueryBuilder(User)
+                    .innerJoinAndSelect('User.Purchase', 'Purchase')
+                    .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                    .where('Bundle.isGroup=:isGroup', { isGroup: true })
+                    .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
+                    .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                    .getOne();
 
-            const folio = await getRepository(Folios).findOne({
-                where: {
-                    id: folioSave
-                },
-                relations: ["Alternate_users"]
-            })
+                    const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
 
-            return folio
+                    if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0)  throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
+                    else {
+                        return createBundlePurchase(bundle, user, paymentMethod, data)
+                    }
+                    
+                }
+            }
+        } else {
+            return createBundlePurchase(bundle, user, paymentMethod, data)
         }
-
-
-        let purchase = new Purchase()
-        purchase.User = user
-        purchase.Bundle = bundle
-        purchase.date = new Date()
-        purchase.Payment_method = paymentMethod
-        purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
-
-        await getRepository(Purchase).save(purchase)
-
-        const transaction = new Transaction()
-        transaction.voucher = data.voucher
-        transaction.date = new Date()
-        transaction.invoice = false
-        transaction.total = bundle.price
-        transaction.Purchase = purchase
-
-        await getRepository(Transaction).save(transaction)
-
 
     },
     async updateExpirationDate() {

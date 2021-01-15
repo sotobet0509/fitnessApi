@@ -3,8 +3,8 @@ import { User } from '../entities/Users'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Purchase } from '../entities/Purchases'
 import { Booking } from '../entities/Bookings'
-import { getPendingClasses, orderByExpirationDay } from "../utils/index"
-import { pendingClasses } from '../interfaces/purchase'
+import { getPendingClasses, orderByExpirationDay, orderLiderPurchasesByExpirationDay } from "../utils/index"
+import { MemberEmail, pendingClasses } from '../interfaces/purchase'
 import * as moment from 'moment'
 import { Folios } from '../entities/Folios'
 import { ClientData } from '../interfaces/auth'
@@ -15,6 +15,7 @@ import { User_categories } from '../entities/UserCategories'
 import { EditItems } from '../interfaces/items'
 import { UserId } from '../interfaces/me'
 import { log } from 'console'
+import { TokenService } from '../services/token'
 
 export const MeRepository = {
     async getProfile(id: string) {
@@ -378,4 +379,56 @@ export const MeRepository = {
         member.fromGroup = ""
         await getRepository(User).save(member)
     },
+    async inviteMember(userId: number, memberEmail: MemberEmail) {
+        const clientRepository = getRepository(User)
+        const user = await getRepository(User).findOne({
+            where: {
+                id: userId
+            }
+        })
+
+        const member = await getRepository(User).findOne({
+            where: {
+                email: memberEmail.email
+            }
+        })
+
+        if (!user) throw new ErrorResponse(404, 47, 'El usuario no existe')
+        if (!user.isLeader) throw new ErrorResponse(404, 61, 'El usuario no es lider')
+
+        const members = await getRepository(User).find({
+            where: [
+                {
+                    fromGroup: user.id
+                },
+                {
+                    id: user.id
+                }
+            ]
+        })
+        
+        const liderPurchases = await createQueryBuilder(User)
+        .innerJoinAndSelect('User.Purchase', 'Purchase')
+        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+        .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
+        .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+        .getOne();
+        
+        const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
+        
+        if ( members.length >= orderedPurchases[0].Bundle.memberLimit) throw new ErrorResponse(404, 63, 'El grupo ya está lleno')
+
+        if (member) {
+            if (member.fromGroup) throw new ErrorResponse(404, 62, 'El miembro ya cuenta con un grupo')
+            member.fromGroup = user.id
+            await clientRepository.save(member)
+        } else {
+            const userToken = new TokenService(user.id)
+            const token = await userToken.signTokenLider()
+
+            return token
+        }
+
+    }
 }

@@ -9,6 +9,7 @@ import { getRepository } from 'typeorm'
 import { EditItems } from '../interfaces/items'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { UserId } from '../interfaces/me'
+import { MemberEmail } from '../interfaces/purchase'
 
 export const MeController = {
 
@@ -112,4 +113,18 @@ export const MeController = {
 
     },
 
+    async inviteMember(req: ExtendedRequest, res: Response) {
+        const userId = parseInt(req.user.id)
+
+        const memberEmail = Joi.object().keys({
+            email: Joi.string().required()
+        })
+        const { error, value } = memberEmail.validate(req.body)
+        if (error) throw new DataMissingError()
+        const email = <MemberEmail>value
+
+        const token = await MeRepository.inviteMember(userId, email)
+        res.json({ success: true, data: token })
+
+    }
 }

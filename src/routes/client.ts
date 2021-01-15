@@ -201,5 +201,6 @@ ClientRouter.patch('/member/remove/:client_id',h(checkToken), h(ClientController
 ClientRouter.get('/member/client/:client_id',h(checkToken), h(ClientController.getMembers))
 
 ClientRouter.get('/member/list',h(checkToken), h(ClientController.getAllMembers))
+ClientRouter.post('/member/:email',h(checkToken), h(ClientController.inviteClientToGroup))
 
 export { ClientRouter }

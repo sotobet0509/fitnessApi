@@ -13,3 +13,8 @@ export interface ScheduleSchema {
 export interface ScheduleIsPass{
     isPass: boolean
 }
+
+export interface ScheduleClientId{
+    client_id: string
+    isPass: boolean
+}
