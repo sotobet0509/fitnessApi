@@ -1,10 +1,10 @@
-import { getRepository, getConnection, Repository, Not } from 'typeorm'
+import { getRepository, getConnection, Repository, Not, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Bundle } from '../entities/Bundles'
 import { Purchase } from '../entities/Purchases'
 import { User } from '../entities/Users'
 import { Discounts } from '../entities/Discounts'
-import { BundleSchema, UpdateBundleSchema} from '../interfaces/bundle'
+import { BundleSchema, UpdateBundleSchema } from '../interfaces/bundle'
 import { Alternate_users } from '../entities/alternateUsers'
 import { PasswordService } from '../services/password'
 
@@ -35,14 +35,71 @@ export const BundleRepository = {
                 }
             })
             if (haveTrialBundle) {
-                bundles = await getRepository(Bundle).find({
-                    where: {
-                        name: Not("Paquete Prueba")
-                    }
-                })
-            } else {
-                bundles = await getRepository(Bundle).find({})
+                if (userId.fromGroup) {
+                    console.log("Pertemece a un grupo")
+                    bundles = await getRepository(Bundle).find({
+                        where: {
+                            isGroup: false,
+                            name: Not("Paquete Prueba")
+                        }
+                    })
+                } else if (userId.isLeader) {
+                    let groupPurchase = await createQueryBuilder(Purchase)
+                        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+                        .andWhere('Purchase.users_id=:userId',{userId: userId.id })
+                        .orderBy('Purchase.expirationDate', 'DESC')
+                        .getOne()
+                        
+                        
+                    bundles = await getRepository(Bundle).find({
+                        where: [
+                            {
+                                isGroup: false,
+                                name: Not("Paquete Prueba")
+                            },
+                            {
+                                name: groupPurchase.Bundle.name
+                            }
+                        ]
+                    })
+                } else {
+                    bundles = await getRepository(Bundle).find({
+                        where: {
+                            name: Not("Paquete Prueba")
+                        }
+                    })
+                }    
 
+            } else {
+                if (userId.fromGroup) {
+                    console.log("Pertemece a un grupo")
+                    bundles = await getRepository(Bundle).find({
+                        where: {
+                            isGroup: false
+                        }
+                    })
+                } else if (userId.isLeader) {
+                    let groupPurchase = await createQueryBuilder(Purchase)
+                        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+                        .andWhere('Purchase.users_id=:userId',{userId: userId.id })
+                        .orderBy('Purchase.expirationDate', 'DESC')
+                        .getOne()
+
+                    bundles = await getRepository(Bundle).find({
+                        where: [
+                            {
+                                isGroup: false
+                            },
+                            {
+                                name: groupPurchase.Bundle.name
+                            }
+                        ]
+                    })
+                } else {
+                    bundles = await getRepository(Bundle).find({})
+                }
             }
 
         } else {
@@ -82,7 +139,7 @@ export const BundleRepository = {
         if (!data.alternateUserId && data.isSpecial) {
             collaborator.email = data.email
 
-            if(data.password){
+            if (data.password) {
                 const passwordService = new PasswordService(data.password)
                 const password = await passwordService.getHashedPassword()
                 collaborator.password = password
@@ -96,10 +153,10 @@ export const BundleRepository = {
             collaboratorId = collaboratorId.split("-").join("")
             const temp = Math.floor((Math.random() * (1000 - 0)) + 0).toString()
             collaboratorId = collaboratorId + temp
-            collaboratorId = collaboratorId.substring(2,collaboratorId.length-1)
+            collaboratorId = collaboratorId.substring(2, collaboratorId.length - 1)
             collaborator.id = collaboratorId
 
-            if(data.email)await getRepository(Alternate_users).save(collaborator)
+            if (data.email) await getRepository(Alternate_users).save(collaborator)
         }
 
         let newBundle = new Bundle()
@@ -111,6 +168,10 @@ export const BundleRepository = {
         newBundle.expirationDays = data.expirationDays ? data.expirationDays : newBundle.expirationDays
         newBundle.passes = data.passes ? data.passes : 0
         newBundle.isUnlimited = data.isUnlimited ? data.isUnlimited : newBundle.isUnlimited
+        if(data.isGroup){
+            newBundle.isGroup = data.isGroup ? data.isGroup : newBundle.isGroup
+            newBundle.memberLimit = data.memberLimit ? data.memberLimit : newBundle.memberLimit
+        }
         if (data.isSpecial) {
             newBundle.isEspecial = data.isSpecial ? data.isSpecial : newBundle.isEspecial
             newBundle.especialDescription = data.especialDescription ? data.especialDescription : newBundle.especialDescription
@@ -119,7 +180,7 @@ export const BundleRepository = {
             if (!data.alternateUserId) {
                 newBundle.altermateUserId = parseInt(collaborator.id)
             } else {
-                newBundle.altermateUserId =  parseInt(data.alternateUserId)
+                newBundle.altermateUserId = parseInt(data.alternateUserId)
             }
         }
 
@@ -150,7 +211,7 @@ export const BundleRepository = {
         if (!data.alternateUserId) {
             collaborator.email = data.email
 
-            if(data.password){
+            if (data.password) {
                 const passwordService = new PasswordService(data.password)
                 const password = await passwordService.getHashedPassword()
                 collaborator.password = password
@@ -164,10 +225,10 @@ export const BundleRepository = {
             collaboratorId = collaboratorId.split("-").join("")
             const temp = Math.floor((Math.random() * (1000 - 0)) + 0).toString()
             collaboratorId = collaboratorId + temp
-            collaboratorId = collaboratorId.substring(2,collaboratorId.length-1)
+            collaboratorId = collaboratorId.substring(2, collaboratorId.length - 1)
             collaborator.id = collaboratorId
 
-            if(data.email)await getRepository(Alternate_users).save(collaborator)
+            if (data.email) await getRepository(Alternate_users).save(collaborator)
         }
 
         updateBundle.name = data.name ? data.name : updateBundle.name
@@ -176,22 +237,32 @@ export const BundleRepository = {
         updateBundle.classNumber = data.classNumber ? data.classNumber : updateBundle.classNumber
         updateBundle.expirationDays = data.expirationDays ? data.expirationDays : updateBundle.expirationDays
         updateBundle.passes = data.passes ? data.passes : updateBundle.passes
-        if(data.isUnlimited){
+        if (data.isUnlimited) {
             updateBundle.isEspecial = true
             updateBundle.classNumber = 100
-        }else if (data.isUnlimited === false){
+        } else if (data.isUnlimited === false) {
             updateBundle.isEspecial = false
         }
+
+        if(data.isGroup){
+            updateBundle.isGroup = data.isGroup ? data.isGroup : updateBundle.isGroup
+            updateBundle.memberLimit = data.memberLimit ? data.memberLimit : updateBundle.memberLimit
+        }
+        if(updateBundle.isGroup && data.isGroup == false){
+            updateBundle.isGroup = false
+            updateBundle.memberLimit = 0
+        }
+
         updateBundle.isEspecial = data.isSpecial ? data.isSpecial : updateBundle.isEspecial
         updateBundle.especialDescription = data.especialDescription ? data.especialDescription : updateBundle.especialDescription
         updateBundle.promotionExpirationDays = data.promotionExpirationDays ? data.promotionExpirationDays : updateBundle.promotionExpirationDays
-        if(!data.alternateUserId){
+        if (!data.alternateUserId) {
             updateBundle.altermateUserId = parseInt(collaborator.id)
-        }else{
+        } else {
             updateBundle.altermateUserId = parseInt(data.alternateUserId) ? parseInt(data.alternateUserId) : updateBundle.altermateUserId
         }
-        
-        
+
+
         await getRepository(Bundle).save(updateBundle)
     },
 }

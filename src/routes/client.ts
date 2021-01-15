@@ -192,9 +192,14 @@ ClientRouter.get('/', h(checkToken), h(ClientController.getAllClients))
  */
 ClientRouter.get('/:client_id',  h(checkToken), h(ClientController.getClient))
 
-
 ClientRouter.patch('/update',h(checkToken), h(ClientController.updateClient))
 
 ClientRouter.patch('/delete/:client_id',h(checkToken), h(ClientController.changeClientStatus))
+
+ClientRouter.patch('/member/remove/:client_id',h(checkToken), h(ClientController.removeMember))
+
+ClientRouter.get('/member/client/:client_id',h(checkToken), h(ClientController.getMembers))
+
+ClientRouter.get('/member/list',h(checkToken), h(ClientController.getAllMembers))
 
 export { ClientRouter }

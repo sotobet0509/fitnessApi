@@ -13,6 +13,8 @@ import { Categories } from '../entities/Categories'
 import { User_items } from '../entities/User_items'
 import { User_categories } from '../entities/UserCategories'
 import { EditItems } from '../interfaces/items'
+import { UserId } from '../interfaces/me'
+import { log } from 'console'
 
 export const MeRepository = {
     async getProfile(id: string) {
@@ -21,7 +23,7 @@ export const MeRepository = {
             where: {
                 id: id
             },
-            relations: ["User_categories","User_categories.Categories", "User_categories.Categories.User_items" ]
+            relations: ["User_categories", "User_categories.Categories", "User_categories.Categories.User_items"]
         })
         if (!profile) throw new ErrorResponse(404, 10, 'El usuario no existe')
         const bookings = await getRepository(Booking).find({
@@ -87,13 +89,13 @@ export const MeRepository = {
 
     async getHistory(user: User) {
         let purchases = await createQueryBuilder(Purchase)
-        .innerJoinAndSelect('Purchase.User', 'User')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
-        .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
-        .where('User.id=:idUser', { idUser: user.id })
-        .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-        .getMany();
+            .innerJoinAndSelect('Purchase.User', 'User')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
+            .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
+            .where('User.id=:idUser', { idUser: user.id })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getMany();
 
         let clases = 0
 
@@ -130,20 +132,20 @@ export const MeRepository = {
     },
     async getClasses(user: User) {
         let client = await createQueryBuilder(User)
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .leftJoinAndSelect('User.Booking', 'Booking')
-        .leftJoinAndSelect('Booking.Schedule', 'Schedule')
-        .leftJoinAndSelect('Booking.Seat', 'Seat')
-        .leftJoinAndSelect('Seat.Room', 'Room')
-        .leftJoinAndSelect('Room.Location', 'Location')
-        .leftJoinAndSelect('Schedule.Instructor', 'Instructor')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
-        .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
-        .where('User.id=:idUser', { idUser: user.id })
-        .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-        .getOne()
-        
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .leftJoinAndSelect('User.Booking', 'Booking')
+            .leftJoinAndSelect('Booking.Schedule', 'Schedule')
+            .leftJoinAndSelect('Booking.Seat', 'Seat')
+            .leftJoinAndSelect('Seat.Room', 'Room')
+            .leftJoinAndSelect('Room.Location', 'Location')
+            .leftJoinAndSelect('Schedule.Instructor', 'Instructor')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
+            .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
+            .where('User.id=:idUser', { idUser: user.id })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getOne()
+
         let mainUser
 
         if (client.fromGroup) {
@@ -153,29 +155,29 @@ export const MeRepository = {
         }
 
         let clientGroup = await createQueryBuilder(User)
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('Bundle.isGroup=:isGroup', { isGroup: true })
-        .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
-        .getOne();
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Bundle.isGroup=:isGroup', { isGroup: true })
+            .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
+            .getOne();
 
-        let boookingsArrayTotal : Booking[] = []
-        let boookingsArray : Booking[] = []
-        let boookingsPassesArray : Booking[] = []
+        let boookingsArrayTotal: Booking[] = []
+        let boookingsArray: Booking[] = []
+        let boookingsPassesArray: Booking[] = []
         for (const i in clientGroup.Purchase) {
             let bookingsPurchases = await getRepository(Booking).find({
-                where: 
-                    {
-                        fromPurchase: clientGroup.Purchase[i].id,
-                        isPass: false
-                    }
+                where:
+                {
+                    fromPurchase: clientGroup.Purchase[i].id,
+                    isPass: false
+                }
             })
             let bookingsPassesPurchases = await getRepository(Booking).find({
-                where: 
-                    {
-                        fromPurchase: clientGroup.Purchase[i].id,
-                        isPass: true
-                    }
+                where:
+                {
+                    fromPurchase: clientGroup.Purchase[i].id,
+                    isPass: true
+                }
             })
             for (const j in bookingsPurchases) {
                 boookingsArray.push(bookingsPurchases[j])
@@ -186,7 +188,7 @@ export const MeRepository = {
                 boookingsArrayTotal.push(bookingsPassesPurchases[j])
             }
         }
-    
+
         let classesGroup: pendingClasses[]
         classesGroup = await getPendingClasses(clientGroup.Purchase, boookingsArrayTotal)
         classesGroup = classesGroup.filter((p: pendingClasses) => {
@@ -196,7 +198,7 @@ export const MeRepository = {
             return true
         })
 
-         
+
         let pendingGroupC = 0
         let pendingGroupP = 0
         for (var i in classesGroup) {
@@ -212,22 +214,22 @@ export const MeRepository = {
         }
 
         const bookingsNoPasses = await createQueryBuilder(Booking)
-        .leftJoinAndSelect('Booking.User', 'User')
-        .leftJoinAndSelect('User.Purchase', 'Purchase')
-        .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('User.id=:idUser', { idUser: user.id })
-        .andWhere('Booking.isPass=:isPass', { isPass: false })
-        .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-        .getMany();
+            .leftJoinAndSelect('Booking.User', 'User')
+            .leftJoinAndSelect('User.Purchase', 'Purchase')
+            .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('User.id=:idUser', { idUser: user.id })
+            .andWhere('Booking.isPass=:isPass', { isPass: false })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getMany();
 
         const passes = await createQueryBuilder(Booking)
-        .leftJoinAndSelect('Booking.User', 'User')
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('Bundle.isGroup=:isGroup', { isGroup: false })
-        .andWhere('Booking.isPass=:isPass', { isPass: true })
-        .andWhere('User.id=:idUser', { idUser: user.id })
-        .getMany();
+            .leftJoinAndSelect('Booking.User', 'User')
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Bundle.isGroup=:isGroup', { isGroup: false })
+            .andWhere('Booking.isPass=:isPass', { isPass: true })
+            .andWhere('User.id=:idUser', { idUser: user.id })
+            .getMany();
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(client.Purchase, client.Booking)
@@ -320,27 +322,27 @@ export const MeRepository = {
 
     async getAllItems() {
         const items = await getRepository(User_items).find({
-         relations:["Categories"]
+            relations: ["Categories"]
         })
         return items
     },
 
-    async editItems(data: EditItems, userdata: User){
+    async editItems(data: EditItems, userdata: User) {
         const deleteItems = await getRepository(User_categories).find({
             where: {
                 User: userdata
             }
         })
 
-        for(var i in deleteItems){
+        for (var i in deleteItems) {
             await getRepository(User_categories).delete(deleteItems[i])
         }
-        
-      
-        for (var j in data.categories){
+
+
+        for (var j in data.categories) {
             let newUserCategory = new User_categories
             const newCategory = await getRepository(Categories).findOne({
-                where:{
+                where: {
                     id: data.categories[j]
                 }
             })
@@ -350,5 +352,30 @@ export const MeRepository = {
             newUserCategory.Categories = newCategory
             await getRepository(User_categories).save(newUserCategory)
         }
-    }
+    },
+
+    async getMembers(user: User) {
+        const members = await getRepository(User).find({
+            where: {
+                fromGroup: user.id
+            }
+        })
+        for (var i in members) {
+            delete members[i].password
+        }
+        return members
+    },
+
+    async removeMember(user: User, memberId: UserId) {
+        console.log(memberId,user.id)
+        const member = await getRepository(User).findOne({
+            where: {
+                id: memberId.user_id,
+                fromGroup: user.id
+            }
+        })
+        if (!member) throw new ErrorResponse(404, 16, "El usuario no pertenece a este grupo")
+        member.fromGroup = ""
+        await getRepository(User).save(member)
+    },
 }

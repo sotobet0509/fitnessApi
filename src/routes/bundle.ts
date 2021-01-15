@@ -10,8 +10,8 @@ const BundleRouter = Router({ mergeParams: true })
  * @swagger
  * /bundles:
  *   get:
- *     description: Obtiene los datos de todos los paquetes
- *     produces:
+ *     description: Obtiene los datoproduces:s de todos los paquetes
+ *     
  *       - application/json
  *     parameters:
  *     responses:

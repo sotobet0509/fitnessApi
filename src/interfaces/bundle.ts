@@ -15,6 +15,8 @@ export interface BundleSchema {
     password?: string
     collaboratorName?: string
     contact?: string
+    isGroup?: boolean
+    memberLimit?: number
 }
 
 export interface UpdateBundleSchema {
@@ -34,4 +36,6 @@ export interface UpdateBundleSchema {
     password?: string
     collaboratorName?: string
     contact?: string
+    isGroup?: boolean
+    memberLimit?: number
 }

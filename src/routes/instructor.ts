@@ -127,7 +127,6 @@ InstructorRouter.patch('/update',h(checkToken), h(InstructorController.updateIns
 
 InstructorRouter.get('/list/all', h(InstructorController.getAllInstructorsWithDeleted))
 
-
 InstructorRouter.patch('/delete/:instructor_id',h(checkToken), h(InstructorController.changeInstructorStatus))
 
 InstructorRouter.patch('/changeProfilePicture/:instructor_id',h(checkToken), h(InstructorController.changeInstructorProfilePicture))

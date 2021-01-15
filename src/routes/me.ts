@@ -124,4 +124,9 @@ MeRouter.get('/items/:item_id', h(checkToken), h(MeController.getItemCategories)
 
 MeRouter.get('/all/items', h(checkToken), h(MeController.getAllItems))
 
+MeRouter.get('/member/list', h(checkToken), h(MeController.getMembers))
+
+MeRouter.patch('/member/remove', h(checkToken), h(MeController.removeMember))
+
+
 export { MeRouter }

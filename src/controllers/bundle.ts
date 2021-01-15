@@ -67,17 +67,17 @@ export const BundleController = {
             email: Joi.string(),
             password: Joi.string(),
             collaboratorName: Joi.string(),
-            contact: Joi.string()
+            contact: Joi.string(),
+            isGroup: Joi.boolean(),
+            membersLimit: Joi.number()
         })
         const { error, value } = userSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <BundleSchema>value
-        console.log(req.files)
         if(req.files){
             const url = await handleProfilePicture(req.files.file)
             data.pictureUrl= url
         }
-        console.log("paso por el controller")
         await BundleRepository.createBundle(data)
         res.json({ success: true })
 
@@ -112,7 +112,9 @@ export const BundleController = {
             email: Joi.string(),
             password: Joi.string(),
             collaboratorName: Joi.string(),
-            contact: Joi.string()
+            contact: Joi.string(),
+            isGroup: Joi.boolean(),
+            membersLimit: Joi.number()
         })
         const { error, value } = userSchema.validate(req.body)
         if (error) throw new DataMissingError()

@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository } from 'typeorm'
+import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Schedule } from '../entities/Schedules'
 import { Booking } from '../entities/Bookings'
@@ -20,7 +20,7 @@ export const ScheduleRepository = {
             where: {
                 id: scheduleId
             },
-            relations: ['Booking', 'Booking.Seat','Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories","Booking.User.User_categories.Categories"]
+            relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
         })
         if (schedule.length == 0) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
@@ -65,26 +65,65 @@ export const ScheduleRepository = {
         if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
 
         const repository = getRepository(Purchase)
-        const purchases = await repository.find({
+
+        let purchases = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+            //.leftJoinAndSelect('Purchase.Payment_method', 'Payment_method')
+            //.leftJoinAndSelect('Purchase.Transaction', 'Transaction')
+            .where('Bundle.isGroup=:isGroup', { isGroup: false })
+            .andWhere('Purchase.users_id=:userId', { userId: client.id })
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .getMany()
+
+        /*const purchases = await repository.find({
             where: {
                 User: client,
                 isCanceled: false
             },
             relations: ['Bundle', 'Payment_method', "Transaction"]
-        })
+        })*/
 
-
+        console.log(client);
+        console.log("--------------");
+        
+        console.log(purchases);
+        console.log("--------------");
+        
 
         //nuevo flujo
         const bookingRepository = getRepository(Booking)
-        const bookings = await getRepository(Booking).find({
-            where: {
-                User: client
+
+        // const bookings = await getRepository(Booking).find({
+        //     where: {
+        //         User: client
+        //     }
+        // })
+
+        // let bookings = await createQueryBuilder(User)
+        // .leftJoinAndSelect('User.Booking', 'Booking')
+        // .leftJoinAndSelect('Booking.fromPurchase', 'Purchase')
+        // .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+        // //.where('User.id=:userId', { userId: client.id })
+        // .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+        // .getOne()
+
+        let boookingsArrayTotal : Booking[] = []
+        for (const i in purchases) {
+            let bookingsPurchases = await getRepository(Booking).find({
+                where: 
+                    {
+                        fromPurchase: purchases[i].id
+                    }
+            })
+            for (const j in bookingsPurchases) {
+                boookingsArrayTotal.push(bookingsPurchases[j])
             }
-        })
+        }
+
+        console.log(boookingsArrayTotal)
 
         let classes: pendingClasses[]
-        classes = await getPendingClasses(purchases, bookings)
+        classes = await getPendingClasses(purchases, boookingsArrayTotal)
 
 
         classes = classes.filter((p: pendingClasses) => {
@@ -151,11 +190,11 @@ export const ScheduleRepository = {
         booking.isPass = isPass
         booking.fromPurchase = idPurchase
 
-        const currentPurchase = await getRepository(Purchase).findOne({
-            where: {
-                id: idPurchase
-            }
-        })
+        // const currentPurchase = await getRepository(Purchase).findOne({
+        //     where: {
+        //         id: idPurchase
+        //     }
+        // })
 
 
 
@@ -206,10 +245,10 @@ export const ScheduleRepository = {
         schedule.start = new Date(data.start)
         schedule.Instructor = instructor
         schedule.Rooms = room
-        if(data.theme){
+        if (data.theme) {
             schedule.theme = data.theme
         }
-       console.log(schedule.theme)
+        console.log(schedule.theme)
         await scheduleRepository.save(schedule)
 
         return schedule
@@ -283,7 +322,7 @@ export const ScheduleRepository = {
         await scheduleRepository.remove(schedule)
     },
 
-    async setAssistance(bookingId: number){
+    async setAssistance(bookingId: number) {
         let booking = await getRepository(Booking).findOne({
             where: {
                 id: bookingId

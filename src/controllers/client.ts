@@ -6,6 +6,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
 import { CustomerData } from '../interfaces/auth'
 import { ClientData } from '../interfaces/auth'
+import { UserId } from '../interfaces/me'
 
 
 export const ClientController = {
@@ -73,5 +74,35 @@ export const ClientController = {
 
         await ClientRepository.changeClientStatus(clientId)
         res.json({ success: true})
+    },
+
+    async removeMember(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        
+        const leader =  Joi.object().keys({
+            user_id: Joi.string().required(),       
+        })
+        const member = req.params.client_id
+        const { error, value } = leader.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <UserId>value
+
+        await ClientRepository.removeMember(data, member)
+        res.json({ success: true})
+    },
+
+    async getMembers(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        
+        const members = await ClientRepository.getMembers(req.params.client_id)
+        res.json({ success: true, members})
+    },
+
+    async getAllMembers(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+
+        const members = await ClientRepository.getAllMembers()
+        res.json({ success: true, members})
     }
+
 }
