@@ -81,14 +81,7 @@ export const ScheduleRepository = {
                 isCanceled: false
             },
             relations: ['Bundle', 'Payment_method', "Transaction"]
-        })*/
-
-        console.log(client);
-        console.log("--------------");
-        
-        console.log(purchases);
-        console.log("--------------");
-        
+        })*/  
 
         //nuevo flujo
         const bookingRepository = getRepository(Booking)
@@ -582,7 +575,7 @@ export const ScheduleRepository = {
         if (data.theme) {
             schedule.theme = data.theme
         }
-        console.log(schedule.theme)
+        //console.log(schedule.theme)
         await scheduleRepository.save(schedule)
 
         return schedule

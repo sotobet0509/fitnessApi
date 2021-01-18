@@ -114,7 +114,7 @@ export const MeController = {
     },
 
     async inviteMember(req: ExtendedRequest, res: Response) {
-        const userId = parseInt(req.user.id)
+        const userId = req.user.id
 
         const memberEmail = Joi.object().keys({
             email: Joi.string().required()

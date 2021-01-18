@@ -21,17 +21,19 @@ export const ClientRepository = {
             .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
             .where('Bundle.isGroup=:isGroup', { isGroup: false })
             .getMany();
+
         let clientsGroup = await createQueryBuilder(User)
             .innerJoinAndSelect('User.Purchase', 'Purchase')
             .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
             .where('Bundle.isGroup=:isGroup', { isGroup: true })
             .getMany();
 
+
         let data = []
         let nextExpirationDate: Date
 
         for (var i in clients) {
-            const client = clients[i]
+            let client = clients[i]
 
             const bookingsNoPasses = await getRepository(Booking).find({
                 where: {
@@ -81,6 +83,13 @@ export const ClientRepository = {
                 nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
             }
 
+            let clientdata = await createQueryBuilder(User)
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .leftJoinAndSelect('User.Booking', 'Booking')
+            .where('User.id=:userId', { userId: client.id })
+            .getOne();
+            client = clientdata
             data.push({
                 client,
                 pending: pendingC,
@@ -167,7 +176,7 @@ export const ClientRepository = {
             } else {
                 nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
             }
-            console.log(pendingC);
+            //console.log(pendingC);
 
             for (const k in members) {
                 for (const l in data) {
@@ -176,7 +185,7 @@ export const ClientRepository = {
                         data[l].pendingPassesGroup = pendingP
                         data[l].takenGroup = boookingsArray.length
                         data[l].takenPassesGroup = boookingsPassesArray.length
-                        console.log(data[l]);
+                        //console.log(data[l]);
                     }
 
                 }
@@ -270,7 +279,7 @@ export const ClientRepository = {
                 break
             }
         }
-        
+
         /* const bookingsNoPasses = await getRepository(Booking).find({
             where: {
                 User: client,
@@ -286,22 +295,22 @@ export const ClientRepository = {
         }) */
 
         const bookingsNoPasses = await createQueryBuilder(Booking)
-        .leftJoinAndSelect('Booking.User', 'User')
-        .leftJoinAndSelect('User.Purchase', 'Purchase')
-        .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('User.id=:idUser', { idUser: client.id })
-        .andWhere('Booking.isPass=:isPass', { isPass: false })
-        .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-        .getMany();
+            .leftJoinAndSelect('Booking.User', 'User')
+            .leftJoinAndSelect('User.Purchase', 'Purchase')
+            .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('User.id=:idUser', { idUser: client.id })
+            .andWhere('Booking.isPass=:isPass', { isPass: false })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getMany();
 
         const passes = await createQueryBuilder(Booking)
-        .leftJoinAndSelect('Booking.User', 'User')
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('Bundle.isGroup=:isGroup', { isGroup: false })
-        .andWhere('Booking.isPass=:isPass', { isPass: true })
-        .andWhere('User.id=:idUser', { idUser: client.id })
-        .getMany();
+            .leftJoinAndSelect('Booking.User', 'User')
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Bundle.isGroup=:isGroup', { isGroup: false })
+            .andWhere('Booking.isPass=:isPass', { isPass: true })
+            .andWhere('User.id=:idUser', { idUser: client.id })
+            .getMany();
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(client.Purchase, client.Booking)
@@ -406,7 +415,7 @@ export const ClientRepository = {
                 email: email
             }
         })
-        
+
         const members = await getRepository(User).find({
             where: [
                 {
@@ -417,18 +426,18 @@ export const ClientRepository = {
                 }
             ]
         })
-        
+
         const liderPurchases = await createQueryBuilder(User)
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('Bundle.isGroup=:isGroup', { isGroup: true })
-        .andWhere('Purchase.users_id=:idUser', { idUser: lider.id })
-        .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-        .getOne();
-        
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Bundle.isGroup=:isGroup', { isGroup: true })
+            .andWhere('Purchase.users_id=:idUser', { idUser: lider.id })
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .getOne();
+
         const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
-        
-        if ( members.length >= orderedPurchases[0].Bundle.memberLimit) throw new ErrorResponse(404, 63, 'El grupo ya está lleno')
+
+        if (members.length >= orderedPurchases[0].Bundle.memberLimit) throw new ErrorResponse(404, 63, 'El grupo ya está lleno')
 
         if (member) {
             if (member.fromGroup) throw new ErrorResponse(404, 62, 'El miembro ya cuenta con un grupo')
@@ -440,7 +449,7 @@ export const ClientRepository = {
 
             return token
         }
-        
+
 
     },
 
@@ -506,7 +515,7 @@ export const ClientRepository = {
         return members
     },
 
-    async getAllMembers() {        
+    async getAllMembers() {
         const leaders = await getRepository(User).find({
             where: {
                 isLeader: true
@@ -520,7 +529,7 @@ export const ClientRepository = {
                     fromGroup: leaders[i].id
                 }
             })
-            groups.push( leaders[i],
+            groups.push(leaders[i],
                 members)
         }
         return groups
