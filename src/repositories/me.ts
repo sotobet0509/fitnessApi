@@ -347,7 +347,7 @@ export const MeRepository = {
                     id: data.categories[j]
                 }
             })
-            console.log(data.categories[j])
+            //console.log(data.categories[j])
 
             newUserCategory.User = userdata
             newUserCategory.Categories = newCategory
@@ -368,7 +368,7 @@ export const MeRepository = {
     },
 
     async removeMember(user: User, memberId: UserId) {
-        console.log(memberId,user.id)
+        //console.log(memberId,user.id)
         const member = await getRepository(User).findOne({
             where: {
                 id: memberId.user_id,
@@ -379,7 +379,7 @@ export const MeRepository = {
         member.fromGroup = ""
         await getRepository(User).save(member)
     },
-    async inviteMember(userId: number, memberEmail: MemberEmail) {
+    async inviteMember(userId: string, memberEmail: MemberEmail) {
         const clientRepository = getRepository(User)
         const user = await getRepository(User).findOne({
             where: {
