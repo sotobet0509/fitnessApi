@@ -114,7 +114,7 @@ export const BundleController = {
             collaboratorName: Joi.string(),
             contact: Joi.string(),
             isGroup: Joi.boolean(),
-            membersLimit: Joi.number()
+            memberLimit: Joi.number()
         })
         const { error, value } = userSchema.validate(req.body)
         if (error) throw new DataMissingError()
