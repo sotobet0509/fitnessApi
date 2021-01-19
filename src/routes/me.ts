@@ -130,4 +130,6 @@ MeRouter.patch('/member/remove', h(checkToken), h(MeController.removeMember))
 
 MeRouter.patch('/member/invite', h(checkToken), h(MeController.inviteMember))
 
+MeRouter.patch('/member/name', h(checkToken), h(MeController.changeGroupName))
+
 export { MeRouter }

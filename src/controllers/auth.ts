@@ -9,6 +9,8 @@ import { AuthRepository } from '../repositories/auth'
 import { TokenService } from '../services/token'
 import { ExtendedRequest } from '../../types'
 import { join } from 'path'
+import { User } from '../entities/Users'
+import { getRepository } from 'typeorm'
 
 
 export const
@@ -21,11 +23,21 @@ export const
         password: Joi.string().required(),
       })
 
+
+      let user = null
+      const haveToken = req.header('Authorization')
+      if (haveToken) {
+        const payload = await TokenService.verifyToken(haveToken)
+        const userRepository = getRepository(User)
+        user = await userRepository.findOne(payload.sub)
+      }
+
+
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalSignUpData>value
 
-      const customer = await AuthRepository.createCustomerLocal(data)
+      const customer = await AuthRepository.createCustomerLocal(data, user)
 
       //Dar acceso
       const customerToken = new TokenService(customer.id)
@@ -71,7 +83,14 @@ export const
         //Buscar por email y ver si existe
         customer = await AuthRepository.findCustomerByEmail(data.email)
         //Si no existe, crearlo
-        if (!customer) customer = await AuthRepository.createCustomerFromFacebook(data)
+        let user = null
+        const haveToken = req.header('Authorization')
+        if (haveToken) {
+          const payload = await TokenService.verifyToken(haveToken)
+          const userRepository = getRepository(User)
+          user = await userRepository.findOne(payload.sub)
+        }
+        if (!customer) customer = await AuthRepository.createCustomerFromFacebook(data, user)
         else customer = await AuthRepository.addFacebookId(customer, data.facebookId)
       }
       //Dar acceso

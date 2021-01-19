@@ -238,10 +238,10 @@ export const BundleRepository = {
         updateBundle.expirationDays = data.expirationDays ? data.expirationDays : updateBundle.expirationDays
         updateBundle.passes = data.passes ? data.passes : updateBundle.passes
         if (data.isUnlimited) {
-            updateBundle.isEspecial = true
+            updateBundle.isUnlimited = true
             updateBundle.classNumber = 100
         } else if (data.isUnlimited === false) {
-            updateBundle.isEspecial = false
+            updateBundle.isUnlimited = false
         }
 
         if(data.isGroup){

@@ -507,32 +507,43 @@ export const ClientRepository = {
         if (!leader.isLeader) throw new ErrorResponse(401, 16, "El usuario no es Lider de un grupo")
 
         const members = await getRepository(User).find({
-            where: {
-                fromGroup: leader.id
-            }
+            where: [
+                {fromGroup: leader.id},
+                {id:leaderId}
+            ]
+            
         })
         if (!members) throw new ErrorResponse(401, 17, "No hay miembros en su grupo")
-        return members
+        const currentDate = new Date()
+        let membersData = []
+        for (var i in members){
+            delete members[i].password
+            const nextClass = await createQueryBuilder(Booking)
+                .innerJoinAndSelect('Booking.Schedule', 'Schedule')
+                .where('Booking.user_id=:userId', { userId: members[i].id })
+                .andWhere('Schedule.date >=:date', { date: currentDate })
+                .orderBy('Schedule.date', 'ASC')
+                .getOne()
+
+                membersData.push({
+                    ...members[i],
+                    nextClass
+                })
+        }
+        
+        return [membersData, leader.groupName]
     },
 
     async getAllMembers() {
+        //agregar todo el desmadre
         const leaders = await getRepository(User).find({
             where: {
                 isLeader: true
             }
         })
         if (leaders.length == 0) throw new ErrorResponse(401, 18, "No hay grupos registrados")
-        let groups = []
-        for (var i in leaders) {
-            const members = await getRepository(User).find({
-                where: {
-                    fromGroup: leaders[i].id
-                }
-            })
-            groups.push(leaders[i],
-                members)
-        }
-        return groups
+
+        return null
     }
 
 }

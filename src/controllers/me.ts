@@ -8,7 +8,7 @@ import { ClientData } from '../interfaces/auth'
 import { getRepository } from 'typeorm'
 import { EditItems } from '../interfaces/items'
 import { ErrorResponse } from '../errors/ErrorResponse'
-import { UserId } from '../interfaces/me'
+import { GroupName, UserId } from '../interfaces/me'
 import { MemberEmail } from '../interfaces/purchase'
 
 export const MeController = {
@@ -68,8 +68,8 @@ export const MeController = {
         if (error) throw new DataMissingError()
         const data = <EditItems>value
 
-        await MeRepository. editItems(data, req.user)
-        res.json({ success: true})
+        await MeRepository.editItems(data, req.user)
+        res.json({ success: true })
     },
 
     async getItems(req: ExtendedRequest, res: Response) {
@@ -80,7 +80,7 @@ export const MeController = {
     },
 
     async getItemCategories(req: ExtendedRequest, res: Response) {
-        const itemId = parseInt( req.params.item_id)
+        const itemId = parseInt(req.params.item_id)
         const categories = await MeRepository.getItemCategories(itemId)
         res.json({ success: true, data: categories })
 
@@ -93,7 +93,7 @@ export const MeController = {
     },
 
     async getMembers(req: ExtendedRequest, res: Response) {
-        if (!req.user.isLeader) throw new ErrorResponse(401, 16, "El usuario no es Lider de un grupo")
+        //if (!req.user.isLeader) throw new ErrorResponse(401, 16, "El usuario no es Lider de un grupo")
         const members = await MeRepository.getMembers(req.user)
         res.json({ success: true, data: members })
 
@@ -102,14 +102,14 @@ export const MeController = {
     async removeMember(req: ExtendedRequest, res: Response) {
         if (!req.user.isLeader) throw new ErrorResponse(401, 16, "El usuario no es Lider de un grupo")
         const member = Joi.object().keys({
-               user_id: Joi.string().required()
+            user_id: Joi.string().required()
         })
 
         const { error, value } = member.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <UserId>value
         await MeRepository.removeMember(req.user, data)
-        res.json({ success: true})
+        res.json({ success: true })
 
     },
 
@@ -126,5 +126,20 @@ export const MeController = {
         const token = await MeRepository.inviteMember(userId, email)
         res.json({ success: true, data: token })
 
-    }
+    },
+
+    async changeGroupName(req: ExtendedRequest, res: Response) {
+        if (!req.user.isLeader) throw new ErrorResponse(401, 16, "El usuario no es Lider de un grupo")
+
+        const groupName = Joi.object().keys({
+            groupName: Joi.string().required()
+        })
+        const { error, value } = groupName.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <GroupName>value
+
+         await MeRepository.changeGroupName(req.user, data)
+        res.json({ success: true })
+
+    },
 }

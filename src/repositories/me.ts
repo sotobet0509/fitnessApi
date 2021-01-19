@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
+import { getRepository, getConnection, Repository, createQueryBuilder, Not } from 'typeorm'
 import { User } from '../entities/Users'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Purchase } from '../entities/Purchases'
@@ -13,9 +13,10 @@ import { Categories } from '../entities/Categories'
 import { User_items } from '../entities/User_items'
 import { User_categories } from '../entities/UserCategories'
 import { EditItems } from '../interfaces/items'
-import { UserId } from '../interfaces/me'
+import { GroupName, UserId } from '../interfaces/me'
 import { log } from 'console'
 import { TokenService } from '../services/token'
+import { id } from 'inversify'
 
 export const MeRepository = {
     async getProfile(id: string) {
@@ -356,15 +357,57 @@ export const MeRepository = {
     },
 
     async getMembers(user: User) {
-        const members = await getRepository(User).find({
-            where: {
-                fromGroup: user.id
-            }
-        })
+        let leaderId = "notNull"
+        console.log(user.id)
+        let members: User[]
+        if (user.isLeader) {
+            leaderId = user.id
+
+            members = await getRepository(User).find({
+                where:
+                {
+                    fromGroup: leaderId,
+                }
+            })
+        } else if(user.fromGroup) {
+            leaderId = user.fromGroup
+            members = await getRepository(User).find({
+                where: [
+                    {
+                        fromGroup: leaderId,
+                        id: Not(user.id)
+                    },
+                    { id: leaderId }
+                ]
+            })
+        }
+        else  throw new ErrorResponse(404, 10, 'El usuario no pertenece a un grupo')
+
+        console.log(leaderId)
+        const currentDate = new Date()
+        let membersData = []
         for (var i in members) {
             delete members[i].password
+            const nextClass = await createQueryBuilder(Booking)
+                .innerJoinAndSelect('Booking.Schedule', 'Schedule')
+                .where('Booking.user_id=:userId', { userId: members[i].id })
+                .andWhere('Schedule.date >=:date', { date: currentDate })
+                .orderBy('Schedule.date', 'ASC')
+                .getOne()
+
+                membersData.push({
+                    ...members[i],
+                    nextClass
+                })
         }
-        return members
+
+        const groupName = await getRepository(User).findOne({
+            where:{
+                id: leaderId
+            }
+        })
+  
+        return [membersData, groupName.groupName]
     },
 
     async removeMember(user: User, memberId: UserId) {
@@ -406,18 +449,18 @@ export const MeRepository = {
                 }
             ]
         })
-        
+
         const liderPurchases = await createQueryBuilder(User)
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('Bundle.isGroup=:isGroup', { isGroup: true })
-        .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
-        .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-        .getOne();
-        
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Bundle.isGroup=:isGroup', { isGroup: true })
+            .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .getOne();
+
         const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
-        
-        if ( members.length >= orderedPurchases[0].Bundle.memberLimit) throw new ErrorResponse(404, 63, 'El grupo ya está lleno')
+
+        if (members.length >= orderedPurchases[0].Bundle.memberLimit) throw new ErrorResponse(404, 63, 'El grupo ya está lleno')
 
         if (member) {
             if (member.fromGroup) throw new ErrorResponse(404, 62, 'El miembro ya cuenta con un grupo')
@@ -430,5 +473,18 @@ export const MeRepository = {
             return token
         }
 
+    },
+
+    async changeGroupName(user: User, data: GroupName) {
+        let leader = await getRepository(User).findOne({
+            where: {
+                id: user.id
+            }
+        })
+        if (!leader) throw new ErrorResponse(404, 62, 'El usuario no existe')
+
+        leader.groupName = data.groupName
+
+        await getRepository(User).save(leader)
     }
 }

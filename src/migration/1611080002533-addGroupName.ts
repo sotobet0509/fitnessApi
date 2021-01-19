@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class Bloom1610150156319 implements MigrationInterface {
-    name = 'Bloom1610150156319'
+export class addGroupName1611080002533 implements MigrationInterface {
+    name = 'addGroupName1611080002533'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query("CREATE TABLE `folios` (`id` int NOT NULL AUTO_INCREMENT, `folio` varchar(255) NOT NULL, `isAviable` tinyint NOT NULL DEFAULT 1, `purchase` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `redeemAt` datetime NULL, `expirationDate` datetime NOT NULL, `clientName` varchar(255) NOT NULL, `alternate_users_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
@@ -13,7 +13,7 @@ export class Bloom1610150156319 implements MigrationInterface {
         await queryRunner.query("CREATE TABLE `user_items` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` varchar(255) NULL, `pictureUrl` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `categories` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` varchar(255) NULL, `type` varchar(255) NOT NULL, `user_items_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `user_categories` (`id` int NOT NULL AUTO_INCREMENT, `User_id` varchar(36) NULL, `Categories_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
-        await queryRunner.query("CREATE TABLE `users` (`id` varchar(36) NOT NULL, `name` varchar(255) NOT NULL, `email` varchar(255) NOT NULL, `lastname` varchar(255) NULL, `password` varchar(255) NULL, `pictureUrl` text NULL, `facebookId` varchar(255) NULL, `googleId` varchar(255) NULL, `tempToken` varchar(255) NULL, `isAdmin` tinyint NOT NULL DEFAULT 0, `isDeleted` tinyint NOT NULL DEFAULT 0, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `isLeader` tinyint NOT NULL DEFAULT 0, `fromGroup` varchar(255) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `users` (`id` varchar(36) NOT NULL, `name` varchar(255) NOT NULL, `email` varchar(255) NOT NULL, `lastname` varchar(255) NULL, `password` varchar(255) NULL, `pictureUrl` text NULL, `facebookId` varchar(255) NULL, `googleId` varchar(255) NULL, `tempToken` varchar(255) NULL, `isAdmin` tinyint NOT NULL DEFAULT 0, `isDeleted` tinyint NOT NULL DEFAULT 0, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `isLeader` tinyint NOT NULL DEFAULT 0, `fromGroup` varchar(255) NULL, `groupName` varchar(255) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `purchases` (`id` int NOT NULL AUTO_INCREMENT, `date` datetime NOT NULL, `addedClasses` int NOT NULL DEFAULT 0, `addedPasses` int NOT NULL DEFAULT 0, `isCanceled` tinyint NOT NULL DEFAULT 0, `expirationDate` datetime NULL DEFAULT '1990-01-01 00:00:00', `bundles_id` int NULL, `payment_metods_id` int NULL, `users_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `instructors` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `lastname` varchar(255) NOT NULL, `description` text NOT NULL, `profilePicture` text NOT NULL, `largePicture` text NOT NULL, `isDeleted` tinyint NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `email` varchar(255) NULL, `password` varchar(255) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `locations` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `address` text NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");

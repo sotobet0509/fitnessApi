@@ -8,3 +8,7 @@ export interface UserId {
 export interface MembersGroup {
   group: User
 }
+
+export interface GroupName {
+  groupName: string
+}

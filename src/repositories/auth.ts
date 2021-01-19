@@ -17,7 +17,7 @@ import { Instructor } from '../entities/Instructors'
 
 
 export const AuthRepository = {
-  async createCustomerLocal(data: LocalSignUpData) {
+  async createCustomerLocal(data: LocalSignUpData, userData: User) {
     const customerRepository = getRepository(User)
     //Revisar si existe ese email
     const exists = await customerRepository.findOne({
@@ -32,6 +32,10 @@ export const AuthRepository = {
     customer.email = data.email.toLocaleLowerCase()
     customer.name = data.name
     customer.lastname = data.lastname
+
+    if(userData){
+      customer.fromGroup = userData.id
+    }
 
     //Hash Password
     const passwordService = new PasswordService(data.password)
@@ -105,7 +109,7 @@ export const AuthRepository = {
     return customer
   },
 
-  async createCustomerFromFacebook(data: FacebookLoginRequest) {
+  async createCustomerFromFacebook(data: FacebookLoginRequest, userData: User) {
     const customerRepository = getRepository(User)
     let customer = new User()
     customer.email = data.email.toLocaleLowerCase()
@@ -114,7 +118,9 @@ export const AuthRepository = {
     customer.lastname = data.lastname
     customer.pictureUrl = data.pictureUrl
     customer.tempToken = null
-
+    if(userData){
+      customer.fromGroup = userData.id
+    }
     customer = await customerRepository.save(customer)
 
     // const bundleRepository = getRepository(Bundle)
