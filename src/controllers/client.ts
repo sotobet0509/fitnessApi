@@ -6,7 +6,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
 import { ClientId, CustomerData } from '../interfaces/auth'
 import { ClientData } from '../interfaces/auth'
-import { UserId } from '../interfaces/me'
+import { GroupName, UserId } from '../interfaces/me'
 
 
 export const ClientController = {
@@ -119,6 +119,21 @@ export const ClientController = {
 
         const token = await ClientRepository.inviteClientToGroup(data.client_id, email)
         res.json({ success: true, data: token })
-    }
+    },
+    async renameGroup(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const clientId = req.params.client_id
+
+        const groupName = Joi.object().keys({
+            groupName: Joi.string().required()
+        })
+        const { error, value } = groupName.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <GroupName>value
+
+        await ClientRepository.renameGroup(clientId, data)
+        res.json({ success: true })
+
+    },
 
 }

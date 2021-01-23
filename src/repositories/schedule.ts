@@ -346,7 +346,7 @@ export const ScheduleRepository = {
             })
 
             if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-            if (client.fromGroup != user.id) throw new ErrorResponse(404, 14, 'El cliente no pertenece al grupo')
+            //if (client.fromGroup != user.id) throw new ErrorResponse(404, 14, 'El cliente no pertenece al grupo')
 
             const liderPurchases = await createQueryBuilder(User)
             .innerJoinAndSelect('User.Purchase', 'Purchase')

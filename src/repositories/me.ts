@@ -90,15 +90,21 @@ export const MeRepository = {
     },
 
     async getHistory(user: User) {
-        let purchases = await createQueryBuilder(Purchase)
-            .innerJoinAndSelect('Purchase.User', 'User')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
-            .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
-            .where('User.id=:idUser', { idUser: user.id })
-            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-            .getMany();
+        // let purchases = await createQueryBuilder(Purchase)
+        //     .innerJoinAndSelect('Purchase.User', 'User')
+        //     .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+        //     .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
+        //     .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
+        //     .where('User.id=:idUser', { idUser: user.id })
+        //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+        //     .getMany();
 
+        let purchases = await getRepository(Purchase).find({
+            where: {
+                User: user
+            },
+            relations: ['User', 'Bundle', 'Payment_method', 'Transaction']
+        })
         let clases = 0
 
 
@@ -119,17 +125,17 @@ export const MeRepository = {
 
         }
 
-        const bookingRepository = getRepository(Booking)
-        const bookings = await bookingRepository.find({
-            where: {
-                User: user
-            }
-        })
-        let clasesTomadas = bookings.length
+        // const bookingRepository = getRepository(Booking)
+        // const bookings = await bookingRepository.find({
+        //     where: {
+        //         User: user
+        //     }
+        // })
+        //  let clasesTomadas = bookings.length
         return {
-            purchases,
-            taken: clasesTomadas,
-            pending: clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
+            purchases
+            //taken: clasesTomadas,
+            //pending: clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
         }
     },
     async getClasses(user: User) {
@@ -257,6 +263,7 @@ export const MeRepository = {
             }
         }
 
+
         let nextExpirationDate: Date
         if (classes.length == 0) {
             nextExpirationDate = null
@@ -272,6 +279,7 @@ export const MeRepository = {
             takenPasses: passes.length,
             compras: orderByExpirationDay(client.Purchase),
             isUnlimited,
+            isUnlimitedGroup,
             nextExpirationDate,
             pendingGroup: pendingGroupC,
             takenGroup: boookingsArray.length,
@@ -369,7 +377,7 @@ export const MeRepository = {
                     fromGroup: leaderId,
                 }
             })
-        } else if(user.fromGroup) {
+        } else if (user.fromGroup) {
             leaderId = user.fromGroup
             members = await getRepository(User).find({
                 where: [
@@ -381,7 +389,7 @@ export const MeRepository = {
                 ]
             })
         }
-        else  throw new ErrorResponse(404, 10, 'El usuario no pertenece a un grupo')
+        else throw new ErrorResponse(404, 10, 'El usuario no pertenece a un grupo')
 
         console.log(leaderId)
         const currentDate = new Date()
@@ -395,18 +403,18 @@ export const MeRepository = {
                 .orderBy('Schedule.date', 'ASC')
                 .getOne()
 
-                membersData.push({
-                    ...members[i],
-                    nextClass
-                })
+            membersData.push({
+                ...members[i],
+                nextClass
+            })
         }
 
         const groupName = await getRepository(User).findOne({
-            where:{
+            where: {
                 id: leaderId
             }
         })
-  
+
         return [membersData, groupName.groupName]
     },
 

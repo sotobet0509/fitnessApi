@@ -55,7 +55,11 @@ export const PurchaseRepository = {
                 purchase.Bundle = bundle
                 purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
 
-
+                if (bundle.isGroup) {
+                    client.isLeader = true
+                    client.groupName = client.email
+                    await getRepository(User).save(client)
+                }
                 const _purchase = await getRepository(Purchase).save(purchase)
 
                 const transaction = new Transaction()
@@ -99,7 +103,11 @@ export const PurchaseRepository = {
                 purchase.Bundle = bundle
                 purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
 
-
+                if (bundle.isGroup) {
+                    client.isLeader = true
+                    client.groupName = client.email
+                    await getRepository(User).save(client)
+                }
                 const _purchase = await getRepository(Purchase).save(purchase)
 
                 const transaction = new Transaction()
@@ -343,26 +351,27 @@ export const PurchaseRepository = {
                     })
 
                     updateClient.isLeader = true
+                    updateClient.groupName = user.email
                     await clientRepository.save(updateClient)
                     return createBundlePurchase(bundle, user, paymentMethod, data)
                 }
-                else{
+                else {
 
                     const liderPurchases = await createQueryBuilder(User)
-                    .innerJoinAndSelect('User.Purchase', 'Purchase')
-                    .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                    .where('Bundle.isGroup=:isGroup', { isGroup: true })
-                    .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
-                    .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-                    .getOne();
+                        .innerJoinAndSelect('User.Purchase', 'Purchase')
+                        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                        .where('Bundle.isGroup=:isGroup', { isGroup: true })
+                        .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
+                        .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                        .getOne();
 
                     const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
 
-                    if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0)  throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
+                    if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0) throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
                     else {
                         return createBundlePurchase(bundle, user, paymentMethod, data)
                     }
-                    
+
                 }
             }
         } else {
@@ -374,14 +383,14 @@ export const PurchaseRepository = {
         const purchases = await getRepository(Purchase).find()
         const date = moment()
         let purchase = new Purchase()
-        for (var i in purchases){
-            if(moment(purchases[i].expirationDate).isAfter(date)){
+        for (var i in purchases) {
+            if (moment(purchases[i].expirationDate).isAfter(date)) {
                 purchase = purchases[i]
-                purchase.expirationDate =  moment(purchase.expirationDate).add(23,'days').toDate()
+                purchase.expirationDate = moment(purchase.expirationDate).add(23, 'days').toDate()
                 await getRepository(Purchase).save(purchase)
             }
         }
-        
+
     },
 }
 
