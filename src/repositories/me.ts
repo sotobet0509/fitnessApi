@@ -172,39 +172,43 @@ export const MeRepository = {
         let boookingsArrayTotal: Booking[] = []
         let boookingsArray: Booking[] = []
         let boookingsPassesArray: Booking[] = []
-        for (const i in clientGroup.Purchase) {
-            let bookingsPurchases = await getRepository(Booking).find({
-                where:
-                {
-                    fromPurchase: clientGroup.Purchase[i].id,
-                    isPass: false
-                }
-            })
-            let bookingsPassesPurchases = await getRepository(Booking).find({
-                where:
-                {
-                    fromPurchase: clientGroup.Purchase[i].id,
-                    isPass: true
-                }
-            })
-            for (const j in bookingsPurchases) {
-                boookingsArray.push(bookingsPurchases[j])
-                boookingsArrayTotal.push(bookingsPurchases[j])
-            }
-            for (const j in bookingsPassesPurchases) {
-                boookingsPassesArray.push(bookingsPassesPurchases[j])
-                boookingsArrayTotal.push(bookingsPassesPurchases[j])
-            }
-        }
 
         let classesGroup: pendingClasses[]
-        classesGroup = await getPendingClasses(clientGroup.Purchase, boookingsArrayTotal)
-        classesGroup = classesGroup.filter((p: pendingClasses) => {
-            let expirationDay = moment(p.purchase.expirationDate)
-            if (expirationDay.isBefore(moment())) return false
-            if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-            return true
-        })
+        if (clientGroup) {
+
+            for (const i in clientGroup.Purchase) {
+                let bookingsPurchases = await getRepository(Booking).find({
+                    where:
+                    {
+                        fromPurchase: clientGroup.Purchase[i].id,
+                        isPass: false
+                    }
+                })
+                let bookingsPassesPurchases = await getRepository(Booking).find({
+                    where:
+                    {
+                        fromPurchase: clientGroup.Purchase[i].id,
+                        isPass: true
+                    }
+                })
+                for (const j in bookingsPurchases) {
+                    boookingsArray.push(bookingsPurchases[j])
+                    boookingsArrayTotal.push(bookingsPurchases[j])
+                }
+                for (const j in bookingsPassesPurchases) {
+                    boookingsPassesArray.push(bookingsPassesPurchases[j])
+                    boookingsArrayTotal.push(bookingsPassesPurchases[j])
+                }
+            }
+
+            classesGroup = await getPendingClasses(clientGroup.Purchase, boookingsArrayTotal)
+            classesGroup = classesGroup.filter((p: pendingClasses) => {
+                let expirationDay = moment(p.purchase.expirationDate)
+                if (expirationDay.isBefore(moment())) return false
+                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
+                return true
+            })
+        }
 
 
         let pendingGroupC = 0
@@ -419,7 +423,8 @@ export const MeRepository = {
     },
 
     async removeMember(user: User, memberId: UserId) {
-        //console.log(memberId,user.id)
+        if (user.changed < 1) throw new ErrorResponse(404, 16, "No quedan cambios disponibles. Por favor acércate a front desk")
+
         const member = await getRepository(User).findOne({
             where: {
                 id: memberId.user_id,
@@ -427,9 +432,12 @@ export const MeRepository = {
             }
         })
         if (!member) throw new ErrorResponse(404, 16, "El usuario no pertenece a este grupo")
-        member.fromGroup = ""
+        member.fromGroup = null
         await getRepository(User).save(member)
+        user.changed -= 1
+        await getRepository(User).save(user)
     },
+
     async inviteMember(userId: string, memberEmail: MemberEmail) {
         const clientRepository = getRepository(User)
         const user = await getRepository(User).findOne({

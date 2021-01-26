@@ -51,6 +51,9 @@ export class User {
     @Column( {nullable: true })
     groupName: string
 
+    @Column({default: 0})
+    changed: number
+
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking[]
     

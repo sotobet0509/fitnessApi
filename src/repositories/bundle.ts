@@ -43,27 +43,7 @@ export const BundleRepository = {
                             name: Not("Paquete Prueba")
                         }
                     })
-                } else if (userId.isLeader) {
-                    let groupPurchase = await createQueryBuilder(Purchase)
-                        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                        .where('Bundle.isGroup=:isGroup', { isGroup: true })
-                        .andWhere('Purchase.users_id=:userId',{userId: userId.id })
-                        .orderBy('Purchase.expirationDate', 'DESC')
-                        .getOne()
-                        
-                        
-                    bundles = await getRepository(Bundle).find({
-                        where: [
-                            {
-                                isGroup: false,
-                                name: Not("Paquete Prueba")
-                            },
-                            {
-                                name: groupPurchase.Bundle.name
-                            }
-                        ]
-                    })
-                } else {
+                }  else {
                     bundles = await getRepository(Bundle).find({
                         where: {
                             name: Not("Paquete Prueba")
@@ -79,25 +59,7 @@ export const BundleRepository = {
                             isGroup: false
                         }
                     })
-                } else if (userId.isLeader) {
-                    let groupPurchase = await createQueryBuilder(Purchase)
-                        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                        .where('Bundle.isGroup=:isGroup', { isGroup: true })
-                        .andWhere('Purchase.users_id=:userId',{userId: userId.id })
-                        .orderBy('Purchase.expirationDate', 'DESC')
-                        .getOne()
-
-                    bundles = await getRepository(Bundle).find({
-                        where: [
-                            {
-                                isGroup: false
-                            },
-                            {
-                                name: groupPurchase.Bundle.name
-                            }
-                        ]
-                    })
-                } else {
+                }  else {
                     bundles = await getRepository(Bundle).find({})
                 }
             }

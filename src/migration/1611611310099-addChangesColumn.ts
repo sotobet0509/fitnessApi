@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class addGroupName1611079984282 implements MigrationInterface {
+export class addChangesColumn1611611310099 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
     }

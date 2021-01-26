@@ -56,9 +56,25 @@ export const PurchaseRepository = {
                 purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
 
                 if (bundle.isGroup) {
+                    client.changed = 1
                     client.isLeader = true
-                    client.groupName = client.email
+                    if(!client.groupName){
+                        client.groupName = client.email
+                    }
                     await getRepository(User).save(client)
+
+                    let members = await getRepository(User).find({
+                        where: {
+                            fromGroup: client.id
+                        }
+                    })
+                    if (members) {
+                        for (var i in members) {
+                            members[i].fromGroup = null
+                            await getRepository(User).save(members[i])
+                        }
+                    }
+                    
                 }
                 const _purchase = await getRepository(Purchase).save(purchase)
 
@@ -104,9 +120,24 @@ export const PurchaseRepository = {
                 purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
 
                 if (bundle.isGroup) {
+                    client.changed = 1
                     client.isLeader = true
-                    client.groupName = client.email
+                    if(!client.groupName){
+                        client.groupName = client.email
+                    }
                     await getRepository(User).save(client)
+
+                    let members = await getRepository(User).find({
+                        where: {
+                            fromGroup: client.id
+                        }
+                    })
+                    if (members) {
+                        for (var i in members) {
+                            members[i].fromGroup = null
+                            await getRepository(User).save(members[i])
+                        }
+                    }
                 }
                 const _purchase = await getRepository(Purchase).save(purchase)
 
@@ -344,18 +375,42 @@ export const PurchaseRepository = {
             else {
                 if (!user.isLeader) {
                     const clientRepository = getRepository(User)
-                    const updateClient = await getRepository(User).findOne({
+                    let updateClient = await getRepository(User).findOne({
                         where: {
                             id: user.id
                         }
                     })
 
+                    updateClient.changed = 1
                     updateClient.isLeader = true
-                    updateClient.groupName = user.email
+                    if(!updateClient.groupName){
+                        updateClient.groupName = user.email
+                    }
                     await clientRepository.save(updateClient)
                     return createBundlePurchase(bundle, user, paymentMethod, data)
                 }
                 else {
+                    let updateClient = await getRepository(User).findOne({
+                        where: {
+                            id: user.id
+                        }
+                    })
+
+                    updateClient.changed = 1
+                    await getRepository(User).save(updateClient)
+                    let members = await getRepository(User).find({
+                        where: {
+                            fromGroup: user.id
+                        }
+                    })
+                    if (members) {
+                        for (var i in members) {
+                            members[i].fromGroup = null
+                            await getRepository(User).save(members[i])
+                        }
+
+                    }
+
 
                     const liderPurchases = await createQueryBuilder(User)
                         .innerJoinAndSelect('User.Purchase', 'Purchase')
@@ -364,14 +419,17 @@ export const PurchaseRepository = {
                         .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
                         .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
                         .getOne();
-
-                    const orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
-
-                    if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0) throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
-                    else {
-                        return createBundlePurchase(bundle, user, paymentMethod, data)
+                    let orderedPurchases
+                    console.log(liderPurchases)
+                    if (liderPurchases) {
+                        orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
+                        console.log(moment().diff(orderedPurchases[0].expirationDate, 'days') )
+                        if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0) throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
+                        else {
+                            return createBundlePurchase(bundle, user, paymentMethod, data)
+                        }
                     }
-
+                    return createBundlePurchase(bundle, user, paymentMethod, data)
                 }
             }
         } else {
