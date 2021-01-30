@@ -1,3 +1,4 @@
+import { MeRepository } from './me';
 import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Schedule } from '../entities/Schedules'
@@ -129,12 +130,9 @@ export const ScheduleRepository = {
         let pending = 0
         let pendingPasses = 0
 
-        for (var i in classes) {
-            pending += classes[i].pendingClasses
-            pendingPasses += classes[i].pendingPasses
-        }
-
-
+        let p = await MeRepository.getClasses(client)
+        pending = p.pending
+        pendingPasses = p.pendingPasses
 
         if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
@@ -265,10 +263,10 @@ export const ScheduleRepository = {
 
         let pendingGroupC = 0
         let pendingGroupP = 0
-        for (var i in classesGroup) {
-            pendingGroupC += classesGroup[i].pendingClasses
-            pendingGroupP += classesGroup[i].pendingPasses
-        }
+
+        let p = await MeRepository.getClasses(client)
+        pendingGroupC = p.pendingGroup
+        pendingGroupP = p.pendingPassesGroup
 
         if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
@@ -381,10 +379,10 @@ export const ScheduleRepository = {
              
             let pendingGroupC = 0
             let pendingGroupP = 0
-            for (var i in classesGroup) {
-                pendingGroupC += classesGroup[i].pendingClasses
-                pendingGroupP += classesGroup[i].pendingPasses
-            }
+            
+            let p = await MeRepository.getClasses(client)
+            pendingGroupC = p.pendingGroup
+            pendingGroupP = p.pendingPassesGroup
 
             if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 

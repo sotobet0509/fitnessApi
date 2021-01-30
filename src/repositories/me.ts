@@ -161,9 +161,8 @@ export const MeRepository = {
             where: {
                 id: user.id
             },
-            relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle']
+            relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User']
         })
-        //console.log(client.Booking)
 
 
 
@@ -276,6 +275,20 @@ export const MeRepository = {
             return true
         })
 
+        let reduceOtherClasses = 0
+        let reduceOtherClassesPasses = 0
+        for (var i in classes) {
+            const _class = classes[i]
+            for (var j in _class.purchase.Booking) {
+                const b: Booking = _class.purchase.Booking[j]
+                if (b.User.id !== user.id && !b.isPass) {
+                    reduceOtherClasses += 1
+                } else if (b.User.id !== user.id) {
+                    reduceOtherClassesPasses += 1
+                }
+            }
+        }
+
         let pendingC = 0
         let pendingP = 0
         for (var i in classes) {
@@ -317,12 +330,11 @@ export const MeRepository = {
             .getMany();
             console.log(currentBookingsGroup)
 
-            console.log(pendingGroupC, pendingC, currentBookingsGroup.length)
             return {
                 bookings,
                 taken: bookingsNoPasses.length - bookingsGroup.length,
-                pending: pendingC - pendingGroupC - currentBookingsGroup.length,
-                pendingPasses: pendingP,
+                pending: pendingC - pendingGroupC - bookingsNoPasses.length - reduceOtherClasses,
+                pendingPasses: pendingP - reduceOtherClassesPasses,
                 takenPasses: passes.length,
                 compras: orderByExpirationDay(client.Purchase),
                 isUnlimited,
