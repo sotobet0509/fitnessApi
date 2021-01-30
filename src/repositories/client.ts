@@ -42,24 +42,24 @@ export const ClientRepository = {
             let client = clients[i]
 
             const bookingsNoPasses = await createQueryBuilder(Booking)
-            .leftJoinAndSelect('Booking.User', 'User')
-            .leftJoinAndSelect('User.Purchase', 'Purchase')
-            .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('User.id=:idUser', { idUser: client.id })
-            .andWhere('Booking.isPass=:isPass', { isPass: false })
-            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-            .getMany();
+                .leftJoinAndSelect('Booking.User', 'User')
+                .leftJoinAndSelect('User.Purchase', 'Purchase')
+                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('User.id=:idUser', { idUser: client.id })
+                .andWhere('Booking.isPass=:isPass', { isPass: false })
+                .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+                .getMany();
 
-        const passes = await createQueryBuilder(Booking)
-            .leftJoinAndSelect('Booking.User', 'User')
-            .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('Bundle.isGroup=:isGroup', { isGroup: false })
-            .andWhere('Booking.isPass=:isPass', { isPass: true })
-            .andWhere('User.id=:idUser', { idUser: client.id })
-            .getMany();
+            const passes = await createQueryBuilder(Booking)
+                .leftJoinAndSelect('Booking.User', 'User')
+                .innerJoinAndSelect('User.Purchase', 'Purchase')
+                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Bundle.isGroup=:isGroup', { isGroup: false })
+                .andWhere('Booking.isPass=:isPass', { isPass: true })
+                .andWhere('User.id=:idUser', { idUser: client.id })
+                .getMany();
 
-        
+
             // const bookingsNoPasses = await getRepository(Booking).find({
             //     where: {
             //         User: client,
@@ -111,7 +111,7 @@ export const ClientRepository = {
 
             data.push({
                 client,
-                pending: pendingC ,
+                pending: pendingC,
                 taken: bookingsNoPasses.length,
                 pendingPasses: pendingP,
                 takenPasses: passes.length,
@@ -179,8 +179,10 @@ export const ClientRepository = {
             let pendingC = 0
             let pendingP = 0
             for (var i in classes) {
-                pendingC += classes[i].pendingClasses
-                pendingP += classes[i].pendingPasses
+                if (!classes[i].purchase.Bundle.isGroup) {
+                    pendingC += classes[i].pendingClasses
+                    pendingP += classes[i].pendingPasses
+                }
             }
             let isUnlimited = false
             for (var i in classes) {
@@ -201,11 +203,11 @@ export const ClientRepository = {
                 for (const l in data) {
                     //console.log(data[l].client)
                     if (data[l].client.id == members[k].id) {
-                        if(!data[l].client.fromGroup){
-                            data[l].pending -= pendingC 
+                        if (!data[l].client.fromGroup) {
+                            data[l].pending -= pendingC
                             data[l].taken -= boookingsArray.length - boookingsPassesArray.length
                         }
-                        data[l].pendingGroup = pendingC 
+                        data[l].pendingGroup = pendingC
                         data[l].pendingPassesGroup = pendingP
                         data[l].takenGroup = boookingsArray.length - boookingsPassesArray.length
                         data[l].takenPassesGroup = boookingsPassesArray.length
@@ -270,7 +272,7 @@ export const ClientRepository = {
         let boookingsPassesArray: Booking[] = []
 
         let isUnlimitedGroup = false
-        
+
         if (clientGroup) {
             for (const i in clientGroup.Purchase) {
                 let bookingsPurchases = await getRepository(Booking).find({
@@ -312,7 +314,7 @@ export const ClientRepository = {
                 pendingGroupC += classesGroup[i].pendingClasses
                 pendingGroupP += classesGroup[i].pendingPasses
             }
-            
+
             for (var i in classesGroup) {
                 if (classesGroup[i].purchase.Bundle.isUnlimited) {
                     isUnlimitedGroup = true
@@ -367,8 +369,10 @@ export const ClientRepository = {
         let pendingC = 0
         let pendingP = 0
         for (var i in classes) {
-            pendingC += classes[i].pendingClasses
-            pendingP += classes[i].pendingPasses
+            if (!classes[i].purchase.Bundle.isGroup) {
+                pendingC += classes[i].pendingClasses
+                pendingP += classes[i].pendingPasses
+            }
         }
         let isUnlimited = false
         for (var i in classes) {
@@ -384,36 +388,19 @@ export const ClientRepository = {
         } else {
             nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
         }
-        if (client.fromGroup) {
-            return {
-                ...client,
-                pending: pendingC ,
-                taken: bookingsNoPasses.length,
-                pendingPasses: pendingP - pendingGroupP,
-                takenPasses: passes.length - boookingsPassesArray.length,
-                isUnlimited,
-                isUnlimitedGroup,
-                nextExpirationDate,
-                pendingGroup: pendingGroupC,
-                takenGroup: boookingsArray.length,
-                pendingPassesGroup: pendingGroupP - boookingsPassesArray.length,
 
-            }
-        } else {
-            return {
-                ...client,
-                pending: pendingC - pendingGroupC,
-                taken: bookingsNoPasses.length ,
-                pendingPasses: pendingP - pendingGroupP,
-                takenPasses: passes.length - boookingsPassesArray.length,
-                isUnlimited,
-                isUnlimitedGroup,
-                nextExpirationDate,
-                pendingGroup: pendingGroupC,
-                takenGroup: boookingsArray.length,
-                pendingPassesGroup: pendingGroupP - boookingsPassesArray.length,
-                takenPassesGroup: boookingsPassesArray.length
-            }
+        return {
+            ...client,
+            pending: pendingC,
+            taken: bookingsNoPasses.length,
+            pendingPasses: pendingP ,
+            takenPasses: passes.length ,
+            isUnlimited,
+            isUnlimitedGroup,
+            nextExpirationDate,
+            pendingGroup: pendingGroupC,
+            takenGroup: boookingsArray.length,
+            pendingPassesGroup: pendingGroupP,
         }
         //return clientGroup;
     },

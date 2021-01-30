@@ -31,10 +31,10 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
     for (var i in purchases) {
 
         const purchase = purchases[i]
-        if(purchase.isCanceled) continue
+        if (purchase.isCanceled) continue
         let contadorClasses = purchase.Bundle.classNumber + purchase.addedClasses
         let contadorPasses = purchase.Bundle.passes + purchase.addedPasses
-  
+
         contadorClasses -= bookings.filter((b: Booking) => {
             let auxBooking = new Booking()
             auxBooking.fromPurchase = purchase
@@ -59,7 +59,7 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
 
     for (var i in bookings) {
         let booking = bookings[i]
-       // console.log(booking)
+        // console.log(booking)
 
         // const validatePurchase = await getRepository(Purchase).findOne({
         //     where:{
@@ -83,13 +83,13 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
                     } else continue
                 }
             }
-        }else{
+        } else {
             const validatePurchase = await getRepository(Purchase).findOne({
-                where:{
+                where: {
                     id: booking.fromPurchase
                 }
             })
-            if( validatePurchase && validatePurchase.isCanceled ) continue
+            if (validatePurchase && validatePurchase.isCanceled) continue
         }
     }
 
@@ -123,7 +123,7 @@ export const orderLiderPurchasesByExpirationDay = (purchases: Purchase[]): Purch
     })
 
     return orderedPurchases
-} 
+}
 
 export const createBundlePurchase = async (bundle: Bundle, user: User, paymentMethod: Payment_method, data: Voucher) => {
     if (bundle.isEspecial) {
@@ -160,7 +160,7 @@ export const createBundlePurchase = async (bundle: Bundle, user: User, paymentMe
         folioSave.purchase = purchase.id
 
         await getRepository(Folios).save(folioSave)
-        
+
         const folio = await getRepository(Folios).findOne({
             where: {
                 id: folioSave.id
