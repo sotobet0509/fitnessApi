@@ -420,10 +420,10 @@ export const PurchaseRepository = {
                         .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
                         .getOne();
                     let orderedPurchases
-                    console.log(liderPurchases)
+                    //console.log(liderPurchases)
                     if (liderPurchases) {
                         orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
-                        console.log(moment().diff(orderedPurchases[0].expirationDate, 'days') )
+                        //console.log(moment().diff(orderedPurchases[0].expirationDate, 'days') )
                         if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0) throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
                         else {
                             return createBundlePurchase(bundle, user, paymentMethod, data)

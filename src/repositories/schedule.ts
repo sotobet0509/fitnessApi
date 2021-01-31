@@ -114,7 +114,7 @@ export const ScheduleRepository = {
             }
         }
 
-        console.log(boookingsArrayTotal)
+        //console.log(boookingsArrayTotal)
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(purchases, boookingsArrayTotal)

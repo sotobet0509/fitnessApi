@@ -385,7 +385,7 @@ export const ClientRepository = {
     },
 
     async removeMember(data: UserId, memberId: string) {
-        console.log(data.user_id);
+        //console.log(data.user_id);
 
         const leader = await getRepository(User).findOne({
             where: {
