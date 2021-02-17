@@ -28,24 +28,50 @@ export const orderByExpirationDay = (purchases: Purchase[]): Purchase[] => {
 
 export const getPendingClasses = async (purchases: Purchase[], bookings: Booking[]): Promise<pendingClasses[]> => {
     let results: pendingClasses[] = []
+    const restBooking = bookings
     for (var i in purchases) {
-
+        // por cada compra se buscarán los bookings que le correspondan
+        // excepto si está cancelado
         const purchase = purchases[i]
         if (purchase.isCanceled) continue
         let contadorClasses = purchase.Bundle.classNumber + purchase.addedClasses
         let contadorPasses = purchase.Bundle.passes + purchase.addedPasses
 
-        contadorClasses -= bookings.filter((b: Booking) => {
+        let bss = []
+        for (var j in restBooking) {
+            const b = restBooking[j]
             let auxBooking = new Booking()
             auxBooking.fromPurchase = purchase
-            return b.fromPurchase === auxBooking.fromPurchase && !b.isPass
-        }).length
+            const booking = await getRepository(Booking).findOne({
+                where: {
+                    id: b.id
+                },
+                relations: ['fromPurchase']
+            })
+            if (booking.fromPurchase && purchase.id === booking.fromPurchase.id && !b.isPass) {
+                bss.push(booking)
+            }
+        }
 
-        contadorPasses -= bookings.filter((b: Booking) => {
+        contadorClasses -= bss.length
+
+        let bsp = []
+        for (var j in restBooking) {
+            const b = restBooking[j]
             let auxBooking = new Booking()
             auxBooking.fromPurchase = purchase
-            return b.fromPurchase === auxBooking.fromPurchase && b.isPass
-        }).length
+            const booking = await getRepository(Booking).findOne({
+                where: {
+                    id: b.id
+                },
+                relations: ['fromPurchase']
+            })
+            if (booking.fromPurchase && purchase.id === booking.fromPurchase.id && b.isPass) {
+                bsp.push(booking)
+            }
+        }
+
+        contadorPasses -= bsp.length
 
         results.push({
             purchase: purchase,
@@ -56,42 +82,6 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
     }
 
     const orderedPurchases = orderPendingClassesByExpirationDay(results)
-
-    for (var i in bookings) {
-        let booking = bookings[i]
-        // console.log(booking)
-
-        // const validatePurchase = await getRepository(Purchase).findOne({
-        //     where:{
-        //         id: booking.fromPurchase
-        //     }
-        // })
-        // if( validatePurchase && validatePurchase.isCanceled ) continue
-
-        if (booking.fromPurchase == null) {
-            for (var j in orderedPurchases) {
-                let orderedPurchase = orderedPurchases[j]
-                if (booking.isPass) {
-                    if (orderedPurchase.pendingPasses > 0 && booking.isPass) {
-                        orderedPurchase.pendingPasses -= 1
-                        break
-                    } else continue
-                } else {
-                    if (orderedPurchase.pendingClasses > 0 && !booking.isPass) {
-                        orderedPurchase.pendingClasses -= 1
-                        break
-                    } else continue
-                }
-            }
-        } else {
-            const validatePurchase = await getRepository(Purchase).findOne({
-                where: {
-                    id: booking.fromPurchase
-                }
-            })
-            if (validatePurchase && validatePurchase.isCanceled) continue
-        }
-    }
 
     return orderedPurchases
 }
