@@ -125,7 +125,10 @@ export const BundleRepository = {
         newBundle.name = data.name ? data.name : newBundle.name
         newBundle.price = data.price ? data.price : newBundle.price
         newBundle.description = data.description ? data.description : newBundle.description
-        newBundle.classNumber = data.classNumber ? data.classNumber : 100
+        newBundle.classNumber = data.classNumber ? data.classNumber : newBundle.classNumber
+        if(newBundle.classNumber == 0 ){
+            newBundle.classNumber = 1
+        }
         if (data.isUnlimited) newBundle.classNumber = 100
         newBundle.expirationDays = data.expirationDays ? data.expirationDays : newBundle.expirationDays
         newBundle.passes = data.passes ? data.passes : 0
@@ -197,6 +200,9 @@ export const BundleRepository = {
         updateBundle.price = data.price ? data.price : updateBundle.price
         updateBundle.description = data.description ? data.description : updateBundle.description
         updateBundle.classNumber = data.classNumber ? data.classNumber : updateBundle.classNumber
+        if(updateBundle.classNumber == 0 ){
+            updateBundle.classNumber = 1
+        }
         updateBundle.expirationDays = data.expirationDays ? data.expirationDays : updateBundle.expirationDays
         updateBundle.passes = data.passes ? data.passes : updateBundle.passes
         if (data.isUnlimited) {

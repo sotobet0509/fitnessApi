@@ -65,7 +65,7 @@ export const ScheduleRepository = {
         })
         if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
 
-        const repository = getRepository(Purchase)
+        //const repository = getRepository(Purchase)
 
         let purchases = await createQueryBuilder(Purchase)
             .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
@@ -82,7 +82,7 @@ export const ScheduleRepository = {
                 isCanceled: false
             },
             relations: ['Bundle', 'Payment_method', "Transaction"]
-        })*/  
+        })*/
 
         //nuevo flujo
         const bookingRepository = getRepository(Booking)
@@ -101,20 +101,18 @@ export const ScheduleRepository = {
         // .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         // .getOne()
 
-        let boookingsArrayTotal : Booking[] = []
+        let boookingsArrayTotal: Booking[] = []
         for (const i in purchases) {
             let bookingsPurchases = await getRepository(Booking).find({
-                where: 
-                    {
-                        fromPurchase: purchases[i].id
-                    }
+                where:
+                {
+                    fromPurchase: purchases[i].id
+                }
             })
             for (const j in bookingsPurchases) {
                 boookingsArrayTotal.push(bookingsPurchases[j])
             }
         }
-
-        //console.log(boookingsArrayTotal)
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(purchases, boookingsArrayTotal)
@@ -134,9 +132,11 @@ export const ScheduleRepository = {
         pending = p.pending
         pendingPasses = p.pendingPasses
 
-        if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
+        if (!scheduleExist.isPrivate) {
+            if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
-        if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
+            if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
+        }
 
         const schedule = await bookingRepository.findOne({
             where: {
@@ -153,7 +153,6 @@ export const ScheduleRepository = {
             for (var i in classes) {
                 if (classes[i].pendingClasses != 0) {
                     if (currentDate.isSameOrBefore(moment(classes[i].purchase.expirationDate))) {
-                        //console.log(currentDate, moment(classes[i].purchase.expirationDate))
                         idPurchase = classes[i].purchase.id
                         break
                     }
@@ -163,7 +162,6 @@ export const ScheduleRepository = {
             for (var i in classes) {
                 if (classes[i].pendingPasses != 0) {
                     if (currentDate.isSameOrBefore(moment(classes[i].purchase.expirationDate))) {
-                        //console.log(currentDate, moment(classes[i].purchase.expirationDate))
                         idPurchase = classes[i].purchase.id
                         break
                     }
@@ -173,22 +171,40 @@ export const ScheduleRepository = {
 
         if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
 
-
         const booking = new Booking()
-        booking.Schedule = scheduleExist
-        booking.Seat = seat
-        booking.User = client
-        booking.isPass = isPass
-        booking.fromPurchase = idPurchase
+        if (scheduleExist.isPrivate) {
+            let privatePurchase = await createQueryBuilder(Purchase)
+                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Bundle.classNumber=:classNumber', { classNumber: 0 })
+                .andWhere('Purchase.addedClasses=:addedClasses', { addedClasses: 0 })
+                .andWhere('Purchase.users_id=:userId', { userId: client.id })
+                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                .getOne()
+
+            if (!privatePurchase) throw new ErrorResponse(409, 49, 'El usuario no puede reservar esta clase')
+
+            privatePurchase.addedClasses += 1
+            await getRepository(Purchase).save(privatePurchase)
+
+            booking.Schedule = scheduleExist
+            booking.Seat = seat
+            booking.User = client
+            booking.isPass = isPass
+            booking.fromPurchase = privatePurchase
+        } else {
+            booking.Schedule = scheduleExist
+            booking.Seat = seat
+            booking.User = client
+            booking.isPass = isPass
+            booking.fromPurchase = idPurchase
+        }
+
 
         // const currentPurchase = await getRepository(Purchase).findOne({
         //     where: {
         //         id: idPurchase
         //     }
         // })
-
-
-
 
         await bookingRepository.save(booking)
 
@@ -212,9 +228,9 @@ export const ScheduleRepository = {
         if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
 
         const client = await getRepository(User).findOne({
-                where: {
-                    id: clientId
-                }
+            where: {
+                id: clientId
+            }
         })
 
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
@@ -231,20 +247,20 @@ export const ScheduleRepository = {
         }
 
         const liderPurchases = await createQueryBuilder(User)
-        .innerJoinAndSelect('User.Purchase', 'Purchase')
-        .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        .where('Bundle.isGroup=:isGroup', { isGroup: true })
-        .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
-        .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-        .getOne();
+            .innerJoinAndSelect('User.Purchase', 'Purchase')
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Bundle.isGroup=:isGroup', { isGroup: true })
+            .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .getOne();
 
-        let boookingsArrayTotal : Booking[] = []
+        let boookingsArrayTotal: Booking[] = []
         for (const i in liderPurchases.Purchase) {
             let bookingsPurchases = await getRepository(Booking).find({
-                where: 
-                    {
-                        fromPurchase: liderPurchases.Purchase[i].id
-                    }
+                where:
+                {
+                    fromPurchase: liderPurchases.Purchase[i].id
+                }
             })
             for (const j in bookingsPurchases) {
                 boookingsArrayTotal.push(bookingsPurchases[j])
@@ -271,7 +287,7 @@ export const ScheduleRepository = {
         if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
         //if (pendingGroupP <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-        
+
         const schedule = await getRepository(Booking).findOne({
             where: {
                 Schedule: scheduleExist,
@@ -336,31 +352,31 @@ export const ScheduleRepository = {
         if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
 
         if (user.isLeader) {
-            
+
             const client = await getRepository(User).findOne({
-                    where: {
-                        id: clientId
-                    }
+                where: {
+                    id: clientId
+                }
             })
 
             if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
             //if (client.fromGroup != user.id) throw new ErrorResponse(404, 14, 'El cliente no pertenece al grupo')
 
             const liderPurchases = await createQueryBuilder(User)
-            .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('Bundle.isGroup=:isGroup', { isGroup: true })
-            .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
-            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-            .getOne();
+                .innerJoinAndSelect('User.Purchase', 'Purchase')
+                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Bundle.isGroup=:isGroup', { isGroup: true })
+                .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
+                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                .getOne();
 
-            let boookingsArrayTotal : Booking[] = []
+            let boookingsArrayTotal: Booking[] = []
             for (const i in liderPurchases.Purchase) {
                 let bookingsPurchases = await getRepository(Booking).find({
-                    where: 
-                        {
-                            fromPurchase: liderPurchases.Purchase[i].id
-                        }
+                    where:
+                    {
+                        fromPurchase: liderPurchases.Purchase[i].id
+                    }
                 })
                 for (const j in bookingsPurchases) {
                     boookingsArrayTotal.push(bookingsPurchases[j])
@@ -376,10 +392,10 @@ export const ScheduleRepository = {
                 if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
                 return true
             })
-             
+
             let pendingGroupC = 0
             let pendingGroupP = 0
-            
+
             let p = await MeRepository.getClasses(client)
             pendingGroupC = p.pendingGroup
             pendingGroupP = p.pendingPassesGroup
@@ -387,7 +403,7 @@ export const ScheduleRepository = {
             if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
             //if (pendingGroupP <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-            
+
             const schedule = await getRepository(Booking).findOne({
                 where: {
                     Schedule: scheduleExist,
@@ -420,7 +436,7 @@ export const ScheduleRepository = {
                     }
                 }
             }
-    
+
             if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
 
             const booking = new Booking()
@@ -439,20 +455,20 @@ export const ScheduleRepository = {
 
             if (!user.fromGroup) throw new ErrorResponse(404, 14, 'El cliente no pertenece a ningún grupo')
             const liderPurchases = await createQueryBuilder(User)
-            .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('Bundle.isGroup=:isGroup', { isGroup: true })
-            .andWhere('Purchase.users_id=:idUser', { idUser: user.fromGroup })
-            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-            .getOne();
+                .innerJoinAndSelect('User.Purchase', 'Purchase')
+                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Bundle.isGroup=:isGroup', { isGroup: true })
+                .andWhere('Purchase.users_id=:idUser', { idUser: user.fromGroup })
+                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                .getOne();
 
-            let boookingsArrayTotal : Booking[] = []
+            let boookingsArrayTotal: Booking[] = []
             for (const i in liderPurchases.Purchase) {
                 let bookingsPurchases = await getRepository(Booking).find({
-                    where: 
-                        {
-                            fromPurchase: liderPurchases.Purchase[i].id
-                        }
+                    where:
+                    {
+                        fromPurchase: liderPurchases.Purchase[i].id
+                    }
                 })
                 for (const j in bookingsPurchases) {
                     boookingsArrayTotal.push(bookingsPurchases[j])
@@ -479,7 +495,7 @@ export const ScheduleRepository = {
             if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
             //if (pendingGroupP <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-            
+
             const schedule = await getRepository(Booking).findOne({
                 where: {
                     Schedule: scheduleExist,
@@ -512,7 +528,7 @@ export const ScheduleRepository = {
                     }
                 }
             }
-    
+
             if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
 
             const booking = new Booking()
@@ -573,6 +589,9 @@ export const ScheduleRepository = {
         if (data.theme) {
             schedule.theme = data.theme
         }
+        if (data.isPrivate) {
+            schedule.isPrivate = data.isPrivate
+        }
         //console.log(schedule.theme)
         await scheduleRepository.save(schedule)
 
@@ -617,6 +636,7 @@ export const ScheduleRepository = {
         updateSchedule.Instructor = instructor ? instructor : updateSchedule.Instructor
         updateSchedule.Rooms = room ? room : updateSchedule.Rooms
         updateSchedule.theme = room ? data.theme : updateSchedule.theme
+        updateSchedule.isPrivate = room ? data.isPrivate : updateSchedule.isPrivate
         await scheduleRepository.save(updateSchedule)
     },
 

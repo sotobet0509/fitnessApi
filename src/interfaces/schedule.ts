@@ -8,6 +8,7 @@ export interface ScheduleSchema {
     sendEmail?: boolean
     deleteBookings?: boolean
     theme?: string
+    isPrivate?: boolean
 }
 
 export interface ScheduleIsPass{

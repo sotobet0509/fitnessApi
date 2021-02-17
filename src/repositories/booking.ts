@@ -7,6 +7,7 @@ import { Booking } from '../entities/Bookings'
 
 import * as moment from 'moment'
 import { Schedule } from '../entities/Schedules'
+import { Purchase } from '../entities/Purchases'
 
 export const BookingRepository = {
 
@@ -17,10 +18,10 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule']
+            relations: ['Schedule','fromPurchase']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
-
+        console.log(booking)
         const start = moment(booking.Schedule.date).set({
             hour: new Date("2020-01-01 " + booking.Schedule.start).getHours(),
             minutes: new Date("2020-01-01 " + booking.Schedule.start).getMinutes(),
@@ -29,10 +30,23 @@ export const BookingRepository = {
         const duration = moment.duration(start.diff(moment())).asHours() + 5
         //console.log(duration, start)
         if (duration >= 3) {
+            if(booking.Schedule.isPrivate){
+                console.log(booking.fromPurchase)
+                let privatePurchase = await getRepository(Purchase).findOne({
+                    where:{
+                        id: booking.fromPurchase.id
+                    }
+                })
+                console.log(privatePurchase)
+                privatePurchase.addedClasses -= 1
+                await getRepository(Purchase).save(privatePurchase)
+            }
             await bookingRepository.remove(booking)
         } else {
             throw new ErrorResponse(409, 18, 'La reservacion ya no se puede eliminar')
         }
+
+        
 
     },
 
