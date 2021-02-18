@@ -243,25 +243,14 @@ export const ClientRepository = {
         let client = await getRepository(User).findOne({
             where: {
                 id: clientId
-            },
-            relations: ['Purchase', 'Booking', 'User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Payment_method', 'Purchase.Transaction', 'Purchase.Booking', 'Purchase.Booking.User']
-
+            }
         })
 
-
-
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-        let mainUser
-        if (client.fromGroup) {
-            mainUser = client.fromGroup
-        } else {
-            mainUser = client.id
-        }
-
+  
         let c = await MeRepository.getClasses(client)
 
         return {
-            ...client,
             ...c
         }
         //return clientGroup;

@@ -40,16 +40,16 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
         let bss = []
         for (var j in restBooking) {
             const b = restBooking[j]
-            let auxBooking = new Booking()
+            /*let auxBooking = new Booking()
             auxBooking.fromPurchase = purchase
             const booking = await getRepository(Booking).findOne({
                 where: {
                     id: b.id
                 },
                 relations: ['fromPurchase']
-            })
-            if (booking.fromPurchase && purchase.id === booking.fromPurchase.id && !b.isPass) {
-                bss.push(booking)
+            })*/
+            if (b.fromPurchase && purchase.id === b.fromPurchase.id && !b.isPass) {
+                bss.push(b)
             }
         }
 
@@ -58,16 +58,16 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
         let bsp = []
         for (var j in restBooking) {
             const b = restBooking[j]
-            let auxBooking = new Booking()
+            /*let auxBooking = new Booking()
             auxBooking.fromPurchase = purchase
             const booking = await getRepository(Booking).findOne({
                 where: {
                     id: b.id
                 },
                 relations: ['fromPurchase']
-            })
-            if (booking.fromPurchase && purchase.id === booking.fromPurchase.id && b.isPass) {
-                bsp.push(booking)
+            })*/
+            if (b.fromPurchase && purchase.id === b.fromPurchase.id && b.isPass) {
+                bsp.push(b)
             }
         }
 

@@ -148,27 +148,31 @@ export const MeRepository = {
     })*/
     async getClasses(user: User) {
         let client
-         client = await createQueryBuilder(User)
+        client = await createQueryBuilder(User)
             .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .leftJoinAndSelect('User.Booking', 'Booking')
-            .leftJoinAndSelect('Booking.Schedule', 'Schedule')
-            .leftJoinAndSelect('Booking.Seat', 'Seat')
-            .leftJoinAndSelect('Seat.Room', 'Room')
-            .leftJoinAndSelect('Room.Location', 'Location')
-            .leftJoinAndSelect('Schedule.Instructor', 'Instructor')
+            .innerJoinAndSelect('User.Booking', 'Booking')
+            .innerJoinAndSelect('Booking.fromPurchase', 'fromPurchase')
+            .innerJoinAndSelect('Booking.Schedule', 'Schedule')
+            .innerJoinAndSelect('Booking.Seat', 'Seat')
+            .innerJoinAndSelect('Seat.Room', 'Room')
+            .innerJoinAndSelect('Room.Location', 'Location')
+            .innerJoinAndSelect('Schedule.Instructor', 'Instructor')
             .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
             .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
             .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
+            .leftJoinAndSelect('User.User_categories', 'User_categories')
+            .leftJoinAndSelect('User_categories.Categories', 'Categories')
+            .leftJoinAndSelect('Categories.User_items', 'User_items')
             .where('User.id=:idUser', { idUser: user.id })
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
             .getOne()
-
+        //console.log(client)
         if (!client) {
             client = await getRepository(User).findOne({
                 where: {
                     id: user.id
                 },
-                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User']
+                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User','User.User_Categories', 'User.User_Categories.Categories', 'User.User_Categories.Categories.User_items']
             })
         }
         let mainUser
@@ -293,6 +297,7 @@ export const MeRepository = {
         }
         let bookings = client.Booking
         return {
+            ...client,
             bookings,
             taken: bookingsNoPasses.length,
             pending: pendingC,

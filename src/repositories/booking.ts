@@ -21,7 +21,7 @@ export const BookingRepository = {
             relations: ['Schedule','fromPurchase']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
-        console.log(booking)
+        //console.log(booking)
         const start = moment(booking.Schedule.date).set({
             hour: new Date("2020-01-01 " + booking.Schedule.start).getHours(),
             minutes: new Date("2020-01-01 " + booking.Schedule.start).getMinutes(),

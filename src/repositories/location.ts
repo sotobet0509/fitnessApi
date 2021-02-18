@@ -37,7 +37,7 @@ export const LocationRepository = {
     async getLocationsByWeek(room_id: number, data: LocationSchema, user: User) {
         let endDate
         let days
-        console.log( moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate())
+        //console.log( moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate())
         if (moment(data.start).day() == 5 || moment(data.start).day() == 6) {
             if (moment(data.start).day() == 5) {
 
@@ -49,12 +49,12 @@ export const LocationRepository = {
                     .getOne()
                 //console.log(scheduleExist)
                 if (!scheduleExist) {
-                    console.log("esta vacio")
+                    //console.log("esta vacio")
                     data.start = moment().isoWeek(moment(data.start).week()).startOf("isoWeek").add(-1, 'days').toDate()
                     days = [[], [], [], [], [], [], [], []]
                     endDate = moment(data.start).add(8, 'days')
                 } else {
-                    console.log("no esta vacio")
+                    //console.log("no esta vacio")
                     data.start = moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate()
                     days = [[], [], [], [], [], [], []]
                     endDate = moment(data.start).add(7, 'days')
