@@ -42,59 +42,59 @@ export const ClientRepository = {
         for (var i in clients) {
             let client = clients[i]
 
-            const bookingsNoPasses = await createQueryBuilder(Booking)
-                .leftJoinAndSelect('Booking.User', 'User')
-                .leftJoinAndSelect('User.Purchase', 'Purchase')
-                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('User.id=:idUser', { idUser: client.id })
-                .andWhere('Booking.isPass=:isPass', { isPass: false })
-                .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-                .getMany();
+            // const bookingsNoPasses = await createQueryBuilder(Booking)
+            //     .leftJoinAndSelect('Booking.User', 'User')
+            //     .leftJoinAndSelect('User.Purchase', 'Purchase')
+            //     .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+            //     .where('User.id=:idUser', { idUser: client.id })
+            //     .andWhere('Booking.isPass=:isPass', { isPass: false })
+            //     .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            //     .getMany();
 
-            const passes = await createQueryBuilder(Booking)
-                .leftJoinAndSelect('Booking.User', 'User')
-                .innerJoinAndSelect('User.Purchase', 'Purchase')
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Bundle.isGroup=:isGroup', { isGroup: false })
-                .andWhere('Booking.isPass=:isPass', { isPass: true })
-                .andWhere('User.id=:idUser', { idUser: client.id })
-                .getMany();
+            // const passes = await createQueryBuilder(Booking)
+            //     .leftJoinAndSelect('Booking.User', 'User')
+            //     .innerJoinAndSelect('User.Purchase', 'Purchase')
+            //     .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            //     .where('Bundle.isGroup=:isGroup', { isGroup: false })
+            //     .andWhere('Booking.isPass=:isPass', { isPass: true })
+            //     .andWhere('User.id=:idUser', { idUser: client.id })
+            //     .getMany();
 
 
-            // const bookingsNoPasses = await getRepository(Booking).find({
-            //     where: {
-            //         User: client,
-            //         isPass: false
-            //     }
+            // // const bookingsNoPasses = await getRepository(Booking).find({
+            // //     where: {
+            // //         User: client,
+            // //         isPass: false
+            // //     }
+            // // })
+
+            // // const passes = await getRepository(Booking).find({
+            // //     where: {
+            // //         User: client,
+            // //         isPass: true
+            // //     }
+            // // })
+
+            // let boookingsArray: Booking[] = []
+            // boookingsArray = bookingsNoPasses.concat(passes)
+
+            let classes: pendingClasses[] = []
+
+            // classes = await getPendingClasses(client.Purchase, boookingsArray)
+            // delete client.password
+            // classes = classes.filter((p: pendingClasses) => {
+            //     let expirationDay = moment(p.purchase.expirationDate)
+            //     if (expirationDay.isBefore(moment())) return false
+            //     if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
+            //     return true
             // })
 
-            // const passes = await getRepository(Booking).find({
-            //     where: {
-            //         User: client,
-            //         isPass: true
-            //     }
-            // })
-
-            let boookingsArray: Booking[] = []
-            boookingsArray = bookingsNoPasses.concat(passes)
-
-            let classes: pendingClasses[]
-
-            classes = await getPendingClasses(client.Purchase, boookingsArray)
-            delete client.password
-            classes = classes.filter((p: pendingClasses) => {
-                let expirationDay = moment(p.purchase.expirationDate)
-                if (expirationDay.isBefore(moment())) return false
-                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-                return true
-            })
-
-            let pendingC = 0
-            let pendingP = 0
-            for (var i in classes) {
-                pendingC += classes[i].pendingClasses
-                pendingP += classes[i].pendingPasses
-            }
+            // let pendingC = 0
+            // let pendingP = 0
+            // for (var i in classes) {
+            //     pendingC += classes[i].pendingClasses
+            //     pendingP += classes[i].pendingPasses
+            // }
             let isUnlimited = false
             for (var i in classes) {
                 if (classes[i].purchase.Bundle.isUnlimited) {
@@ -112,10 +112,10 @@ export const ClientRepository = {
 
             data.push({
                 client,
-                pending: pendingC,
-                taken: bookingsNoPasses.length,
-                pendingPasses: pendingP,
-                takenPasses: passes.length,
+                pending: 0,
+                taken: 0,
+                pendingPasses: 0,
+                takenPasses: 0,
                 isUnlimited,
                 nextExpirationDate,
                 pendingGroup: 0,
