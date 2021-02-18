@@ -172,7 +172,7 @@ export const MeRepository = {
                 where: {
                     id: user.id
                 },
-                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User','User.User_Categories', 'User.User_Categories.Categories', 'User.User_Categories.Categories.User_items']
+                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User','User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items']
             })
         }
         let mainUser
