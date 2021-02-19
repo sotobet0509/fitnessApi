@@ -38,8 +38,8 @@ export const LocationRepository = {
         let endDate
         let days
         //console.log( moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate())
-        if (moment(data.start).day() == 5 || moment(data.start).day() == 6) {
-            if (moment(data.start).day() == 5) {
+        if (moment(data.start).day() == 6 || moment(data.start).day() == 0) {
+            if (moment(data.start).day() == 6) {
 
                 let currentDate = moment()
                 const scheduleExist = await createQueryBuilder(Schedule)
