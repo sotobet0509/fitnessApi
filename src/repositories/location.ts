@@ -60,7 +60,7 @@ export const LocationRepository = {
                     endDate = moment(data.start).add(7, 'days')
                 }
             } else {
-                data.start = moment().isoWeek(moment(data.start).week()).startOf("isoWeek").add(-1, 'days').toDate()
+                data.start = moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").add(-1, 'days').toDate()
                 days = [[], [], [], [], [], [], [], []]
                 endDate = moment(data.start).add(8, 'days')
             }
