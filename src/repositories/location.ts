@@ -4,7 +4,7 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { Location } from '../entities/Locantions'
 import { Room } from '../entities/Rooms'
 import { Schedule } from '../entities/Schedules'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import { LocationSchema } from '../interfaces/location';
 import { endianness } from 'os';
 import { Instructor } from '../entities/Instructors';
@@ -41,7 +41,7 @@ export const LocationRepository = {
         if (moment(data.start).day() == 6 || moment(data.start).day() == 0) {
             if (moment(data.start).day() == 6) {
 
-                let currentDate = moment()
+                let currentDate = moment().tz("America/Mexico_City")
                 const scheduleExist = await createQueryBuilder(Schedule)
                     .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
                     .andWhere('Date(Schedule.date)<:cuDate', { cuDate: moment(currentDate).add(1, 'days').format('YYYY-MM-DD') })
