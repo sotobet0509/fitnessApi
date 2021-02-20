@@ -45,7 +45,7 @@ export const LocationRepository = {
                 const scheduleExist = await createQueryBuilder(Schedule)
                     .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
                     .andWhere('Date(Schedule.date)<:cuDate', { cuDate: moment(currentDate).add(1, 'days').format('YYYY-MM-DD') })
-                    .andWhere('Time(Schedule.start)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+                    .andWhere('Time(Schedule.end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
                     .getOne()
                 //console.log(scheduleExist)
                 if (!scheduleExist) {
