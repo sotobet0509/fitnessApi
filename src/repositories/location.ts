@@ -118,15 +118,21 @@ export const LocationRepository = {
         }
 
 
+        let temp
+        let flag = false
         if (days.length == 8) {
             for (var i in days[0]) {
                 if (moment(data.start).format('YYYY-MM-DD') != moment(days[0][i].date).format('YYYY-MM-DD')) {
+                    if (!flag) {
+                        temp = i
+                        flag = true
+                    }
                     days[7].push(days[0][i])
-                    days[0].splice(i,1)
+                    //days[0].splice(i, 1)
                 }
             }
         }
-
+        days[0].splice(temp, days[7].length)
         return days
     },
 
