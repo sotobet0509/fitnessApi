@@ -118,7 +118,7 @@ export const LocationRepository = {
         }
 
 
-        let temp
+        let temp = 0
         let flag = false
         if (days.length == 8) {
             for (var i in days[0]) {
