@@ -131,8 +131,8 @@ export const LocationRepository = {
                     //days[0].splice(i, 1)
                 }
             }
+            days[0].splice(temp, days[7].length)
         }
-        days[0].splice(temp, days[7].length)
         return days
     },
 
