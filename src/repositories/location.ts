@@ -124,7 +124,7 @@ export const LocationRepository = {
             for (var i in days[0]) {
                 if (moment(data.start).format('YYYY-MM-DD') != moment(days[0][i].date).format('YYYY-MM-DD')) {
                     if (!flag) {
-                        temp = i
+                        temp = parseInt(i)
                         flag = true
                     }
                     days[7].push(days[0][i])
