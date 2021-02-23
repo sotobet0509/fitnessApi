@@ -60,7 +60,7 @@ export const LocationRepository = {
                     endDate = moment(data.start).add(7, 'days')
                 }
             } else {
-                data.start = moment().isoWeek(moment(data.start).week() -1 ).startOf("isoWeek").add(-1, 'days').toDate()
+                data.start = moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").add(-1, 'days').toDate()
                 days = [[], [], [], [], [], [], [], []]
                 endDate = moment(data.start).add(8, 'days')
             }
@@ -117,20 +117,21 @@ export const LocationRepository = {
             days[day - currentDay].push(filteredSchedule)
         }
 
-        let temp
+
+        let temp = 0
         let flag = false
         if (days.length == 8) {
             for (var i in days[0]) {
                 if (moment(data.start).format('YYYY-MM-DD') != moment(days[0][i].date).format('YYYY-MM-DD')) {
                     if (!flag) {
-                        temp = i
+                        temp = parseInt(i)
                         flag = true
                     }
                     days[7].push(days[0][i])
                     //days[0].splice(i, 1)
                 }
             }
-            days[0].splice(temp, days[7].length )
+            days[0].splice(temp, days[7].length)
         }
         return days
     },
