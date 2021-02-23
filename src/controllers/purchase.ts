@@ -4,11 +4,9 @@ import { ExtendedRequest } from '../../types'
 import { PurchaseRepository } from '../repositories/purchase'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { DataMissingError } from '../errors/DataMissingError'
-import { Comments, extraPurchaseSchema, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
-import { join } from 'path'
-import { JoinAttribute } from 'typeorm/query-builder/JoinAttribute'
+import { Comments, extraPurchaseSchema, InitialzePurchase, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
 import { URLSearchParams } from 'url'
-import { getRepository } from 'typeorm'
+
 
 const fetch = require('node-fetch')
 
@@ -104,17 +102,10 @@ export const PurchaseController = {
     async buyClient(req: ExtendedRequest, res: Response) {
         if (req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
         const userId = req.user.id
-        //console.log(userId)
-        const bundleId = parseInt(req.params.bundle_id)
+       
+        const operationId = req.params.operationId
 
-        const voucher = Joi.object().keys({
-            voucher: Joi.string().required()
-        })
-        const { error, value } = voucher.validate(req.body)
-        if (error) throw new DataMissingError()
-        const data = <Voucher>value
-
-        const folio = await PurchaseRepository.buyClient(userId, bundleId, data)
+        const folio = await PurchaseRepository.buyClient(userId, operationId)
 
         return res.json({
             success: true, folio
@@ -127,10 +118,10 @@ export const PurchaseController = {
         for (var i in Object.keys(body)) {
             b.append(Object.keys(body)[i], body[Object.keys(body)[i]])
         }
-        //b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
-        b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
-        b.append('apiUsername', 'merchant.1146286')
-        b.append('merchant', '1146286')
+        b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
+        //b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
+        b.append('apiUsername', 'merchant.TEST1146286')
+        b.append('merchant', 'TEST1146286')
         const response = await fetch('https://evopaymentsmexico.gateway.mastercard.com/api/nvp/version/57', {
             method: 'POST',
             body: b,
@@ -141,9 +132,63 @@ export const PurchaseController = {
         const responseText = await response.text()
         res.send(responseText)
     },
+
     async updateExpiarationDate(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
         await PurchaseRepository.updateExpirationDate()
+        return res.json({
+            success: true
+        })
+    },
+
+    async inicializePurchase(req: ExtendedRequest, res: Response) {
+        if (req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+
+        const purchaseData = Joi.object().keys({
+            bundleId: Joi.number().required(),
+            operationIds: Joi.string().required()
+        })
+        const { error, value } = purchaseData.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <InitialzePurchase>value
+
+        await PurchaseRepository.inicializePurchase(req.user, data)
+        return res.json({
+            success: true
+        })
+    },
+
+    async getAllPurchases(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+
+        const purchases = await PurchaseRepository.getAllPurchases()
+        return res.json({
+            success: true,
+            purchases
+        })
+    },
+
+    async completePurchase(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+        
+        await PurchaseRepository.completePurchase(parseInt(req.params.purchaseId))
+        return res.json({
+            success: true
+        })
+    },
+
+    async setCancelStatus(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+
+        await PurchaseRepository.setCancelStatus(parseInt(req.params.purchaseId))
+        return res.json({
+            success: true
+        })
+    },
+
+    async eraseOldPendingPurchases(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+        await PurchaseRepository.eraseOldPendingPurchases()
         return res.json({
             success: true
         })

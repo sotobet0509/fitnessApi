@@ -52,10 +52,20 @@ PurchaseRouter.delete('/:purchase_id', h(checkToken), h(PurchaseController.cance
 
 PurchaseRouter.patch('/updateall', h(checkToken), h(PurchaseController.updateAll))
 
-PurchaseRouter.post('/bundle/:bundle_id', h(checkToken), h(PurchaseController.buyClient))
+PurchaseRouter.patch('/buy/:operationId', h(checkToken), h(PurchaseController.buyClient))
 
 PurchaseRouter.post('/createSession', h(PurchaseController.createSession))
 
 PurchaseRouter.patch('/update-expiration-date',h(checkToken), h(PurchaseController.updateExpiarationDate))
+
+PurchaseRouter.post('/init',h(checkToken), h(PurchaseController.inicializePurchase))
+
+PurchaseRouter.get('/all',h(checkToken), h(PurchaseController.getAllPurchases))
+
+PurchaseRouter.patch('/complete/:purchaseId',h(checkToken), h(PurchaseController.completePurchase))
+
+PurchaseRouter.patch('/cancel/:purchaseId',h(checkToken), h(PurchaseController.setCancelStatus))
+
+PurchaseRouter.delete('/erase/oldPendingPurchases',h(checkToken), h(PurchaseController.eraseOldPendingPurchases))
 
 export { PurchaseRouter }

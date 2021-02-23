@@ -5,7 +5,7 @@ import { Booking } from "../entities/Bookings"
 import { Bundle } from "../entities/Bundles"
 import { Folios } from "../entities/Folios"
 import { Payment_method } from "../entities/Payment_methods"
-import { Purchase } from "../entities/Purchases"
+import { Purchase, status } from "../entities/Purchases"
 import { Transaction } from "../entities/Transactions"
 import { User } from "../entities/Users"
 import { pendingClasses, Voucher } from "../interfaces/purchase"
@@ -115,39 +115,42 @@ export const orderLiderPurchasesByExpirationDay = (purchases: Purchase[]): Purch
     return orderedPurchases
 }
 
-export const createBundlePurchase = async (bundle: Bundle, user: User, paymentMethod: Payment_method, data: Voucher) => {
-    if (bundle.isEspecial) {
-        let purchase = new Purchase()
+export const createBundlePurchase = async (data: Purchase) => {
+
+    if (data.Bundle.isEspecial) {
+        /*let purchase = new Purchase()
         purchase.User = user
         purchase.Bundle = bundle
         purchase.date = new Date()
         purchase.Payment_method = paymentMethod
         purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
-
-        await getRepository(Purchase).save(purchase)
+        */
+        data.status = status.FINISHED
+        data.expirationDate = moment().add(data.Bundle.expirationDays, 'days').toDate()
+        await getRepository(Purchase).save(data)
 
         const transaction = new Transaction()
-        transaction.voucher = data.voucher
+        transaction.voucher = data.operationIds
         transaction.date = new Date()
         transaction.invoice = false
-        transaction.total = bundle.price
-        transaction.Purchase = purchase
+        transaction.total = data.pendingAmount
+        transaction.Purchase = data
 
         await getRepository(Transaction).save(transaction)
 
         const colaborador = await getRepository(Alternate_users).findOne({
             where: {
-                id: bundle.altermateUserId
+                id: data.Bundle.altermateUserId
             }
         })
         const shortColaborador = colaborador.name.substr(0, 3).toUpperCase()
         let shortUuid = uuidv4().substr(0, 6)
         let folioSave = new Folios()
         folioSave.Alternate_users = colaborador
-        folioSave.clientName = user.name + " " + user.lastname
+        folioSave.clientName = data.User.name + " " + data.User.lastname
         folioSave.folio = shortColaborador + "-" + shortUuid
-        folioSave.expirationDate = moment().add(bundle.promotionExpirationDays, 'days').toDate()
-        folioSave.purchase = purchase.id
+        folioSave.expirationDate = moment().add(data.Bundle.promotionExpirationDays, 'days').toDate()
+        folioSave.purchase = data.id
 
         await getRepository(Folios).save(folioSave)
 
@@ -162,21 +165,23 @@ export const createBundlePurchase = async (bundle: Bundle, user: User, paymentMe
     }
 
 
-    let purchase = new Purchase()
+    /*let purchase = new Purchase()
     purchase.User = user
     purchase.Bundle = bundle
     purchase.date = new Date()
     purchase.Payment_method = paymentMethod
     purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+    */
+    data.status = status.FINISHED
+    data.expirationDate = moment().add(data.Bundle.expirationDays, 'days').toDate()
 
-    await getRepository(Purchase).save(purchase)
+    await getRepository(Purchase).save(data)
 
     const transaction = new Transaction()
-    transaction.voucher = data.voucher
+    transaction.voucher = data.operationIds
     transaction.date = new Date()
     transaction.invoice = false
-    transaction.total = bundle.price
-    transaction.Purchase = purchase
-
+    transaction.total = data.pendingAmount
+    transaction.Purchase = data
     await getRepository(Transaction).save(transaction)
 } 

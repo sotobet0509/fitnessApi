@@ -45,7 +45,7 @@ export const LocationRepository = {
                 const scheduleExist = await createQueryBuilder(Schedule)
                     .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
                     .andWhere('Date(Schedule.date)<:cuDate', { cuDate: moment(currentDate).add(1, 'days').format('YYYY-MM-DD') })
-                    .andWhere('Time(Schedule.start)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+                    .andWhere('Time(Schedule.end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
                     .getOne()
                 //console.log(scheduleExist)
                 if (!scheduleExist) {
@@ -60,7 +60,7 @@ export const LocationRepository = {
                     endDate = moment(data.start).add(7, 'days')
                 }
             } else {
-                data.start = moment().isoWeek(moment(data.start).week()).startOf("isoWeek").add(-1, 'days').toDate()
+                data.start = moment().isoWeek(moment(data.start).week() -1 ).startOf("isoWeek").add(-1, 'days').toDate()
                 days = [[], [], [], [], [], [], [], []]
                 endDate = moment(data.start).add(8, 'days')
             }
@@ -69,7 +69,7 @@ export const LocationRepository = {
             days = [[], [], [], [], [], [], []]
             endDate = moment(data.start).add(7, 'days')
         }
-
+        console.log(data.start)
 
         let room = await getRepository(Room).find({
             relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking', 'Schedules.Rooms']
@@ -117,16 +117,21 @@ export const LocationRepository = {
             days[day - currentDay].push(filteredSchedule)
         }
 
-
+        let temp
+        let flag = false
         if (days.length == 8) {
             for (var i in days[0]) {
                 if (moment(data.start).format('YYYY-MM-DD') != moment(days[0][i].date).format('YYYY-MM-DD')) {
+                    if (!flag) {
+                        temp = i
+                        flag = true
+                    }
                     days[7].push(days[0][i])
-                    days[0].splice(i,1)
+                    //days[0].splice(i, 1)
                 }
             }
+            days[0].splice(temp, days[7].length )
         }
-
         return days
     },
 

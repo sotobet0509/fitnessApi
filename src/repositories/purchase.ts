@@ -1,17 +1,18 @@
 import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
-import { Comments, extraPurchaseSchema, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
-import { Purchase } from '../entities/Purchases'
+import { Comments, extraPurchaseSchema, InitialzePurchase, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
+import { Purchase, status } from '../entities/Purchases'
 import { Bundle } from '../entities/Bundles'
 import { Transaction } from '../entities/Transactions'
-import { Payment_method } from '../entities/Payment_methods'
+import { Payment_method, type } from '../entities/Payment_methods'
 import { createBundlePurchase, getPendingClasses, orderLiderPurchasesByExpirationDay } from '../utils'
 import { Booking } from '../entities/Bookings'
 import * as moment from "moment"
 import { Folios } from '../entities/Folios'
 import { Alternate_users } from '../entities/alternateUsers'
 import { v4 as uuidv4 } from 'uuid'
+
 
 export const PurchaseRepository = {
     async buy(data: PurchaseData, clientId: string) {
@@ -58,7 +59,7 @@ export const PurchaseRepository = {
                 if (bundle.isGroup) {
                     client.changed = 1
                     client.isLeader = true
-                    if(!client.groupName){
+                    if (!client.groupName) {
                         client.groupName = client.email
                     }
                     await getRepository(User).save(client)
@@ -74,7 +75,7 @@ export const PurchaseRepository = {
                             await getRepository(User).save(members[i])
                         }
                     }
-                    
+
                 }
                 const _purchase = await getRepository(Purchase).save(purchase)
 
@@ -122,7 +123,7 @@ export const PurchaseRepository = {
                 if (bundle.isGroup) {
                     client.changed = 1
                     client.isLeader = true
-                    if(!client.groupName){
+                    if (!client.groupName) {
                         client.groupName = client.email
                     }
                     await getRepository(User).save(client)
@@ -346,7 +347,7 @@ export const PurchaseRepository = {
         }
     },
 
-    async buyClient(userId: string, bundleId: number, data: Voucher) {
+    async buyClient(userId: string, operationId: string,) {
         const user = await getRepository(User).findOne({
             where: {
                 id: userId
@@ -354,21 +355,22 @@ export const PurchaseRepository = {
         })
         if (!user) throw new ErrorResponse(404, 47, 'El usuario no existe')
 
+        const purchase = await getRepository(Purchase).findOne({
+            where: {
+                operationIds: operationId,
+                status: status.PENDING
+            },
+            relations: ['Bundle', 'User']
+        })
+        if (!purchase) throw new ErrorResponse(404, 47, 'La compra no existe o ya fue registrada')
+
         const bundle = await getRepository(Bundle).findOne({
             where: {
-                id: bundleId
+                id: purchase.Bundle.id
             }
         })
         if (!bundle) throw new ErrorResponse(404, 48, 'El paquete no existe')
 
-        const paymentMethod = await getRepository(Payment_method).findOne(
-            {
-                where: {
-                    id: 0
-                }
-            }
-        )
-        if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe')
 
         if (bundle.isGroup) {
             if (user.fromGroup) throw new ErrorResponse(404, 58, 'Usuario de tipo miembro')
@@ -383,11 +385,11 @@ export const PurchaseRepository = {
 
                     updateClient.changed = 1
                     updateClient.isLeader = true
-                    if(!updateClient.groupName){
+                    if (!updateClient.groupName) {
                         updateClient.groupName = user.email
                     }
                     await clientRepository.save(updateClient)
-                    return createBundlePurchase(bundle, user, paymentMethod, data)
+                    return createBundlePurchase(purchase)
                 }
                 else {
                     let updateClient = await getRepository(User).findOne({
@@ -426,17 +428,18 @@ export const PurchaseRepository = {
                         //console.log(moment().diff(orderedPurchases[0].expirationDate, 'days') )
                         if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0) throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
                         else {
-                            return createBundlePurchase(bundle, user, paymentMethod, data)
+                            return createBundlePurchase(purchase)
                         }
                     }
-                    return createBundlePurchase(bundle, user, paymentMethod, data)
+                    return createBundlePurchase(purchase)
                 }
             }
         } else {
-            return createBundlePurchase(bundle, user, paymentMethod, data)
+            return createBundlePurchase(purchase)
         }
 
     },
+
     async updateExpirationDate() {
         const purchases = await getRepository(Purchase).find()
         const date = moment()
@@ -448,7 +451,108 @@ export const PurchaseRepository = {
                 await getRepository(Purchase).save(purchase)
             }
         }
+    },
 
+    async inicializePurchase(client: User, data: InitialzePurchase) {
+        const user = await getRepository(User).findOne({
+            where: {
+                id: client.id
+            }
+        })
+        if (!user) throw new ErrorResponse(404, 14, 'El cliente no existe')
+
+
+        const bundle = await getRepository(Bundle).findOne({
+            where: {
+                id: data.bundleId
+            }
+        })
+        if (!bundle) throw new ErrorResponse(404, 14, 'El paquete no existe')
+
+        const paymentMethod = await getRepository(Payment_method).findOne(
+            {
+                where: {
+                    id: 0
+                }
+            }
+        )
+
+        let purchase = new Purchase()
+        purchase.date = new Date()
+        purchase.status = status.PENDING
+        purchase.pendingAmount = bundle.price
+        purchase.Bundle = bundle
+        purchase.Payment_method = paymentMethod
+        purchase.User = user
+        purchase.operationIds = data.operationIds
+
+        await getRepository(Purchase).save(purchase)
+    },
+
+    async getAllPurchases() {
+        const purchases = await getRepository(Purchase).find({
+            relations: ['Transaction', 'User', 'Bundle']
+        })
+        if (!purchases) throw new ErrorResponse(404, 70, 'No hay compras registradas')
+        return purchases
+    },
+
+    async completePurchase(purchaseId: number) {
+        let purchase = await getRepository(Purchase).findOne({
+            where: {
+                id: purchaseId,
+                status: status.PENDING
+            },
+            relations: ['Bundle']
+        })
+        if (!purchase) throw new ErrorResponse(404, 71, 'La compra no existe o no tiene status "Pendiente"')
+        console.log(purchase.Bundle)
+        const bundle = await getRepository(Bundle).findOne({
+            where: {
+                id: purchase.Bundle.id
+            }
+        })
+        if (!bundle) throw new ErrorResponse(404, 72, 'El paquete no existe')
+
+        purchase.status = status.FINISHED
+        purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+
+        let transaction = new Transaction()
+        transaction.voucher = purchase.operationIds
+        transaction.date = new Date()
+        transaction.Purchase = purchase
+        transaction.total = purchase.pendingAmount
+        transaction.invoice = false
+
+        await getRepository(Purchase).save(purchase)
+        await getRepository(Transaction).save(transaction)
+
+    },
+
+    async setCancelStatus(data: number) {
+        const purchase = await getRepository(Purchase).findOne({
+            where: {
+                id: data,
+                status: status.PENDING
+            }
+        })
+        if (!purchase) throw new ErrorResponse(404, 71, 'La compra no existe o no tiene status "Pendiente"')
+
+        purchase.status = status.CANCELED
+        await getRepository(Purchase).save(purchase)
+    },
+
+    async eraseOldPendingPurchases() {
+        const validateDate = moment().add(-15, "days")
+        const oldPendingPurchases = await createQueryBuilder(Purchase)
+            .where('Date(Purchase.date) <=:vDate', { vDate: validateDate.format('YYYY-MM-DD') })
+            .andWhere('Purchase.status =:status', { status: "Pendiente" })
+            .getMany();
+
+        for (var i in oldPendingPurchases) {
+            //console.log(oldPendingPurchases[i])
+            await getRepository(Purchase).delete(oldPendingPurchases[i])
+        }
     },
 }
 

@@ -1,7 +1,7 @@
 import { getRepository, getConnection, Repository, createQueryBuilder, Not } from 'typeorm'
 import { User } from '../entities/Users'
 import { ErrorResponse } from '../errors/ErrorResponse'
-import { Purchase } from '../entities/Purchases'
+import { Purchase, status } from '../entities/Purchases'
 import { Booking } from '../entities/Bookings'
 import { getPendingClasses, orderByExpirationDay, orderLiderPurchasesByExpirationDay } from "../utils/index"
 import { MemberEmail, pendingClasses } from '../interfaces/purchase'
@@ -165,6 +165,7 @@ export const MeRepository = {
             .leftJoinAndSelect('Categories.User_items', 'User_items')
             .where('User.id=:idUser', { idUser: user.id })
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)') 
             .getOne()
         //console.log(client)
         if (!client) {

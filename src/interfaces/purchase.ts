@@ -35,3 +35,8 @@ export interface Voucher{
 export interface MemberEmail {
     email: string
 }
+
+export interface InitialzePurchase {
+    bundleId: number
+    operationIds: string
+}
