@@ -66,6 +66,6 @@ PurchaseRouter.patch('/complete/:purchaseId',h(checkToken), h(PurchaseController
 
 PurchaseRouter.patch('/cancel/:purchaseId',h(checkToken), h(PurchaseController.setCancelStatus))
 
-PurchaseRouter.delete('/erase/oldPendingPurchases',h(checkToken), h(PurchaseController.eraseOldPendingPurchases))
+PurchaseRouter.patch('/erase/oldPendingPurchases',h(checkToken), h(PurchaseController.eraseOldPendingPurchases))
 
 export { PurchaseRouter }

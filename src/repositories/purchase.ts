@@ -12,6 +12,7 @@ import * as moment from "moment"
 import { Folios } from '../entities/Folios'
 import { Alternate_users } from '../entities/alternateUsers'
 import { v4 as uuidv4 } from 'uuid'
+import { stat } from 'fs'
 
 
 export const PurchaseRepository = {
@@ -551,7 +552,8 @@ export const PurchaseRepository = {
 
         for (var i in oldPendingPurchases) {
             //console.log(oldPendingPurchases[i])
-            await getRepository(Purchase).delete(oldPendingPurchases[i])
+            oldPendingPurchases[i].status = status.CANCELED
+            await getRepository(Purchase).save(oldPendingPurchases[i])
         }
     },
 }

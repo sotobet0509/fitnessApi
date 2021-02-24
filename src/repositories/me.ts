@@ -101,9 +101,17 @@ export const MeRepository = {
         //     .getMany();
 
         let purchases = await getRepository(Purchase).find({
-            where: {
-                User: user
-            },
+            where: [
+                {
+                    User: user,
+                    status: status.FINISHED
+                },
+                {
+
+                    User: user,
+                    status: null
+                }
+            ],
             relations: ['User', 'Bundle', 'Payment_method', 'Transaction']
         })
         let clases = 0
@@ -165,7 +173,7 @@ export const MeRepository = {
             .leftJoinAndSelect('Categories.User_items', 'User_items')
             .where('User.id=:idUser', { idUser: user.id })
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)') 
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
             .getOne()
         //console.log(client)
         if (!client) {
@@ -173,7 +181,7 @@ export const MeRepository = {
                 where: {
                     id: user.id
                 },
-                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User','Purchase.Transaction','Purchase.Payment_method','User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items']
+                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User', 'Purchase.Transaction', 'Purchase.Payment_method', 'User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items']
             })
         }
         let mainUser
