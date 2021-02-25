@@ -29,7 +29,7 @@ export const BookingRepository = {
             minutes: new Date("2020-01-01 " + booking.Schedule.start).getMinutes(),
             seconds: 0
         })
-        const duration = moment.duration(start.diff(moment())).asHours() + 5
+        const duration = moment.duration(start.diff(moment())).asHours() + 6
         //console.log(duration, start)
         if (duration >= 3) {
             if (booking.Schedule.isPrivate) {
