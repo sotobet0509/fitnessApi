@@ -120,8 +120,8 @@ export const PurchaseController = {
         }
         //b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
         b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
-        b.append('apiUsername', 'merchant.TEST1146286')
-        b.append('merchant', 'TEST1146286')
+        b.append('apiUsername', 'merchant.1146286')
+        b.append('merchant', '1146286')
         const response = await fetch('https://evopaymentsmexico.gateway.mastercard.com/api/nvp/version/57', {
             method: 'POST',
             body: b,
