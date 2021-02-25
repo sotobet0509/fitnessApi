@@ -8,6 +8,8 @@ import { Booking } from '../entities/Bookings'
 import * as moment from 'moment'
 import { Schedule } from '../entities/Schedules'
 import { Purchase } from '../entities/Purchases'
+import { DeleteBooking } from '../interfaces/booking'
+import { PurchaseRepository } from './purchase'
 
 export const BookingRepository = {
 
@@ -18,7 +20,7 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule','fromPurchase']
+            relations: ['Schedule', 'fromPurchase']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
         //console.log(booking)
@@ -30,10 +32,10 @@ export const BookingRepository = {
         const duration = moment.duration(start.diff(moment())).asHours() + 5
         //console.log(duration, start)
         if (duration >= 3) {
-            if(booking.Schedule.isPrivate){
+            if (booking.Schedule.isPrivate) {
                 console.log(booking.fromPurchase)
                 let privatePurchase = await getRepository(Purchase).findOne({
-                    where:{
+                    where: {
                         id: booking.fromPurchase.id
                     }
                 })
@@ -45,9 +47,6 @@ export const BookingRepository = {
         } else {
             throw new ErrorResponse(409, 18, 'La reservacion ya no se puede eliminar')
         }
-
-        
-
     },
 
     async getSeats(scheduleId: number) {
@@ -62,7 +61,7 @@ export const BookingRepository = {
             where: {
                 Schedule: schedule
             },
-            relations: ['Seat', 'User','User.User_categories','User.User_categories.Categories','User.User_categories.Categories.User_items']
+            relations: ['Seat', 'User', 'User.User_categories', 'User.User_categories.Categories', 'User.User_categories.Categories.User_items']
         })
 
         let data = []
@@ -82,5 +81,32 @@ export const BookingRepository = {
             })
         }
         return data
+    },
+
+    async deleteBookingFromAdmin(bookingId: number, data: DeleteBooking) {
+
+        const booking = await getRepository(Booking).findOne({
+            where: {
+                id: bookingId
+            },
+            relations: ['Schedule', 'fromPurchase']
+        })
+        if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
+
+        if (data.discountClass) {
+            let purchase = await getRepository(Purchase).findOne({
+                where: {
+                    id: booking.fromPurchase.id
+                }
+            })
+            if (!purchase) throw new ErrorResponse(404, 14, 'La compra no existe')
+
+            purchase.addedClasses -= 1
+
+            await getRepository(Purchase).save(purchase)
+            await getRepository(Booking).remove(booking)
+        }else{
+            await getRepository(Booking).remove(booking)
+        }
     },
 }

@@ -4,6 +4,8 @@ import { ExtendedRequest } from '../../types'
 import { BundleRepository } from '../repositories/bundle'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { BookingRepository } from '../repositories/booking'
+import { DataMissingError } from '../errors/DataMissingError'
+import { DeleteBooking } from '../interfaces/booking'
 
 export const BookingController ={
 
@@ -24,5 +26,20 @@ export const BookingController ={
             success: true,
             data: response
         })
-    }
+    },
+
+    async deleteBookingFromAdmin(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const bookingId = parseInt(req.params.booking_id)
+
+        const deleteBooking = Joi.object().keys({
+            discountClass: Joi.boolean().required()
+        })
+        const { error, value } = deleteBooking.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <DeleteBooking>value
+
+        await BookingRepository.deleteBookingFromAdmin(bookingId, data)
+        res.json({ success: true})
+    },
 }
