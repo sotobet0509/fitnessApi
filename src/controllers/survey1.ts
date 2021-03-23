@@ -1,14 +1,14 @@
 import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
-import { QuestionRepository } from '../repositories/question'
+import { Survey1Repository } from '../repositories/survey1'
 import { DataMissingError } from '../errors/DataMissingError'
-import { QuestionarySchema } from '../interfaces/questionary'
-import { handleQuestions } from '../services/files'
+import { Survey1Schema } from '../interfaces/survey1'
+import { handleSurvey1 } from '../services/files'
 
-export const QuestionController ={
+export const Survey1Controller ={
 
-    async saveQuestionary(req: ExtendedRequest, res: Response){
+    async saveSurvey1(req: ExtendedRequest, res: Response){
         const user = req.user
 
         const questionary = Joi.object().keys({
@@ -20,14 +20,14 @@ export const QuestionController ={
 
         const { error, value } = questionary.validate(req.body)
         if (error) throw new DataMissingError()
-        const data = <QuestionarySchema>value
+        const data = <Survey1Schema>value
 
         if(req.files){
-            const url = await handleQuestions(req.files.file)
+            const url = await handleSurvey1(req.files.file)
             data.url= url
         }
 
-        await QuestionRepository.saveQuestionary(data, user)
+        await Survey1Repository.saveSurvey1(data, user)
         res.json({ success: true})
     },
 

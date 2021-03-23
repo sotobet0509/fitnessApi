@@ -1,6 +1,6 @@
-import { conection, device } from "../entities/questions";
+import { conection, device } from "../entities/Survey1";
 
-export interface QuestionarySchema {
+export interface Survey1Schema {
     device: device
     browser: string
     conection: conection

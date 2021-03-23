@@ -11,8 +11,8 @@ export enum conection {
     WIFI = 'WiFi'
 }
 
-@Entity({name: 'questions'})
-export class Questions {
+@Entity({name: 'survey1'})
+export class Survey1 {
     @PrimaryGeneratedColumn('increment')
     id: number
 
@@ -34,7 +34,7 @@ export class Questions {
     @CreateDateColumn()
     createdAt: Date
 
-    @ManyToOne(type => User, User => User.Questions)
+    @ManyToOne(type => User, User => User.Survey1)
     @JoinColumn()
     User: User
 
