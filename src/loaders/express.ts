@@ -26,6 +26,7 @@ import { FolioRouter } from '../routes/folio'
 import { ImageRouter } from '../routes/image'
 import { RoomRouter } from '../routes/room'
 import { CollaboratorRouter } from '../routes/collaborator'
+import { QuestionRouter } from '../routes/question'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -84,6 +85,7 @@ export default class ExpressApp {
     this.application.use('/images', ImageRouter)
     this.application.use('/rooms', RoomRouter)
     this.application.use('/collaborators', CollaboratorRouter)
+    this.application.use('/questions', QuestionRouter)
   }
 
   private loadErrorHandlers(): void {
