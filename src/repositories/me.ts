@@ -175,7 +175,7 @@ export const MeRepository = {
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
             .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
             .getOne()
-        //console.log(client)
+        console.log(client.Purchase)
         if (!client) {
             client = await getRepository(User).findOne({
                 where: {
@@ -285,6 +285,7 @@ export const MeRepository = {
 
         let pendingC = 0
         let pendingP = 0
+        //console.log(classes)
         for (var i in classes) {
             pendingC += classes[i].pendingClasses
             pendingP += classes[i].pendingPasses

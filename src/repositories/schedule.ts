@@ -74,6 +74,7 @@ export const ScheduleRepository = {
             .where('Bundle.isGroup=:isGroup', { isGroup: false })
             .andWhere('Purchase.users_id=:userId', { userId: client.id })
             .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
             .getMany()
 
         /*const purchases = await repository.find({
