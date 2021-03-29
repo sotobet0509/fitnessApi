@@ -544,7 +544,7 @@ export const PurchaseRepository = {
     },
 
     async eraseOldPendingPurchases() {
-        const validateDate = moment().add(-15, "days")
+        const validateDate = moment().add(-30, "days")
         const oldPendingPurchases = await createQueryBuilder(Purchase)
             .where('Date(Purchase.date) <=:vDate', { vDate: validateDate.format('YYYY-MM-DD') })
             .andWhere('Purchase.status =:status', { status: "Pendiente" })
