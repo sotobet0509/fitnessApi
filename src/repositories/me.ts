@@ -175,7 +175,7 @@ export const MeRepository = {
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
             .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
             .getOne()
-        console.log(client.Purchase)
+        //console.log(client.Purchase)
         if (!client) {
             client = await getRepository(User).findOne({
                 where: {
