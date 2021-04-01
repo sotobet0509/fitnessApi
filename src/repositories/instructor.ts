@@ -1,9 +1,7 @@
 import { getRepository, getConnection, Repository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Instructor } from '../entities/Instructors'
-import { InstructorController } from '../controllers/instructor'
 import { InstructorSchema } from '../interfaces/instructor'
-import { User } from '../entities/Users'
 
 export const InstructorRepository = {
     async getInstructor(instructorId: number) {

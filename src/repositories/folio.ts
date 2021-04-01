@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository, Not } from 'typeorm'
+import { getRepository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Folios } from '../entities/Folios'
 import * as moment from 'moment'

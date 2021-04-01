@@ -1,6 +1,4 @@
-import { getRepository, getConnection, Repository } from 'typeorm'
-import * as moment from 'moment'
-import { ErrorResponse } from '../errors/ErrorResponse'
+import { getRepository } from 'typeorm'
 import { Room } from '../entities/Rooms'
 
 export const RoomRepository = {

@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
+import { getRepository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { Comments, extraPurchaseSchema, InitialzePurchase, Invoice, PurchaseData, Voucher } from '../interfaces/purchase'
@@ -12,7 +12,6 @@ import * as moment from "moment"
 import { Folios } from '../entities/Folios'
 import { Alternate_users } from '../entities/alternateUsers'
 import { v4 as uuidv4 } from 'uuid'
-import { stat } from 'fs'
 
 
 export const PurchaseRepository = {
@@ -223,8 +222,6 @@ export const PurchaseRepository = {
 
             const pending = hasClasses.find(x => x.purchase.id == purchase.id)
 
-            //console.log(currentBundle.classNumber - pending.pendingClasses, (newBundle.classNumber))
-
             if (currentBundle.classNumber - pending.pendingClasses < (newBundle.classNumber)) {
                 transaction.voucher = "Devolución"
                 transaction.date = new Date()
@@ -252,7 +249,6 @@ export const PurchaseRepository = {
         )
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
 
-        //console.log(purchaseId)
         let purchase = await getRepository(Purchase).findOne(
             {
                 where: {
@@ -339,7 +335,6 @@ export const PurchaseRepository = {
                 if (date.isAfter(date2)) return 1
                 return 0
             })
-            //console.log(orderedPurchases)
             if (orderedPurchases.length > 0) {
                 purchases[i].expirationDate = moment(orderedPurchases[orderedPurchases.length - 1].date).add(purchases[i].Bundle.expirationDays, "days").toDate()
 
@@ -423,10 +418,8 @@ export const PurchaseRepository = {
                         .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
                         .getOne();
                     let orderedPurchases
-                    //console.log(liderPurchases)
                     if (liderPurchases) {
                         orderedPurchases = orderLiderPurchasesByExpirationDay(liderPurchases.Purchase)
-                        //console.log(moment().diff(orderedPurchases[0].expirationDate, 'days') )
                         if (moment().diff(orderedPurchases[0].expirationDate, 'days') < 0) throw new ErrorResponse(404, 60, 'Usuario lider ya tiene paquete grupal')
                         else {
                             return createBundlePurchase(purchase)
@@ -507,7 +500,6 @@ export const PurchaseRepository = {
             relations: ['Bundle']
         })
         if (!purchase) throw new ErrorResponse(404, 71, 'La compra no existe o no tiene status "Pendiente"')
-        console.log(purchase.Bundle)
         const bundle = await getRepository(Bundle).findOne({
             where: {
                 id: purchase.Bundle.id
@@ -551,7 +543,6 @@ export const PurchaseRepository = {
             .getMany();
 
         for (var i in oldPendingPurchases) {
-            //console.log(oldPendingPurchases[i])
             oldPendingPurchases[i].status = status.CANCELED
             await getRepository(Purchase).save(oldPendingPurchases[i])
         }

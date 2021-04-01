@@ -1,20 +1,17 @@
 import { MeRepository } from './me';
 import { Booking } from './../entities/Bookings';
 import { Purchase } from './../entities/Purchases';
-import { getRepository, getConnection, Repository, Between, createQueryBuilder } from 'typeorm'
+import { getRepository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
-import { PasswordService } from '../services/password'
 import * as moment from 'moment'
 import { getPendingClasses, orderLiderPurchasesByExpirationDay } from '../utils';
 import { pendingClasses } from '../interfaces/purchase';
 import { sendActivationUrl } from '../services/mail';
-import { Bundle } from '../entities/Bundles';
-import { GroupName, MembersGroup, UserId } from '../interfaces/me';
+import { GroupName, UserId } from '../interfaces/me';
 
 import { TokenService } from '../services/token';
-import e = require('express');
 
 export const ClientRepository = {
     async getAllClients() {
@@ -198,11 +195,9 @@ export const ClientRepository = {
             } else {
                 nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
             }
-            //console.log(pendingC);
-
+           
             for (const k in members) {
                 for (const l in data) {
-                    //console.log(data[l].client)
                     if (data[l].client.id == members[k].id) {
                         if (!data[l].client.fromGroup) {
                             data[l].pending -= pendingC
@@ -212,7 +207,6 @@ export const ClientRepository = {
                         data[l].pendingPassesGroup = pendingP
                         data[l].takenGroup = boookingsArray.length - boookingsPassesArray.length
                         data[l].takenPassesGroup = boookingsPassesArray.length
-                        //console.log(data[l]);
                     }
 
                 }
@@ -374,7 +368,6 @@ export const ClientRepository = {
     },
 
     async removeMember(data: UserId, memberId: string) {
-        //console.log(data.user_id);
 
         const leader = await getRepository(User).findOne({
             where: {

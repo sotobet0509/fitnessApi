@@ -5,15 +5,10 @@ import { PasswordService } from '../services/password'
 import { TokenService } from '../services/token'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { sendActivationUrl, sendRecoveryPasswordMail } from '../services/mail'
-// import { BundleRepository } from './bundle'
-// import { Bundle } from '../entities/Bundles'
-// import { Purchase } from '../entities/Purchases'
-// import { Payment_method } from '../entities/Payment_methods'
-// import { Transaction } from '../entities/Transactions'
 import { v4 as uuidv4 } from 'uuid'
 import { Alternate_users } from '../entities/alternateUsers'
 import { Instructor } from '../entities/Instructors'
-// import * as moment from 'moment'
+
 
 
 export const AuthRepository = {
@@ -227,7 +222,6 @@ export const AuthRepository = {
   },
 
   async changePassword(data: ChangePasswordSchema) {
-    //console.log(data)
     const userRepository = getRepository(User)
     let user = await userRepository.findOne({
 

@@ -15,9 +15,6 @@ export class Booking {
     @CreateDateColumn()
     createdAt: Date
 
-    /* @Column({nullable: true})
-    fromPurchase: number */
-
     @Column({default: false})
     assistance: boolean
 

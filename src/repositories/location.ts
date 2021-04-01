@@ -1,12 +1,10 @@
-import { Booking } from './../entities/Bookings';
-import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
+import { getRepository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Location } from '../entities/Locantions'
 import { Room } from '../entities/Rooms'
 import { Schedule } from '../entities/Schedules'
 import * as moment from 'moment-timezone'
 import { LocationSchema } from '../interfaces/location';
-import { endianness } from 'os';
 import { Instructor } from '../entities/Instructors';
 import { User } from '../entities/Users';
 
@@ -37,7 +35,6 @@ export const LocationRepository = {
     async getLocationsByWeek(room_id: number, data: LocationSchema, user: User) {
         let endDate
         let days
-        //console.log( moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate())
         if (moment(data.start).day() == 6 || moment(data.start).day() == 0) {
             if (moment(data.start).day() == 6) {
 
@@ -47,14 +44,11 @@ export const LocationRepository = {
                     .andWhere('Date(Schedule.date)<:cuDate', { cuDate: moment(currentDate).add(1, 'days').format('YYYY-MM-DD') })
                     .andWhere('Time(Schedule.end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
                     .getOne()
-                //console.log(scheduleExist)
                 if (!scheduleExist) {
-                    //console.log("esta vacio")
                     data.start = moment().isoWeek(moment(data.start).week()).startOf("isoWeek").add(-1, 'days').toDate()
                     days = [[], [], [], [], [], [], [], []]
                     endDate = moment(data.start).add(8, 'days')
                 } else {
-                    //console.log("no esta vacio")
                     data.start = moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate()
                     days = [[], [], [], [], [], [], []]
                     endDate = moment(data.start).add(7, 'days')
@@ -69,8 +63,6 @@ export const LocationRepository = {
             days = [[], [], [], [], [], [], []]
             endDate = moment(data.start).add(7, 'days')
         }
-        console.log(data.start)
-
         let room = await getRepository(Room).find({
             relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking', 'Schedules.Rooms']
         })

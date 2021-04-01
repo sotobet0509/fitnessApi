@@ -1,5 +1,5 @@
 import { MeRepository } from './me';
-import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
+import { getRepository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Schedule } from '../entities/Schedules'
 import { Booking } from '../entities/Bookings'
@@ -102,22 +102,25 @@ export const ScheduleRepository = {
         // .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         // .getOne()
 
+       
         let boookingsArrayTotal: Booking[] = []
         for (const i in purchases) {
             let bookingsPurchases = await getRepository(Booking).find({
                 where:
                 {
                     fromPurchase: purchases[i].id
-                }
+                },
+                relations:['fromPurchase']
+                
             })
             for (const j in bookingsPurchases) {
                 boookingsArrayTotal.push(bookingsPurchases[j])
             }
         }
+        console.log(boookingsArrayTotal)
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(purchases, boookingsArrayTotal)
-
 
         classes = classes.filter((p: pendingClasses) => {
             let expirationDay = moment(p.purchase.expirationDate)
@@ -125,7 +128,6 @@ export const ScheduleRepository = {
             if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
             return true
         })
-
         let pending = 0
         let pendingPasses = 0
 
@@ -149,7 +151,6 @@ export const ScheduleRepository = {
 
         let idPurchase = null
         const currentDate = moment(scheduleExist.date)
-
         if (!isPass) {
             for (var i in classes) {
                 if (classes[i].pendingClasses != 0) {
@@ -304,7 +305,6 @@ export const ScheduleRepository = {
             for (var i in classesGroup) {
                 if (classesGroup[i].pendingClasses != 0) {
                     if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                        //console.log(currentDate, moment(classesGroup[i].purchase.expirationDate))
                         idPurchase = classesGroup[i].purchase.id
                         break
                     }
@@ -314,7 +314,6 @@ export const ScheduleRepository = {
             for (var i in classesGroup) {
                 if (classesGroup[i].pendingPasses != 0) {
                     if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                        //console.log(currentDate, moment(classesGroup[i].purchase.expirationDate))
                         idPurchase = classesGroup[i].purchase.id
                         break
                     }
@@ -420,7 +419,6 @@ export const ScheduleRepository = {
                 for (var i in classesGroup) {
                     if (classesGroup[i].pendingClasses != 0) {
                         if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            //console.log(currentDate, moment(classesGroup[i].purchase.expirationDate))
                             idPurchase = classesGroup[i].purchase.id
                             break
                         }
@@ -430,7 +428,6 @@ export const ScheduleRepository = {
                 for (var i in classesGroup) {
                     if (classesGroup[i].pendingPasses != 0) {
                         if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            //console.log(currentDate, moment(classesGroup[i].purchase.expirationDate))
                             idPurchase = classesGroup[i].purchase.id
                             break
                         }
@@ -512,7 +509,6 @@ export const ScheduleRepository = {
                 for (var i in classesGroup) {
                     if (classesGroup[i].pendingClasses != 0) {
                         if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            //console.log(currentDate, moment(classesGroup[i].purchase.expirationDate))
                             idPurchase = classesGroup[i].purchase.id
                             break
                         }
@@ -521,8 +517,7 @@ export const ScheduleRepository = {
             } else {
                 for (var i in classesGroup) {
                     if (classesGroup[i].pendingPasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            //console.log(currentDate, moment(classesGroup[i].purchase.expirationDate))
+                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {                         
                             idPurchase = classesGroup[i].purchase.id
                             break
                         }
@@ -593,7 +588,6 @@ export const ScheduleRepository = {
         if (data.isPrivate) {
             schedule.isPrivate = data.isPrivate
         }
-        //console.log(schedule.theme)
         await scheduleRepository.save(schedule)
 
         return schedule

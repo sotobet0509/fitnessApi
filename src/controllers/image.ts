@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
-import { getTreeRepository } from 'typeorm'
 import { ImageRepository } from '../repositories/image'
 
 export const ImageController ={

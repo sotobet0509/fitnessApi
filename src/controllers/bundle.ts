@@ -9,7 +9,6 @@ import { getRepository } from 'typeorm'
 import { BlackList } from '../entities/BlackList'
 import { DataMissingError } from '../errors/DataMissingError'
 import { BundleSchema, UpdateBundleSchema } from '../interfaces/bundle'
-import { stringify } from 'querystring'
 import { handleProfilePicture } from '../services/files'
 
 export const BundleController = {

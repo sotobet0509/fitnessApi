@@ -151,7 +151,6 @@ export async function sendActivationUrl(email: string, token: string) {
 }
 
 export async function sendPurchaseConfirmation(email: string, transactionData: TransactionData) {
-  //console.log('transactionData', transactionData)
 
   sgMail.setApiKey(config.sendGridApiKey)
   let subtotal = 0

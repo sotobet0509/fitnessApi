@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
-import { BundleRepository } from '../repositories/bundle'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { BookingRepository } from '../repositories/booking'
 import { DataMissingError } from '../errors/DataMissingError'

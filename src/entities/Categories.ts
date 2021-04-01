@@ -1,7 +1,5 @@
-import { table } from 'console'
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm'
 import { User_categories } from './UserCategories'
-import { User } from './Users'
 import { User_items } from './User_items'
 
 @Entity({name: 'categories'})

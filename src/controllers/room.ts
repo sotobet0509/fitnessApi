@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { RoomRepository } from '../repositories/room'
 

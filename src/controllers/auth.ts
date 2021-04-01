@@ -8,7 +8,6 @@ import { ErrorResponse } from '../errors/ErrorResponse'
 import { AuthRepository } from '../repositories/auth'
 import { TokenService } from '../services/token'
 import { ExtendedRequest } from '../../types'
-import { join } from 'path'
 import { User } from '../entities/Users'
 import { getRepository } from 'typeorm'
 
@@ -196,9 +195,6 @@ export const
         tempToken: Joi.string().required(),
         password: Joi.string().required()
       })
-
-
-      //console.log(changePasswordSchema.tempToken, changePasswordSchema.password)
 
       const { error, value } = changePasswordSchema.validate(req.body)
       if (error) throw new DataMissingError()

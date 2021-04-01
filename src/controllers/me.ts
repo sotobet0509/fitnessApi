@@ -5,7 +5,6 @@ import { MeRepository } from '../repositories/me'
 import { handleProfilePicture } from '../services/files'
 import { DataMissingError } from '../errors/DataMissingError'
 import { ClientData } from '../interfaces/auth'
-import { getRepository } from 'typeorm'
 import { EditItems } from '../interfaces/items'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { GroupName, UserId } from '../interfaces/me'
@@ -31,9 +30,7 @@ export const MeController = {
     },
 
     async uploadProfilePicture(req: ExtendedRequest, res: Response) {
-        //console.log(req.files)
         const url = await handleProfilePicture(req.files.file)
-        //console.log(url)
         const user = req.user
 
         await MeRepository.uploadProfilePicture(url, user)

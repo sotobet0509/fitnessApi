@@ -48,13 +48,12 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
                 },
                 relations: ['fromPurchase']
             })*/
+            console.log(b.fromPurchase , purchase.id)
             if (b.fromPurchase && purchase.id === b.fromPurchase.id && !b.isPass) {
                 bss.push(b)
             }
         }
-
         contadorClasses -= bss.length
-
         let bsp = []
         for (var j in restBooking) {
             const b = restBooking[j]
@@ -72,17 +71,18 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
         }
 
         contadorPasses -= bsp.length
-
+        
         results.push({
             purchase: purchase,
             pendingClasses: contadorClasses,
             pendingPasses: contadorPasses
         })
-        if (contadorClasses == 0 && contadorPasses == 0) results.pop()
+        if (contadorClasses <= 0 && contadorPasses <= 0) results.pop()
     }
 
+    //console.log(results)
     const orderedPurchases = orderPendingClassesByExpirationDay(results)
-
+    //console.log(orderedPurchases.length)
     return orderedPurchases
 }
 

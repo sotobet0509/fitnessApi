@@ -5,9 +5,6 @@ import { ScheduleRepository } from '../repositories/schedule'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { ScheduleIsPass, ScheduleSchema, ScheduleClientId } from '../interfaces/schedule'
 import { DataMissingError } from '../errors/DataMissingError'
-import { getRepository } from 'typeorm'
-import { BookingRepository } from '../repositories/booking'
-
 
 export const ScheduleController = {
 
@@ -106,7 +103,6 @@ export const ScheduleController = {
         const { error, value } = scheduleSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <ScheduleSchema>value
-        //console.log(data)
         await ScheduleRepository.createSchedule(data)
         res.json({ success: true })
     },

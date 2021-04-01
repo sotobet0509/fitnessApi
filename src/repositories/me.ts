@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository, createQueryBuilder, Not } from 'typeorm'
+import { getRepository, createQueryBuilder, Not } from 'typeorm'
 import { User } from '../entities/Users'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Purchase, status } from '../entities/Purchases'
@@ -14,10 +14,8 @@ import { User_items } from '../entities/User_items'
 import { User_categories } from '../entities/UserCategories'
 import { EditItems } from '../interfaces/items'
 import { GroupName, UserId } from '../interfaces/me'
-import { log } from 'console'
 import { TokenService } from '../services/token'
-import { id } from 'inversify'
-import { couldStartTrivia } from 'typescript'
+
 
 export const MeRepository = {
     async getProfile(id: string) {
@@ -37,7 +35,6 @@ export const MeRepository = {
         })
         let minutesDone = 0
         let favorites = []
-        //console.log(bookings, profile)
         for (var i in bookings) {
             const booking: Booking = bookings[i]
             const schedule = booking.Schedule
@@ -51,11 +48,8 @@ export const MeRepository = {
                 minutes: new Date(`2020-01-01 ${schedule.end}`).getMinutes(),
                 seconds: 0
             })
-            //console.log('start', start)
-            //console.log('end', end)
             const minutes = moment.duration(end.diff(start))
             if (start.isBefore(moment()) && moment(schedule.date).month() === moment().month()) {
-                //console.log('done', minutes.asMinutes())
                 minutesDone += minutes.asMinutes()
             }
             const instructor = schedule.Instructor
@@ -175,7 +169,6 @@ export const MeRepository = {
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
             .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
             .getOne()
-        //console.log(client.Purchase)
         if (!client) {
             client = await getRepository(User).findOne({
                 where: {
@@ -285,7 +278,6 @@ export const MeRepository = {
 
         let pendingC = 0
         let pendingP = 0
-        //console.log(classes)
         for (var i in classes) {
             pendingC += classes[i].pendingClasses
             pendingP += classes[i].pendingPasses
@@ -392,8 +384,6 @@ export const MeRepository = {
                     id: data.categories[j]
                 }
             })
-            //console.log(data.categories[j])
-
             newUserCategory.User = userdata
             newUserCategory.Categories = newCategory
             await getRepository(User_categories).save(newUserCategory)
@@ -402,7 +392,6 @@ export const MeRepository = {
 
     async getMembers(user: User) {
         let leaderId = "notNull"
-        //console.log(user.id)
         let members: User[]
         if (user.isLeader) {
             leaderId = user.id
@@ -427,7 +416,6 @@ export const MeRepository = {
         }
         else throw new ErrorResponse(404, 10, 'El usuario no pertenece a un grupo')
 
-        //console.log(leaderId)
         const currentDate = new Date()
         let membersData = []
         for (var i in members) {

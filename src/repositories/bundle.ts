@@ -36,7 +36,6 @@ export const BundleRepository = {
             })
             if (haveTrialBundle) {
                 if (userId.fromGroup) {
-                    //console.log("Pertemece a un grupo")
                     bundles = await getRepository(Bundle).find({
                         where: {
                             isGroup: false,
@@ -53,7 +52,6 @@ export const BundleRepository = {
 
             } else {
                 if (userId.fromGroup) {
-                    //console.log("Pertemece a un grupo")
                     bundles = await getRepository(Bundle).find({
                         where: {
                             isGroup: false

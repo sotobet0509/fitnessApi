@@ -1,5 +1,4 @@
-import { getRepository, getConnection, Repository } from 'typeorm'
-import * as moment from 'moment'
+import { getRepository } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Survey1Schema } from '../interfaces/survey1'
 import { User } from '../entities/Users'
