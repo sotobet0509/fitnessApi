@@ -29,7 +29,7 @@ export const ScheduleRepository = {
             relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
         })*/
         console.log(schedule);
-        
+
         if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
         const bookings = await getRepository(Booking).find({
@@ -53,19 +53,19 @@ export const ScheduleRepository = {
             delete bookings[i].User.groupName
             delete bookings[i].User.changed
         }
-       
-        
+
+
         let available = []
         let occupied = []
         for (var i in bookings) {
             occupied[i] = bookings[i].Seat.id
         }
-       
+
         let seat = await createQueryBuilder(Seat)
-        .where('Seat.id NOT IN (:...seatId)', {seatId: occupied })
-        .getMany()
-        
-       
+            .where('Seat.id NOT IN (:...seatId)', { seatId: occupied })
+            .getMany()
+
+
         return {
             schedule,
             bookings: bookings,
@@ -704,5 +704,38 @@ export const ScheduleRepository = {
         booking.assistance = !booking.assistance
 
         await getRepository(Booking).save(booking)
+    },
+
+    async searchSchedule(query: string) {
+        const schedules = await createQueryBuilder(Schedule)
+            .select(["Schedule.id",
+                "Schedule.date",
+                "Schedule.start",
+                "Schedule.end",
+                "Instructor.id"
+            ])
+            .leftJoinAndSelect('Schedule.Instructor', 'Instructor')
+            .where('Schedule.id like :query or Schedule.date like :query or Schedule.start like :query or Schedule.end like :query or Instructor.name like :query', {
+                query: '%' + query + '%',
+            })
+            .limit(10)
+            .orderBy('Schedule.id', 'DESC')
+            .getMany()
+
+        let data = []
+
+        for (var i in schedules) {
+            let bookings = await getRepository(Booking).find({
+                where: {
+                    Schedule: schedules[i]
+                }
+            })
+            data.push({
+                shedule: schedules[i],
+                occupied: bookings.length
+            })
+        }
+
+        return data
     }
 }

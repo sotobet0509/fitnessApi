@@ -144,6 +144,14 @@ export const ScheduleController = {
         const bookingId = parseInt(req.params.booking_id)
         await ScheduleRepository.setAssistance(bookingId)
         res.json({ success: true })
-    }
+    },
+
+    async searchSchedule(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+
+        const schedules = await ScheduleRepository.searchSchedule(req.params.query)
+        res.json({ success: true, data: schedules})
+
+    },
 
 }

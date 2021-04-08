@@ -46,8 +46,10 @@ export const LocationController = {
 
     async getSchedules(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-        const schedules = await LocationRepository.getSchedules()
-        res.json({ success: true, data: schedules })
+        let page = req.query.page.toString()
+        console.log(page)
+        //const schedules = await LocationRepository.getSchedules(page)
+       // res.json({ success: true, data: schedules })
     },
 
     async getInstructorSchedules(req: ExtendedRequest, res: Response) {

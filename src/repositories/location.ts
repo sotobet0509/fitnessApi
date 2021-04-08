@@ -7,6 +7,8 @@ import * as moment from 'moment-timezone'
 import { LocationSchema } from '../interfaces/location';
 import { Instructor } from '../entities/Instructors';
 import { User } from '../entities/Users';
+import { Seat } from '../entities/Seats'
+import { Booking } from '../entities/Bookings'
 
 
 /*moment.locale('en', {
@@ -128,11 +130,44 @@ export const LocationRepository = {
         return days
     },
 
-    async getSchedules() {
-        const schedueles = await getRepository(Schedule).find({
-            relations: ['Instructor', 'Booking', 'Rooms']
-        })
-        return schedueles
+    async getSchedules(page: string) {
+        let pages = parseInt(page)
+
+        const schedules = await createQueryBuilder(Schedule)
+            .select([
+                "Schedule",
+                "Instructor.name",
+                "Room.name"
+            ])
+            .leftJoinAndSelect("Schedule.Instructor", "Instructor")
+            .leftJoinAndSelect("Schedule.Room", "Room")
+            .skip(pages * 10)
+            .take(10)
+            .getMany()
+
+        let data = []
+        
+        const seat = await getRepository(Seat).find()
+        let seatlengt = seat.length
+
+        for(var i in schedules){
+            const bookings = await getRepository(Booking).find({
+                where:{
+                    Schedule: schedules[i]
+                }
+            })
+            let soldout = false
+            if(seatlengt == bookings.length){
+                soldout = true
+            }
+            
+            data.push({
+                schedule: schedules[i],
+                soldOut: soldout
+            })
+        }
+
+        return data
     },
 
     async getInstructorSchedules(instructor: Instructor, data: LocationSchema) {
