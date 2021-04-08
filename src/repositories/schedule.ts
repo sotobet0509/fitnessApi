@@ -41,7 +41,6 @@ export const ScheduleRepository = {
 
         for (var i in bookings) {
             delete bookings[i].User.password
-            delete bookings[i].User.pictureUrl
             delete bookings[i].User.email
             delete bookings[i].User.facebookId
             delete bookings[i].User.googleId
@@ -62,17 +61,15 @@ export const ScheduleRepository = {
             occupied[i] = bookings[i].Seat.id
         }
        
-        const seats = await getRepository(Seat).find({
-            where:{
-                id: Not(occupied)
-            }
-        })
+        let seat = await createQueryBuilder(Seat)
+        .where('Seat.id NOT IN (:...seatId)', {seatId: occupied })
+        .getMany()
         
        
         return {
             schedule,
             bookings: bookings,
-            available: seats
+            available: seat
         }
     },
 
