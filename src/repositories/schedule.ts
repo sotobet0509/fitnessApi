@@ -1,5 +1,5 @@
 import { MeRepository } from './me';
-import { getRepository, createQueryBuilder } from 'typeorm'
+import { getRepository, createQueryBuilder, Not } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Schedule } from '../entities/Schedules'
 import { Booking } from '../entities/Bookings'
@@ -19,10 +19,7 @@ export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
 
         let schedule = await createQueryBuilder(Schedule)
-            .select(["date",
-                "start",
-                "end"])
-            .where('Bundle.isGroup=:isGroup', { isGroup: false })
+            .where('Schedule.id=:id', { id: scheduleId })
             .getOne()
 
         /*const schedule = await getRepository(Schedule).find({
@@ -31,6 +28,8 @@ export const ScheduleRepository = {
             },
             relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
         })*/
+        console.log(schedule);
+        
         if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
         const bookings = await getRepository(Booking).find({
@@ -55,24 +54,25 @@ export const ScheduleRepository = {
             delete bookings[i].User.groupName
             delete bookings[i].User.changed
         }
-        const seats = await getRepository(Seat).find()
-
+       
+        
         let available = []
         let occupied = []
-
         for (var i in bookings) {
             occupied[i] = bookings[i].Seat.id
         }
-
        
-        for (var i in seats) {
-            //if(seats[i].id)
-        }
-
+        const seats = await getRepository(Seat).find({
+            where:{
+                id: Not(occupied)
+            }
+        })
+        
+       
         return {
             schedule,
             bookings: bookings,
-           // available:
+            available: seats
         }
     },
 
