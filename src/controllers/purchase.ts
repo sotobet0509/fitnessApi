@@ -20,10 +20,15 @@ export const PurchaseController = {
             ).required(),
             transactionId: Joi.string().required(),
             comments: Joi.string(),
-            discount: Joi.number()
+            discount: Joi.number(),
+            paymentMethod: Joi.string().valid('efectivo', 'tarjeta').required(),
         })
         const { error, value } = purchaseSchema.validate(req.body)
-        if (error) throw new DataMissingError()
+        if (error) {
+            console.log(error)
+            throw new DataMissingError()
+        }
+
         const data = <PurchaseData>value
         const clientId = req.params.client_id
         await PurchaseRepository.buy(data, clientId)
@@ -102,7 +107,7 @@ export const PurchaseController = {
     async buyClient(req: ExtendedRequest, res: Response) {
         if (req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
         const userId = req.user.id
-       
+
         const operationId = req.params.operationId
 
         const folio = await PurchaseRepository.buyClient(userId, operationId)
@@ -170,7 +175,7 @@ export const PurchaseController = {
 
     async completePurchase(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
-        
+
         await PurchaseRepository.completePurchase(parseInt(req.params.purchaseId))
         return res.json({
             success: true

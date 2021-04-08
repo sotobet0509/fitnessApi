@@ -17,28 +17,63 @@ import { getPendingClasses } from '../utils'
 
 export const ScheduleRepository = {
     async getSchedule(scheduleId: number) {
-        const schedule = await getRepository(Schedule).find({
+
+        let schedule = await createQueryBuilder(Schedule)
+            .select(["date",
+                "start",
+                "end"])
+            .where('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getOne()
+
+        /*const schedule = await getRepository(Schedule).find({
             where: {
                 id: scheduleId
             },
             relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
-        })
-        if (schedule.length == 0) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
+        })*/
+        if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
-        for (var i in schedule) {
-            for (var j in schedule[i].Booking) {
-                delete schedule[i].Booking[j].User.email
-                delete schedule[i].Booking[j].User.createdAt
-                delete schedule[i].Booking[j].User.facebookId
-                delete schedule[i].Booking[j].User.googleId
-                delete schedule[i].Booking[j].User.password
-                delete schedule[i].Booking[j].User.isAdmin
-                delete schedule[i].Booking[j].User.isDeleted
-                delete schedule[i].Booking[j].User.tempToken
-            }
+        const bookings = await getRepository(Booking).find({
+            where: {
+                Schedule: schedule
+            },
+            relations: ["User", "Seat", "User.User_categories", "User.User_categories.Categories"]
+        })
+
+        for (var i in bookings) {
+            delete bookings[i].User.password
+            delete bookings[i].User.pictureUrl
+            delete bookings[i].User.email
+            delete bookings[i].User.facebookId
+            delete bookings[i].User.googleId
+            delete bookings[i].User.tempToken
+            delete bookings[i].User.isAdmin
+            delete bookings[i].User.isDeleted
+            delete bookings[i].User.createdAt
+            delete bookings[i].User.isLeader
+            delete bookings[i].User.fromGroup
+            delete bookings[i].User.groupName
+            delete bookings[i].User.changed
+        }
+        const seats = await getRepository(Seat).find()
+
+        let available = []
+        let occupied = []
+
+        for (var i in bookings) {
+            occupied[i] = bookings[i].Seat.id
         }
 
-        return schedule
+       
+        for (var i in seats) {
+            //if(seats[i].id)
+        }
+
+        return {
+            schedule,
+            bookings: bookings,
+           // available:
+        }
     },
 
     async setBooking(scheduleId: number, seatId: number, clientId: string, isPass: boolean) {
@@ -102,7 +137,7 @@ export const ScheduleRepository = {
         // .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         // .getOne()
 
-       
+
         let boookingsArrayTotal: Booking[] = []
         for (const i in purchases) {
             let bookingsPurchases = await getRepository(Booking).find({
@@ -110,8 +145,8 @@ export const ScheduleRepository = {
                 {
                     fromPurchase: purchases[i].id
                 },
-                relations:['fromPurchase']
-                
+                relations: ['fromPurchase']
+
             })
             for (const j in bookingsPurchases) {
                 boookingsArrayTotal.push(bookingsPurchases[j])
@@ -517,7 +552,7 @@ export const ScheduleRepository = {
             } else {
                 for (var i in classesGroup) {
                     if (classesGroup[i].pendingPasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {                         
+                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
                             idPurchase = classesGroup[i].purchase.id
                             break
                         }

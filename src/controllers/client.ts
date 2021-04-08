@@ -136,4 +136,10 @@ export const ClientController = {
 
     },
 
+    async searchClient(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+
+        const clients = await ClientRepository.searchClient(req.params.query)
+        res.json({ success: true, clients})
+    },
 }

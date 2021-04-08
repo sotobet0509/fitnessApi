@@ -12,7 +12,7 @@ export class Bundle {
     @Column('float')
     price: number
 
-    @Column('float')
+    @Column('float', {nullable: true})
     offer: number
 
     @Column()

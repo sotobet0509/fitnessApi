@@ -1,7 +1,7 @@
 import { MeRepository } from './me';
 import { Booking } from './../entities/Bookings';
 import { Purchase } from './../entities/Purchases';
-import { getRepository, createQueryBuilder } from 'typeorm'
+import { getRepository, createQueryBuilder, QueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { User } from '../entities/Users'
 import { ClientData, CustomerData } from '../interfaces/auth'
@@ -195,7 +195,7 @@ export const ClientRepository = {
             } else {
                 nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
             }
-           
+
             for (const k in members) {
                 for (const l in data) {
                     if (data[l].client.id == members[k].id) {
@@ -241,7 +241,7 @@ export const ClientRepository = {
         })
 
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-  
+
         let c = await MeRepository.getClasses(client)
 
         return {
@@ -491,6 +491,17 @@ export const ClientRepository = {
         leader.groupName = data.groupName
 
         await getRepository(User).save(leader)
+    },
+
+    async searchClient(query: string) {
+        const clients = await createQueryBuilder(User)
+            .where('name like :query or lastname like :query or email like :query', {
+                query: '%' + query + '%',
+            })
+            .limit(20)
+            .getMany()
+
+        return clients
     }
 
 }

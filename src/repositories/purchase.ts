@@ -40,7 +40,7 @@ export const PurchaseRepository = {
         const paymentMethod = await getRepository(Payment_method).findOne(
             {
                 where: {
-                    id: 0
+                    type: data.paymentMethod
                 }
             }
         )

@@ -5,6 +5,7 @@ export interface PurchaseData {
     transactionId: string
     comments?: string
     discount?: number
+    paymentMethod: string
 }
 
 export interface Invoice{
