@@ -1,6 +1,7 @@
 import { Application, json, urlencoded } from 'express'
 import * as express from 'express'
 import config from '../config'
+
 import * as morgan from 'morgan'
 import * as cors from 'cors'
 import * as helmet from 'helmet'
@@ -20,6 +21,12 @@ import { InstructorRouter } from '../routes/instructor'
 import { ClientRouter } from '../routes/client'
 import { PurchaseRouter } from '../routes/purchase'
 import { BookingRouter } from '../routes/booking'
+import { VersionRouter } from '../routes/version'
+import { FolioRouter } from '../routes/folio'
+import { ImageRouter } from '../routes/image'
+import { RoomRouter } from '../routes/room'
+import { CollaboratorRouter } from '../routes/collaborator'
+import { Survey1Router } from '../routes/survey1'
 
 const swaggerDocs = swaggerjsondoc({
   swaggerDefinition: {
@@ -73,6 +80,12 @@ export default class ExpressApp {
     this.application.use('/clients', ClientRouter)
     this.application.use('/purchase', PurchaseRouter)
     this.application.use('/bookings', BookingRouter)
+    this.application.use('/versions', VersionRouter)
+    this.application.use('/folios', FolioRouter)
+    this.application.use('/images', ImageRouter)
+    this.application.use('/rooms', RoomRouter)
+    this.application.use('/collaborators', CollaboratorRouter)
+    this.application.use('/survey1', Survey1Router)
   }
 
   private loadErrorHandlers(): void {

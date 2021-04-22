@@ -7,8 +7,15 @@ export interface ScheduleSchema {
     roomsId?: number
     sendEmail?: boolean
     deleteBookings?: boolean
+    theme?: string
+    isPrivate?: boolean
 }
 
 export interface ScheduleIsPass{
+    isPass: boolean
+}
+
+export interface ScheduleClientId{
+    client_id: string
     isPass: boolean
 }

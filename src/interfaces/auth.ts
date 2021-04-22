@@ -42,7 +42,17 @@ export interface ClientData {
   createdAt?: Date
 }
 
+export interface ClientId {
+  client_id: string
+}
+
 export interface ChangePasswordSchema {
  tempToken: string
  password: string
 }
+
+
+export interface ChangePasswordManualSchema {
+  password: string
+  clientId: string
+ }

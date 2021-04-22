@@ -2,11 +2,15 @@ import { Request, Response } from 'express'
 import axios from 'axios'
 import Joi = require('@hapi/joi')
 import config from '../config'
-import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema } from '../interfaces/auth'
+import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema, ChangePasswordManualSchema } from '../interfaces/auth'
 import { DataMissingError } from '../errors/DataMissingError'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { AuthRepository } from '../repositories/auth'
 import { TokenService } from '../services/token'
+import { ExtendedRequest } from '../../types'
+import { User } from '../entities/Users'
+import { getRepository } from 'typeorm'
+
 
 export const
   AuthController = {
@@ -18,11 +22,21 @@ export const
         password: Joi.string().required(),
       })
 
+
+      let user = null
+      const haveToken = req.header('Authorization')
+      if (haveToken) {
+        const payload = await TokenService.verifyToken(haveToken)
+        const userRepository = getRepository(User)
+        user = await userRepository.findOne(payload.sub)
+      }
+
+
       const { error, value } = localLoginSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <LocalSignUpData>value
 
-      const customer = await AuthRepository.createCustomerLocal(data)
+      const customer = await AuthRepository.createCustomerLocal(data, user)
 
       //Dar acceso
       const customerToken = new TokenService(customer.id)
@@ -68,7 +82,14 @@ export const
         //Buscar por email y ver si existe
         customer = await AuthRepository.findCustomerByEmail(data.email)
         //Si no existe, crearlo
-        if (!customer) customer = await AuthRepository.createCustomerFromFacebook(data)
+        let user = null
+        const haveToken = req.header('Authorization')
+        if (haveToken) {
+          const payload = await TokenService.verifyToken(haveToken)
+          const userRepository = getRepository(User)
+          user = await userRepository.findOne(payload.sub)
+        }
+        if (!customer) customer = await AuthRepository.createCustomerFromFacebook(data, user)
         else customer = await AuthRepository.addFacebookId(customer, data.facebookId)
       }
       //Dar acceso
@@ -175,9 +196,6 @@ export const
         password: Joi.string().required()
       })
 
-
-      console.log(changePasswordSchema.tempToken, changePasswordSchema.password)
-
       const { error, value } = changePasswordSchema.validate(req.body)
       if (error) throw new DataMissingError()
       const data = <ChangePasswordSchema>value
@@ -196,17 +214,85 @@ export const
         token
       })
     },
-    
+
     async verifyEmail(req: Request, res: Response) {
       const mail = req.params.mail
 
-     const available = await AuthRepository.verifyEmail(mail)
+      const available = await AuthRepository.verifyEmail(mail)
 
       return res.json({
         success: true,
         available
       })
-    }
+    },
 
 
+    async changePasswordManual(req: ExtendedRequest, res: Response) {
+      if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+      const changePasswordSchema = Joi.object().keys({
+        password: Joi.string().required(),
+        clientId: Joi.string().required()
+      })
+
+      const { error, value } = changePasswordSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <ChangePasswordManualSchema>value
+
+      await AuthRepository.changePasswordManual(data)
+
+
+      return res.json({
+        success: true,
+      })
+    },
+
+    async loginColaborador(req: Request, res: Response) {
+      const localLoginSchema = Joi.object().keys({
+        email: Joi.string().required(),
+        password: Joi.string().required(),
+      })
+
+      const { error, value } = localLoginSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <LocalLoginData>value
+
+      const user = await AuthRepository.authenticateColaborador(data)
+
+      //Dar acceso
+      const userToken = new TokenService(user.id.toString())
+      const token = await userToken.signToken()
+
+      delete user.password
+
+      return res.json({
+        success: true,
+        token,
+        user,
+      })
+    },
+
+    async loginInstructor(req: Request, res: Response) {
+      const localLoginSchema = Joi.object().keys({
+        email: Joi.string().required(),
+        password: Joi.string().required(),
+      })
+
+      const { error, value } = localLoginSchema.validate(req.body)
+      if (error) throw new DataMissingError()
+      const data = <LocalLoginData>value
+
+      const instructor = await AuthRepository.authenticateInstructor(data)
+
+      //Dar acceso
+      const instructorToken = new TokenService(instructor.id.toString())
+      const token = await instructorToken.signToken()
+
+      delete instructor.password
+
+      return res.json({
+        success: true,
+        token,
+        instructor,
+      })
+    },
   }

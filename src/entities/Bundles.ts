@@ -12,7 +12,7 @@ export class Bundle {
     @Column('float')
     price: number
 
-    @Column('float')
+    @Column('float', {nullable: true})
     offer: number
 
     @Column()
@@ -33,8 +33,33 @@ export class Bundle {
     @Column()
     isRecurrent: boolean
 
-    @OneToMany(type => Purchase, purchase => purchase.Bundle)
-    purchase: Purchase
+    @Column({default: false})
+    isUnlimited: boolean
 
-    
+    @Column({default: false})
+    isEspecial: boolean
+
+    @Column({nullable: true})
+    especialDescription: string
+
+    @Column('integer', {nullable: true})
+    promotionExpirationDays: number
+
+    @Column({nullable: true})
+    pictureUrl: string
+
+    @Column('integer')
+    altermateUserId: number
+
+    @Column({default: 1})
+    max: number
+
+    @Column('integer', {default: 0})
+    memberLimit: number
+
+    @Column({default: false})
+    isGroup: boolean
+
+    @OneToMany(type => Purchase, purchase => purchase.Bundle)
+    purchase: Purchase    
 }

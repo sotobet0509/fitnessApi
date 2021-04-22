@@ -1,9 +1,7 @@
-import { getRepository, getConnection, Repository } from 'typeorm'
+import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Instructor } from '../entities/Instructors'
-import { InstructorController } from '../controllers/instructor'
 import { InstructorSchema } from '../interfaces/instructor'
-import { User } from '../entities/Users'
 
 export const InstructorRepository = {
     async getInstructor(instructorId: number) {
@@ -12,14 +10,23 @@ export const InstructorRepository = {
                 id: instructorId
             }
         })
+
+        delete instructor.password
         if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
         return instructor
     },
 
     async getAllInstructors() {
+
         const instructors = await getRepository(Instructor).find({
             isDeleted: false
         })
+
+        for(var i in instructors){
+            delete instructors[i].password
+            delete instructors[i].email
+            delete instructors[i].isDeleted
+        }
         return instructors
     },
 
@@ -82,13 +89,22 @@ export const InstructorRepository = {
         })
         if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
         instructor.profilePicture = url
-        
+
         await InstructorRepository.save(instructor)
     },
     async getAllInstructorsWithDeleted() {
         const instructors = await getRepository(Instructor).find({
-
         })
+
+        for(var i in instructors){
+            delete instructors[i].password
+            delete instructors[i].email
+            delete instructors[i].createdAt
+            delete instructors[i].isDeleted
+            delete instructors[i].profilePicture
+            delete instructors[i].largePicture
+        }
+
         if (!instructors) throw new ErrorResponse(404, 40, 'No hay instructores registrados')
         return instructors
     },

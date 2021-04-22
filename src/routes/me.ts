@@ -114,4 +114,26 @@ MeRouter.get('/classes', h(checkToken), h(MeController.classes))
 
 MeRouter.patch('/changeProfilePicture', h(checkToken), h(MeController.uploadProfilePicture))
 
+MeRouter.patch('/', h(checkToken), h(MeController.editUsers))
+
+MeRouter.patch('/items', h(checkToken), h(MeController.editItems))
+
+MeRouter.get('/items', h(checkToken), h(MeController.getItems))
+
+MeRouter.get('/items/:item_id', h(checkToken), h(MeController.getItemCategories))
+
+MeRouter.get('/all/items', h(checkToken), h(MeController.getAllItems))
+
+MeRouter.get('/member/list', h(checkToken), h(MeController.getMembers))
+
+MeRouter.patch('/member/remove', h(checkToken), h(MeController.removeMember))
+
+MeRouter.patch('/member/invite', h(checkToken), h(MeController.inviteMember))
+
+MeRouter.patch('/member/name', h(checkToken), h(MeController.changeGroupName))
+
+MeRouter.post('/update/classes-history', h(MeController.updateClassesHistory))
+
+MeRouter.post('/update/pendings', h(MeController.updatePendings))
+
 export { MeRouter }

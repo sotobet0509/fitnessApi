@@ -1,73 +1,88 @@
 import * as moment from "moment"
+import { getRepository } from "typeorm"
+import { Alternate_users } from "../entities/alternateUsers"
 import { Booking } from "../entities/Bookings"
-import { Purchase } from "../entities/Purchases"
-import { pendingClasses } from "../interfaces/purchase"
+import { Bundle } from "../entities/Bundles"
+import { Folios } from "../entities/Folios"
+import { Payment_method } from "../entities/Payment_methods"
+import { Purchase, status } from "../entities/Purchases"
+import { Transaction } from "../entities/Transactions"
+import { User } from "../entities/Users"
+import { pendingClasses, Voucher } from "../interfaces/purchase"
+import { v4 as uuidv4 } from 'uuid'
 
 
 export const orderByExpirationDay = (purchases: Purchase[]): Purchase[] => {
     let orderedPurchases = []
 
     orderedPurchases = purchases.sort((a: Purchase, b: Purchase) => {
-        let date = moment(a.date)
-        let date2 = moment(b.date)
-        let dayExpiration = date.add(a.Bundle.expirationDays, "days")
-        let dayExpiration2 = date2.add(b.Bundle.expirationDays, "days")
-        if (dayExpiration.isBefore(dayExpiration2)) return -1
-        if (dayExpiration.isAfter(dayExpiration2)) return 1
+        let date = moment(a.expirationDate)
+        let date2 = moment(b.expirationDate)
+        if (date.isBefore(date2)) return -1
+        if (date.isAfter(date2)) return 1
         return 0
     })
 
     return orderedPurchases
 }
 
-export const getPendingClasses = (purchases: Purchase[], bookings: Booking[]): pendingClasses[] => {
+export const getPendingClasses = async (purchases: Purchase[], bookings: Booking[]): Promise<pendingClasses[]> => {
     let results: pendingClasses[] = []
+    const restBooking = bookings
     for (var i in purchases) {
-
+        // por cada compra se buscarán los bookings que le correspondan
+        // excepto si está cancelado
         const purchase = purchases[i]
-
+        if (purchase.isCanceled) continue
         let contadorClasses = purchase.Bundle.classNumber + purchase.addedClasses
         let contadorPasses = purchase.Bundle.passes + purchase.addedPasses
-  
-        contadorClasses -= bookings.filter((b: Booking) => {
-            return b.fromPurchase === purchase.id && !b.isPass
-        }).length
 
-        contadorPasses -= bookings.filter((b: Booking) => {
-            return b.fromPurchase === purchase.id && b.isPass
-        }).length
+        let bss = []
+        for (var j in restBooking) {
+            const b = restBooking[j]
+            /*let auxBooking = new Booking()
+            auxBooking.fromPurchase = purchase
+            const booking = await getRepository(Booking).findOne({
+                where: {
+                    id: b.id
+                },
+                relations: ['fromPurchase']
+            })*/
+            //console.log(b.fromPurchase , purchase.id)
+            if (b.fromPurchase && purchase.id === b.fromPurchase.id && !b.isPass) {
+                bss.push(b)
+            }
+        }
+        contadorClasses -= bss.length
+        let bsp = []
+        for (var j in restBooking) {
+            const b = restBooking[j]
+            /*let auxBooking = new Booking()
+            auxBooking.fromPurchase = purchase
+            const booking = await getRepository(Booking).findOne({
+                where: {
+                    id: b.id
+                },
+                relations: ['fromPurchase']
+            })*/
+            if (b.fromPurchase && purchase.id === b.fromPurchase.id && b.isPass) {
+                bsp.push(b)
+            }
+        }
 
+        contadorPasses -= bsp.length
+        
         results.push({
             purchase: purchase,
             pendingClasses: contadorClasses,
             pendingPasses: contadorPasses
         })
-        if (contadorClasses == 0 && contadorPasses == 0) results.pop()
+        if (contadorClasses <= 0 && contadorPasses <= 0) results.pop()
     }
 
+    //console.log(results)
     const orderedPurchases = orderPendingClassesByExpirationDay(results)
-
-    for (var i in bookings) {
-        let booking = bookings[i]
-
-        if (booking.fromPurchase == null) {
-            for (var j in orderedPurchases) {
-                let orderedPurchase = orderedPurchases[j]
-                if (booking.isPass) {
-                    if (orderedPurchase.pendingPasses > 0 && booking.isPass) {
-                        orderedPurchase.pendingPasses -= 1
-                        break
-                    } else continue
-                } else {
-                    if (orderedPurchase.pendingClasses > 0 && !booking.isPass) {
-                        orderedPurchase.pendingClasses -= 1
-                        break
-                    } else continue
-                }
-            }
-        }
-    }
-
+    //console.log(orderedPurchases.length)
     return orderedPurchases
 }
 
@@ -76,14 +91,97 @@ export const orderPendingClassesByExpirationDay = (purchases: pendingClasses[]):
     let orderedPurchases = []
 
     orderedPurchases = purchases.sort((a: pendingClasses, b: pendingClasses) => {
-        let date = moment(a.purchase.date)
-        let date2 = moment(b.purchase.date)
-        let dayExpiration = date.add(a.purchase.Bundle.expirationDays, "days")
-        let dayExpiration2 = date2.add(b.purchase.Bundle.expirationDays, "days")
-        if (dayExpiration.isBefore(dayExpiration2)) return -1
-        if (dayExpiration.isAfter(dayExpiration2)) return 1
+        let date = moment(a.purchase.expirationDate)
+        let date2 = moment(b.purchase.expirationDate)
+        if (date.isBefore(date2)) return -1
+        if (date.isAfter(date2)) return 1
         return 0
     })
 
     return orderedPurchases
+}
+
+export const orderLiderPurchasesByExpirationDay = (purchases: Purchase[]): Purchase[] => {
+    let orderedPurchases = []
+
+    orderedPurchases = purchases.sort((a: Purchase, b: Purchase) => {
+        let date = moment(a.expirationDate)
+        let date2 = moment(b.expirationDate)
+        if (date.isBefore(date2)) return 1
+        if (date.isAfter(date2)) return -1
+        return 0
+    })
+
+    return orderedPurchases
+}
+
+export const createBundlePurchase = async (data: Purchase) => {
+
+    if (data.Bundle.isEspecial) {
+        /*let purchase = new Purchase()
+        purchase.User = user
+        purchase.Bundle = bundle
+        purchase.date = new Date()
+        purchase.Payment_method = paymentMethod
+        purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+        */
+        data.status = status.FINISHED
+        data.expirationDate = moment().add(data.Bundle.expirationDays, 'days').toDate()
+        await getRepository(Purchase).save(data)
+
+        const transaction = new Transaction()
+        transaction.voucher = data.operationIds
+        transaction.date = new Date()
+        transaction.invoice = false
+        transaction.total = data.pendingAmount
+        transaction.Purchase = data
+
+        await getRepository(Transaction).save(transaction)
+
+        const colaborador = await getRepository(Alternate_users).findOne({
+            where: {
+                id: data.Bundle.altermateUserId
+            }
+        })
+        const shortColaborador = colaborador.name.substr(0, 3).toUpperCase()
+        let shortUuid = uuidv4().substr(0, 6)
+        let folioSave = new Folios()
+        folioSave.Alternate_users = colaborador
+        folioSave.clientName = data.User.name + " " + data.User.lastname
+        folioSave.folio = shortColaborador + "-" + shortUuid
+        folioSave.expirationDate = moment().add(data.Bundle.promotionExpirationDays, 'days').toDate()
+        folioSave.purchase = data.id
+
+        await getRepository(Folios).save(folioSave)
+
+        const folio = await getRepository(Folios).findOne({
+            where: {
+                id: folioSave.id
+            },
+            relations: ["Alternate_users"]
+        })
+
+        return folio
+    }
+
+
+    /*let purchase = new Purchase()
+    purchase.User = user
+    purchase.Bundle = bundle
+    purchase.date = new Date()
+    purchase.Payment_method = paymentMethod
+    purchase.expirationDate = moment().add(bundle.expirationDays, 'days').toDate()
+    */
+    data.status = status.FINISHED
+    data.expirationDate = moment().add(data.Bundle.expirationDays, 'days').toDate()
+
+    await getRepository(Purchase).save(data)
+
+    const transaction = new Transaction()
+    transaction.voucher = data.operationIds
+    transaction.date = new Date()
+    transaction.invoice = false
+    transaction.total = data.pendingAmount
+    transaction.Purchase = data
+    await getRepository(Transaction).save(transaction)
 } 

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { BundleController } from '../controllers/bundle'
 import * as h from 'express-async-handler'
+import { checkToken } from '../middleware/CheckToken'
 
 
 const BundleRouter = Router({ mergeParams: true })
@@ -9,8 +10,8 @@ const BundleRouter = Router({ mergeParams: true })
  * @swagger
  * /bundles:
  *   get:
- *     description: Obtiene los datos de todos los paquetes
- *     produces:
+ *     description: Obtiene los datoproduces:s de todos los paquetes
+ *     
  *       - application/json
  *     parameters:
  *     responses:
@@ -51,6 +52,9 @@ const BundleRouter = Router({ mergeParams: true })
  *               isRecurrent:
  *                 type: boolean 
  *                 example: false
+ *               isUnlimited:
+ *                 type: boolean 
+ *                 example: false 
  *       500:
  *         description: Server error
  */
@@ -98,11 +102,24 @@ BundleRouter.get('/', h(BundleController.getAllBundles))
 *                example: false
 *              isRecurrent:
 *                type: boolean 
+*                example: false 
+*              isUnlimited:
+*                type: boolean 
 *                example: false     
  *       500:
  *         description: Server error
  */
 
 BundleRouter.get('/:bundle_id', h(BundleController.getBundle))
+
+BundleRouter.patch('/updateall', h(BundleController.updatePasses))
+
+BundleRouter.get('/discount/all', h(BundleController.getAllDiscounts))
+
+BundleRouter.post('/create',h(checkToken), h(BundleController.createBundle))
+
+BundleRouter.patch('/activate/:bundle_id',h(checkToken), h(BundleController.changeBundleStatus))
+
+BundleRouter.patch('/edit/:bundle_id',h(checkToken), h(BundleController.updateBundle))
 
 export { BundleRouter }

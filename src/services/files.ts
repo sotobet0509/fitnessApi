@@ -25,3 +25,14 @@ export async function handleInstructorProfilePicture(file: UploadedFile) {
     await file.mv(path.join(__dirname, `../../files/instructors/${filename}`))
     return url
 }
+
+export async function handleSurvey1(file: UploadedFile) {
+    if(file.truncated) throw new ErrorResponse(400, 30, 'El archivo es demasiado grande')
+    const name = uuidv4()
+    let filename = name + file.name
+    filename = filename.trim()
+
+    const url = `${config.questionsUrl}${filename}`
+    await file.mv(path.join(__dirname, `../../files/survey1/${filename}`))
+    return url
+}

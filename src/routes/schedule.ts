@@ -56,6 +56,10 @@ const ScheduleRouter = Router({ mergeParams: true })
  */
 ScheduleRouter.get('/:scheduleId', h(ScheduleController.getSchedule))
 
+ScheduleRouter.get('/client/:scheduleId',h(checkToken), h(ScheduleController.getClientSchedule))
+
+ScheduleRouter.get('/search/:query',h(checkToken), h(ScheduleController.searchSchedule))
+
 /**
  * @swagger
  * /schedules/{schedule_id}/seat/{seat_id}/client/{client_id}:
@@ -93,6 +97,10 @@ ScheduleRouter.get('/:scheduleId', h(ScheduleController.getSchedule))
 ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id',h(checkToken), h(ScheduleController.booking))
 
 ScheduleRouter.post('/:schedule_id/seat/:seat_id',h(checkToken), h(ScheduleController.bookingClient))
+
+ScheduleRouter.post('/:schedule_id/seat/:seat_id/member',h(checkToken), h(ScheduleController.bookingClientGroupByAdmin))
+
+ScheduleRouter.post('/:schedule_id/seat/:seat_id/client/:client_id/member',h(checkToken), h(ScheduleController.bookingClientGroup))
 
 /**
  * @swagger
@@ -139,7 +147,10 @@ ScheduleRouter.post('/create',h(checkToken), h(ScheduleController.createSchedule
 
 ScheduleRouter.patch('/update',h(checkToken), h(ScheduleController.updateSchedule))
 
-
 ScheduleRouter.delete('/:schedule_id',h(checkToken), h(ScheduleController.deleteSchedule))
+
+ScheduleRouter.patch('/assistance/:booking_id',h(checkToken), h(ScheduleController.setAssistance))
+
+
 
 export { ScheduleRouter }

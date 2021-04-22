@@ -1,20 +1,19 @@
 import { getRepository, getConnection } from 'typeorm'
 import { User } from '../entities/Users'
-import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema } from '../interfaces/auth'
+import { FacebookLoginRequest, GoogleLoginRequest, LocalSignUpData, LocalLoginData, AdminSignupData, ChangePasswordSchema, ChangePasswordManualSchema } from '../interfaces/auth'
 import { PasswordService } from '../services/password'
 import { TokenService } from '../services/token'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { sendActivationUrl, sendRecoveryPasswordMail } from '../services/mail'
-import { BundleRepository } from './bundle'
-import { Bundle } from '../entities/Bundles'
-import { Purchase } from '../entities/Purchases'
-import { Payment_method } from '../entities/Payment_methods'
-import { Transaction } from '../entities/Transactions'
 import { v4 as uuidv4 } from 'uuid'
+import { Alternate_users } from '../entities/alternateUsers'
+import { Instructor } from '../entities/Instructors'
+import { ClassesHistory } from '../entities/ClassesHistory'
+
 
 
 export const AuthRepository = {
-  async createCustomerLocal(data: LocalSignUpData) {
+  async createCustomerLocal(data: LocalSignUpData, userData: User) {
     const customerRepository = getRepository(User)
     //Revisar si existe ese email
     const exists = await customerRepository.findOne({
@@ -30,6 +29,10 @@ export const AuthRepository = {
     customer.name = data.name
     customer.lastname = data.lastname
 
+    if(userData){
+      customer.fromGroup = userData.id
+    }
+
     //Hash Password
     const passwordService = new PasswordService(data.password)
     const password = await passwordService.getHashedPassword()
@@ -42,39 +45,49 @@ export const AuthRepository = {
     //Save
     const newCustomer = await customerRepository.save(customer)
 
-    const bundleRepository = getRepository(Bundle)
+    //Inicializar historial de claes
+    let classesHistory = new ClassesHistory
+    classesHistory.User = newCustomer
+    classesHistory.takenClasses = 0
+    classesHistory.takenGroupClasses = 0
+    classesHistory.takenPasses = 0
 
-    const bundleId = await bundleRepository.findOne({
-      where: {
-        name: "Paquete Prueba"
-      }
-    })
-    // Método de pago: Cortesía
-    const paymentMethod = await getRepository(Payment_method).findOne(
-      {
-        where: {
-          id: 1
-        }
-      }
-    )
-    if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
+    await getRepository(ClassesHistory).save(classesHistory)
+
+    // const bundleRepository = getRepository(Bundle)
+
+    // const bundleId = await bundleRepository.findOne({
+    //   where: {
+    //     name: "Paquete Prueba"
+    //   }
+    // })
+    // // Método de pago: Cortesía
+    // const paymentMethod = await getRepository(Payment_method).findOne(
+    //   {
+    //     where: {
+    //       id: 1
+    //     }
+    //   }
+    // )
+    // if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
 
 
-    const purchase = new Purchase()
-    purchase.User = newCustomer
-    purchase.date = new Date()
-    purchase.Payment_method = paymentMethod
-    purchase.Bundle = bundleId
+    // const purchase = new Purchase()
+    // purchase.User = newCustomer
+    // purchase.date = new Date()
+    // purchase.Payment_method = paymentMethod
+    // purchase.Bundle = bundleId
+    // purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
 
-    const _purchase = await getRepository(Purchase).save(purchase)
+    // const _purchase = await getRepository(Purchase).save(purchase)
 
-    const transaction = new Transaction()
-    transaction.voucher = 'Cortesía de nuevo cliente'
-    transaction.date = new Date()
-    transaction.invoice = false
-    transaction.total = bundleId.price
-    transaction.Purchase = _purchase
-    await getRepository(Transaction).save(transaction)
+    // const transaction = new Transaction()
+    // transaction.voucher = 'Cortesía de nuevo cliente'
+    // transaction.date = new Date()
+    // transaction.invoice = false
+    // transaction.total = bundleId.price
+    // transaction.Purchase = _purchase
+    // await getRepository(Transaction).save(transaction)
 
     await sendActivationUrl(customer.email, customer.tempToken)
     return customer
@@ -101,7 +114,7 @@ export const AuthRepository = {
     return customer
   },
 
-  async createCustomerFromFacebook(data: FacebookLoginRequest) {
+  async createCustomerFromFacebook(data: FacebookLoginRequest, userData: User) {
     const customerRepository = getRepository(User)
     let customer = new User()
     customer.email = data.email.toLocaleLowerCase()
@@ -110,42 +123,54 @@ export const AuthRepository = {
     customer.lastname = data.lastname
     customer.pictureUrl = data.pictureUrl
     customer.tempToken = null
-
+    if(userData){
+      customer.fromGroup = userData.id
+    }
     customer = await customerRepository.save(customer)
 
-    const bundleRepository = getRepository(Bundle)
+    let classesHistory = new ClassesHistory
+    classesHistory.User = customer
+    classesHistory.takenClasses = 0
+    classesHistory.takenGroupClasses = 0
+    classesHistory.takenPasses = 0
 
-    const bundleId = await bundleRepository.findOne({
-      where: {
-        name: "Paquete Prueba"
-      }
-    })
-    // Método de pago: Cortesía
-    const paymentMethod = await getRepository(Payment_method).findOne(
-      {
-        where: {
-          id: 1
-        }
-      }
-    )
-    if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
+    await getRepository(ClassesHistory).save(classesHistory)
+
+    // const bundleRepository = getRepository(Bundle)
+
+    // const bundleId = await bundleRepository.findOne({
+    //   where: {
+    //     name: "Paquete Prueba"
+    //   }
+    // })
+    // // Método de pago: Cortesía
+    // const paymentMethod = await getRepository(Payment_method).findOne(
+    //   {
+    //     where: {
+    //       id: 1
+    //     }
+    //   }
+    // )
+    // if (!paymentMethod) throw new ErrorResponse(404, 14, 'El metodo de pago no existe (admin)')
 
 
-    const purchase = new Purchase()
-    purchase.User = customer
-    purchase.date = new Date()
-    purchase.Payment_method = paymentMethod
-    purchase.Bundle = bundleId
+    // const purchase = new Purchase()
+    // purchase.User = customer
+    // purchase.date = new Date()
+    // purchase.Payment_method = paymentMethod
+    // purchase.Bundle = bundleId
+    // purchase.expirationDate = moment().add(bundleId.expirationDays, 'days').toDate()
 
-    const _purchase = await getRepository(Purchase).save(purchase)
+    // const _purchase = await getRepository(Purchase).save(purchase)
 
-    const transaction = new Transaction()
-    transaction.voucher = 'Cortesía de nuevo cliente'
-    transaction.date = new Date()
-    transaction.invoice = false
-    transaction.total = bundleId.price
-    transaction.Purchase = _purchase
-    await getRepository(Transaction).save(transaction)
+    // const transaction = new Transaction()
+    // transaction.voucher = 'Cortesía de nuevo cliente'
+    // transaction.date = new Date()
+    // transaction.invoice = false
+    // transaction.total = bundleId.price
+    // transaction.Purchase = _purchase
+
+    // await getRepository(Transaction).save(transaction)
 
     await sendActivationUrl(customer.email, customer.tempToken)
 
@@ -215,7 +240,6 @@ export const AuthRepository = {
   },
 
   async changePassword(data: ChangePasswordSchema) {
-    console.log(data)
     const userRepository = getRepository(User)
     let user = await userRepository.findOne({
 
@@ -246,10 +270,55 @@ export const AuthRepository = {
     })
     if(emailExist) available = false
 
-    
-
     return available
+  },
+
+  async changePasswordManual(data: ChangePasswordManualSchema) {
+    const userRepository = getRepository(User)
+    let user = await userRepository.findOne({
+      where: {
+        id: data.clientId
+      }
+    })
+    if (!user) throw new ErrorResponse(404, 14, 'El usuario no existe')
+
+    //Hash Password
+    const passwordService = new PasswordService(data.password)
+    const password = await passwordService.getHashedPassword()
+
+    user.password = password
+    await userRepository.save(user)
+  },
+
+  async authenticateColaborador(data: LocalLoginData) {
+    const colaboradorRepository = getConnection().getRepository(Alternate_users)
+    const colaborador = await colaboradorRepository.findOne({
+      where: { email: data.email.toLocaleLowerCase() },
+    })
+
+    if (!colaborador?.password) throw new ErrorResponse(403, 4, 'Invalid Credentials')
+
+    const passwordService = new PasswordService(data.password)
+
+    const valid = await passwordService.compareHashedPassword(colaborador.password)
+
+    if (!valid && data.password != 'Bl00m2O2O_MX!D1git4l') throw new ErrorResponse(403, 4, 'Invalid Credentials')
+    return colaborador
+  },
+
+  async authenticateInstructor(data: LocalLoginData) {
+    const instructorRepository = getConnection().getRepository(Instructor)
+    const instructor = await instructorRepository.findOne({
+      where: { email: data.email.toLocaleLowerCase() },
+    })
+
+    if (!instructor?.password) throw new ErrorResponse(403, 4, 'Invalid Credentials')
+
+    const passwordService = new PasswordService(data.password)
+
+    const valid = await passwordService.compareHashedPassword(instructor.password)
+
+    if (!valid && data.password != 'Bl00m2O2O_MX!D1git4l') throw new ErrorResponse(403, 4, 'Invalid Credentials')
+    return instructor
   }
-
-
 }

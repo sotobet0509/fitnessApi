@@ -18,6 +18,12 @@ export class Schedule {
     @Column('time')
     start: Date
 
+    @Column({nullable: true})
+    theme:string
+
+    @Column({default: false})
+    isPrivate: boolean
+
     @ManyToOne(type => Instructor, Instructor => Instructor.Schedule)
     @JoinColumn({name: 'instructors_id'})
     Instructor: Instructor
