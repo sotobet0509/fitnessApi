@@ -16,6 +16,7 @@ import { pendingClasses } from '../interfaces/purchase'
 import { getPendingClasses } from '../utils'
 
 export const ScheduleRepository = {
+
     async getSchedule(scheduleId: number) {
 
         let schedule = await createQueryBuilder(Schedule)
@@ -28,7 +29,7 @@ export const ScheduleRepository = {
             },
             relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
         })*/
-        console.log(schedule);
+        //console.log(schedule);
 
         if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
@@ -54,22 +55,150 @@ export const ScheduleRepository = {
             delete bookings[i].User.changed
         }
 
-
-        let available = []
         let occupied = []
         for (var i in bookings) {
             occupied[i] = bookings[i].Seat.id
         }
 
-        let seat = await createQueryBuilder(Seat)
-            .where('Seat.id NOT IN (:...seatId)', { seatId: occupied })
-            .getMany()
+        let seats = await getRepository(Seat).find()
+
+        let filteredSeats = []
+        if (occupied.length != 0) {
+
+            let seat = await createQueryBuilder(Seat)
+                .where('Seat.id NOT IN (:...seatId)', { seatId: occupied })
+                .getMany()
+
+
+            let freeSeats = []
+            for (var i in seat) {
+                freeSeats.push(seat[i].id)
+            }
+
+            for (var i in seats) {
+                if (freeSeats.includes(seats[i].id)) {
+                    filteredSeats.push({
+                        ...seats[i],
+                        available: true
+                    })
+                } else {
+                    filteredSeats.push({
+                        ...seats[i],
+                        available: false
+                    })
+                }
+            }
+        } else {
+            for (var i in seats) {
+                filteredSeats.push({
+                    ...seats[i],
+                    available: false
+                })
+            }
+        }
 
 
         return {
-            schedule,
-            bookings: bookings,
-            available: seat
+            ...schedule,
+            Booking: bookings,
+            available: filteredSeats
+        }
+    },
+
+
+    async getClientSchedule(scheduleId: number, user: User) {
+
+        const client = await getRepository(User).findOne({
+            where: {
+                id: user.id
+            }
+        })
+        if (!client) throw new ErrorResponse(404, 13, 'Usuario no existe')
+
+        let schedule = await createQueryBuilder(Schedule)
+            .where('Schedule.id=:id', { id: scheduleId })
+            .getOne()
+
+
+        /*const schedule = await getRepository(Schedule).find({
+            where: {
+                id: scheduleId
+            },
+            relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
+        })*/
+        //console.log(schedule);
+
+        if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
+
+        const bookings = await getRepository(Booking).find({
+            where: {
+                Schedule: schedule
+            },
+            relations: ["User", "Seat", "User.User_categories", "User.User_categories.Categories"]
+        })
+
+        for (var i in bookings) {
+            delete bookings[i].User.password
+            delete bookings[i].User.email
+            delete bookings[i].User.facebookId
+            delete bookings[i].User.googleId
+            delete bookings[i].User.tempToken
+            delete bookings[i].User.isAdmin
+            delete bookings[i].User.isDeleted
+            delete bookings[i].User.createdAt
+            delete bookings[i].User.isLeader
+            delete bookings[i].User.fromGroup
+            delete bookings[i].User.groupName
+            delete bookings[i].User.changed
+        }
+
+        let occupied = []
+        for (var i in bookings) {
+            occupied[i] = bookings[i].Seat.id
+        }
+
+        let seats = await getRepository(Seat).find()
+
+        let filteredSeats = []
+        if (occupied.length != 0) {
+
+            let seat = await createQueryBuilder(Seat)
+                .where('Seat.id NOT IN (:...seatId)', { seatId: occupied })
+                .getMany()
+
+
+            let freeSeats = []
+            for (var i in seat) {
+                freeSeats.push(seat[i].id)
+            }
+
+            for (var i in seats) {
+                if (freeSeats.includes(seats[i].id)) {
+                    filteredSeats.push({
+                        ...seats[i],
+                        available: true
+                    })
+                } else {
+                    filteredSeats.push({
+                        ...seats[i],
+                        available: false
+                    })
+                }
+            }
+        } else {
+            for (var i in seats) {
+                filteredSeats.push({
+                    ...seats[i],
+                    available: false
+                })
+            }
+        }
+
+        
+
+        return {
+            ...schedule,
+            available: filteredSeats
         }
     },
 
@@ -149,7 +278,7 @@ export const ScheduleRepository = {
                 boookingsArrayTotal.push(bookingsPurchases[j])
             }
         }
-        console.log(boookingsArrayTotal)
+        //console.log(boookingsArrayTotal)
 
         let classes: pendingClasses[]
         classes = await getPendingClasses(purchases, boookingsArrayTotal)
@@ -698,8 +827,14 @@ export const ScheduleRepository = {
         let booking = await getRepository(Booking).findOne({
             where: {
                 id: bookingId
-            }
+            },
+            relations: ['Schedule']
         })
+        if (!booking) throw new ErrorResponse(409, 49, 'No existe esa reservacion')
+        let currentDate = moment().tz("America/Mexico_City")
+
+        if (currentDate.format('YYYY-MM-DD') != moment(booking.Schedule.date).format('YYYY-MM-DD')) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista el dia de la clase')
+        if (currentDate.format("HH:mm:ss") < booking.Schedule.start.toString()) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista despues de la hora de inicio de la clase')
 
         booking.assistance = !booking.assistance
 
@@ -724,6 +859,9 @@ export const ScheduleRepository = {
 
         let data = []
 
+        const seats = await createQueryBuilder(Seat)
+            .getCount()
+
         for (var i in schedules) {
             let bookings = await getRepository(Booking).find({
                 where: {
@@ -731,8 +869,8 @@ export const ScheduleRepository = {
                 }
             })
             data.push({
-                shedule: schedules[i],
-                occupied: bookings.length
+                ...schedules[i],
+                available: seats - bookings.length
             })
         }
 

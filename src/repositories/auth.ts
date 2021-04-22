@@ -8,6 +8,7 @@ import { sendActivationUrl, sendRecoveryPasswordMail } from '../services/mail'
 import { v4 as uuidv4 } from 'uuid'
 import { Alternate_users } from '../entities/alternateUsers'
 import { Instructor } from '../entities/Instructors'
+import { ClassesHistory } from '../entities/ClassesHistory'
 
 
 
@@ -43,6 +44,15 @@ export const AuthRepository = {
 
     //Save
     const newCustomer = await customerRepository.save(customer)
+
+    //Inicializar historial de claes
+    let classesHistory = new ClassesHistory
+    classesHistory.User = newCustomer
+    classesHistory.takenClasses = 0
+    classesHistory.takenGroupClasses = 0
+    classesHistory.takenPasses = 0
+
+    await getRepository(ClassesHistory).save(classesHistory)
 
     // const bundleRepository = getRepository(Bundle)
 
@@ -117,6 +127,14 @@ export const AuthRepository = {
       customer.fromGroup = userData.id
     }
     customer = await customerRepository.save(customer)
+
+    let classesHistory = new ClassesHistory
+    classesHistory.User = customer
+    classesHistory.takenClasses = 0
+    classesHistory.takenGroupClasses = 0
+    classesHistory.takenPasses = 0
+
+    await getRepository(ClassesHistory).save(classesHistory)
 
     // const bundleRepository = getRepository(Bundle)
 

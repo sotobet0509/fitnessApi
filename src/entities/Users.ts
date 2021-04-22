@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated, ManyToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated, ManyToMany, OneToOne } from 'typeorm'
 import { Booking } from './Bookings'
+import { ClassesHistory } from './ClassesHistory'
 import { Purchase } from './Purchases'
 import { Survey1 } from './Survey1'
 import { User_categories } from './UserCategories'
@@ -66,4 +67,7 @@ export class User {
 
     @OneToMany(type => Survey1, Survey1 => Survey1.User)
     Survey1: Survey1
+
+    @OneToOne(type => ClassesHistory, ClassesHistory => ClassesHistory.User)
+    ClassesHistory: ClassesHistory
 }

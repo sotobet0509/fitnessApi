@@ -56,6 +56,8 @@ const ScheduleRouter = Router({ mergeParams: true })
  */
 ScheduleRouter.get('/:scheduleId', h(ScheduleController.getSchedule))
 
+ScheduleRouter.get('/client/:scheduleId',h(checkToken), h(ScheduleController.getClientSchedule))
+
 ScheduleRouter.get('/search/:query',h(checkToken), h(ScheduleController.searchSchedule))
 
 /**

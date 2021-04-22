@@ -15,6 +15,8 @@ import { User_categories } from '../entities/UserCategories'
 import { EditItems } from '../interfaces/items'
 import { GroupName, UserId } from '../interfaces/me'
 import { TokenService } from '../services/token'
+import { ClassesHistory } from '../entities/ClassesHistory'
+import { Console } from 'console'
 
 
 export const MeRepository = {
@@ -522,5 +524,59 @@ export const MeRepository = {
         leader.groupName = data.groupName
 
         await getRepository(User).save(leader)
+    },
+
+    async updateClassesHistory() {
+        const allclients = await getRepository(User).find({
+            relations: ["Booking"]
+        })
+
+        for (var i in allclients) {
+            let classes = 0
+            let passes = 0
+            for (var j in allclients[i].Booking) {
+                if (allclients[i].Booking[j].isPass) {
+                    passes++
+                } else {
+                    classes++
+                }
+            }
+
+            let classesHistory = new ClassesHistory
+            classesHistory.takenGroupClasses = 0
+            classesHistory.takenClasses = classes
+            classesHistory.takenPasses = passes
+            classesHistory.User = allclients[i]
+
+            await getRepository(ClassesHistory).save(classesHistory)
+        }
+    },
+
+    async updatePendings() {
+        const currentDate = moment().tz("America/Mexico_City").format('YYYY-MM-DD')
+        const allPurchases = await createQueryBuilder(Purchase)
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Purchase.expirationDate>:cDate', { cDate: currentDate })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .getMany();
+
+        for (var i in allPurchases) {
+            const bookings = await getRepository(Booking).find({
+                where: {
+                    fromPurchase: allPurchases[i]
+                }
+            })
+           
+            if (bookings.length > 0) {
+                allPurchases[i].addedClasses -= bookings.length
+                if(allPurchases[i].id == 1990){
+                    console.log(allPurchases[i].id, allPurchases[i].addedClasses )
+                    //await getRepository(Purchase).save(allPurchases[i])
+                }
+                
+            }
+        }
     }
+
 }

@@ -132,4 +132,8 @@ MeRouter.patch('/member/invite', h(checkToken), h(MeController.inviteMember))
 
 MeRouter.patch('/member/name', h(checkToken), h(MeController.changeGroupName))
 
+MeRouter.post('/update/classes-history', h(MeController.updateClassesHistory))
+
+MeRouter.post('/update/pendings', h(MeController.updatePendings))
+
 export { MeRouter }

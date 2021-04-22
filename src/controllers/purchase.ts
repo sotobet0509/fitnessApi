@@ -123,10 +123,10 @@ export const PurchaseController = {
         for (var i in Object.keys(body)) {
             b.append(Object.keys(body)[i], body[Object.keys(body)[i]])
         }
-        //b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
-        b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
-        b.append('apiUsername', 'merchant.1146286')
-        b.append('merchant', '1146286')
+        b.append('apiPassword', 'fd29007ba13ab16e3fc16e1c9ef8c85d') // TEST
+        //b.append('apiPassword', '9e092c06e150c6cf046a5ee508d92375') // PROD
+        b.append('apiUsername', 'merchant.TEST1146286')
+        b.append('merchant', 'TEST1146286')
         const response = await fetch('https://evopaymentsmexico.gateway.mastercard.com/api/nvp/version/57', {
             method: 'POST',
             body: b,
@@ -165,11 +165,12 @@ export const PurchaseController = {
 
     async getAllPurchases(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+        let page = req.query.page.toString()
 
-        const purchases = await PurchaseRepository.getAllPurchases()
+        const purchases = await PurchaseRepository.getAllPurchases(page)
         return res.json({
             success: true,
-            purchases
+            data: purchases
         })
     },
 
@@ -196,6 +197,17 @@ export const PurchaseController = {
         await PurchaseRepository.eraseOldPendingPurchases()
         return res.json({
             success: true
+        })
+    },
+
+    async searchPurchase(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+       
+        const purchases = await PurchaseRepository.searchPurchase(req.params.query)
+
+        return res.json({
+            success: true,
+            purchases
         })
     },
 }

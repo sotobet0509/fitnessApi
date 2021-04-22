@@ -1,6 +1,7 @@
 export interface BundleSchema {
     name: string
     price: number
+    offer?: number
     description: string
     classNumber?: number
     expirationDays: number
@@ -22,6 +23,7 @@ export interface BundleSchema {
 export interface UpdateBundleSchema {
     name?: string
     price?: number
+    offer?: number
     description?: string
     classNumber?: number
     expirationDays?: number

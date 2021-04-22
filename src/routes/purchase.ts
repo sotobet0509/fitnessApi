@@ -62,6 +62,8 @@ PurchaseRouter.post('/init',h(checkToken), h(PurchaseController.inicializePurcha
 
 PurchaseRouter.get('/all',h(checkToken), h(PurchaseController.getAllPurchases))
 
+PurchaseRouter.get('/search/:query',h(checkToken), h(PurchaseController.searchPurchase))
+
 PurchaseRouter.patch('/complete/:purchaseId',h(checkToken), h(PurchaseController.completePurchase))
 
 PurchaseRouter.patch('/cancel/:purchaseId',h(checkToken), h(PurchaseController.setCancelStatus))

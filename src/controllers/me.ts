@@ -135,7 +135,19 @@ export const MeController = {
         if (error) throw new DataMissingError()
         const data = <GroupName>value
 
-         await MeRepository.changeGroupName(req.user, data)
+        await MeRepository.changeGroupName(req.user, data)
+        res.json({ success: true })
+
+    },
+
+    async updateClassesHistory(req: ExtendedRequest, res: Response) {
+        await MeRepository.updateClassesHistory()
+        res.json({ success: true })
+
+    },
+
+    async updatePendings(req: ExtendedRequest, res: Response) {
+        await MeRepository.updatePendings()
         res.json({ success: true })
 
     },

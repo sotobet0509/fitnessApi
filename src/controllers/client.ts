@@ -13,7 +13,10 @@ export const ClientController = {
 
     async getAllClients(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
-        const clients = await ClientRepository.getAllClients()
+
+        let page = req.query.page.toString()
+        
+        const clients = await ClientRepository.getAllClients(page)
         res.json({ success: true, data: clients })
     },
 

@@ -14,9 +14,9 @@ import { GroupName, UserId } from '../interfaces/me';
 import { TokenService } from '../services/token';
 
 export const ClientRepository = {
-    async getAllClients() {
+    async getAllClients(page: string) {
 
-        let clients = await getRepository(User).find({
+        /*let clients = await getRepository(User).find({
             relations: ['Purchase', 'Purchase.Bundle', 'Booking']
         })
 
@@ -212,8 +212,50 @@ export const ClientRepository = {
                 }
             }
         }
+        */
+        const pages = parseInt(page)
+        let clients = await createQueryBuilder(User)
+            .select([
+                "User.id",
+                "User.name",
+                "User.lastname",
+                "User.email",
+                "User.createdAt",
+                "User.isDeleted"
+            ])
+            .skip(pages * 10)
+            .take(10)
+            .getMany();
 
-        return data
+        let pagesNumber = await createQueryBuilder(User)
+            .select([
+                "User.id"
+            ])
+            .skip(pages * 10)
+            .take(10)
+            .getCount();
+
+        let data = []
+        let currentDate = moment().tz("America/Mexico_City")
+        for (var i in clients) {
+            let booking = await createQueryBuilder(Booking)
+                .leftJoinAndSelect("Booking.Schedule", "Schedule")
+                .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
+                .andWhere('Time(Schedule.start)<:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+                .andWhere('Booking.user_id =:userId', { userId: clients[i].id })
+                .orderBy("Schedule.date", "DESC")
+                .addOrderBy("Schedule.start", "ASC")
+                .getOne();
+            if (!booking) {
+                booking = null
+            }
+            data.push({
+                client: clients[i],
+                nextClass: booking
+            })
+        }
+        //console.log(data)
+        return { data, pages: pagesNumber }
 
     },
 
@@ -498,10 +540,41 @@ export const ClientRepository = {
             .where('name like :query or lastname like :query or email like :query', {
                 query: '%' + query + '%',
             })
-            .limit(20)
+            .andWhere("isDeleted = false")
+            .andWhere("isAdmin = false")
+            .limit(10)
             .getMany()
+        
+        let data = []
+        let currentDate = moment().tz("America/Mexico_City")
+        for (var i in clients) {
+            delete clients[i].password
+            delete clients[i].pictureUrl
+            delete clients[i].googleId
+            delete clients[i].facebookId
+            delete clients[i].isAdmin
+            delete clients[i].pictureUrl
+            delete clients[i].tempToken
 
-        return clients
+            let booking = await createQueryBuilder(Booking)
+                .leftJoinAndSelect("Booking.Schedule", "Schedule")
+                .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
+                .andWhere('Time(Schedule.start)<:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+                .andWhere('Booking.user_id =:userId', { userId: clients[i].id })
+                .orderBy("Schedule.date", "DESC")
+                .addOrderBy("Schedule.start", "ASC")
+                .getOne();
+
+                if (!booking) {
+                    booking = null
+                }
+                data.push({
+                    ...clients[i],
+                    nextClass: booking
+                })
+        }
+        //console.log(data)
+        return data
     }
 
 }

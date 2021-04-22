@@ -483,12 +483,45 @@ export const PurchaseRepository = {
         await getRepository(Purchase).save(purchase)
     },
 
-    async getAllPurchases() {
-        const purchases = await getRepository(Purchase).find({
+    async getAllPurchases(page: string) {
+        const pages = parseInt(page)
+
+        let purchases = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect("Purchase.User", "User")
+            .leftJoinAndSelect("Purchase.Transaction", "Transaction")
+            .leftJoinAndSelect("Purchase.Bundle", "Bundle")
+            .select([
+                "Purchase",
+                "Transaction",
+                "Bundle",
+                "User.name",
+                "User.lastname",
+                "User.email"
+            ])
+            .orderBy("Purchase.date","DESC")
+            .skip(pages * 10)
+            .take(10)
+            .getMany();
+
+            let pagesNumber = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect("Purchase.User", "User")
+            .leftJoinAndSelect("Purchase.Transaction", "Transaction")
+            .leftJoinAndSelect("Purchase.Bundle", "Bundle")
+            .select([
+                "Purchase.id"
+            ])
+            .orderBy("Purchase.date","DESC")
+            .skip(pages * 10)
+            .take(10)
+            .getCount()
+            
+
+        /*const purchases = await getRepository(Purchase).find({
             relations: ['Transaction', 'User', 'Bundle']
-        })
+        })*/
         if (!purchases) throw new ErrorResponse(404, 70, 'No hay compras registradas')
-        return purchases
+        console.log(purchases)
+        return {purchases, pages: pagesNumber}
     },
 
     async completePurchase(purchaseId: number) {
@@ -546,6 +579,21 @@ export const PurchaseRepository = {
             oldPendingPurchases[i].status = status.CANCELED
             await getRepository(Purchase).save(oldPendingPurchases[i])
         }
+    },
+
+    async searchPurchase(query: string) {
+        const purchases = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect("Purchase.User", "User")
+            .leftJoinAndSelect("Purchase.Transaction", "Transaction")
+            .leftJoinAndSelect("Purchase.Bundle", "Bundle")
+            .where('Purchase.operationIds like :query  or Purchase.date like :query or Purchase.status like :query or Purchase.pendingAmount like :query or Bundle.name like :query or User.name like :query or User.lastname like :query or User.email like :query', {
+                query: '%' + query + '%',
+            })
+            .limit(10)
+            .orderBy("Purchase.date", "DESC")
+            .getMany()
+
+        return purchases
     },
 }
 

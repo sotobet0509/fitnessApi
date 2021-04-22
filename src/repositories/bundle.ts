@@ -11,13 +11,25 @@ import { PasswordService } from '../services/password'
 
 export const BundleRepository = {
     async getBundle(bundleId: number) {
+        
         const bundle = await getRepository(Bundle).findOne({
             where: {
                 id: bundleId
             }
         })
         if (!bundle) throw new ErrorResponse(404, 11, 'El paquete no existe')
-        return bundle
+        
+        let alternateUser
+        if(bundle.altermateUserId){
+            alternateUser = await getRepository(Alternate_users).findOne({
+                where:{
+                    id: bundle.altermateUserId
+                }
+            })
+        }
+        
+        return {...bundle,
+            alternateUser}
     },
 
     async getAllBundles(userId: User) {
@@ -95,6 +107,7 @@ export const BundleRepository = {
     },
 
     async createBundle(data: BundleSchema) {
+        console.log(data)
         let collaborator = new Alternate_users()
         if (!data.alternateUserId && data.isSpecial) {
             collaborator.email = data.email
@@ -122,6 +135,7 @@ export const BundleRepository = {
         let newBundle = new Bundle()
         newBundle.name = data.name ? data.name : newBundle.name
         newBundle.price = data.price ? data.price : newBundle.price
+        newBundle.offer = data.offer ? data.offer : newBundle.offer
         newBundle.description = data.description ? data.description : newBundle.description
         newBundle.classNumber = data.classNumber ? data.classNumber : newBundle.classNumber
         if(newBundle.classNumber == 0 ){
@@ -196,6 +210,7 @@ export const BundleRepository = {
 
         updateBundle.name = data.name ? data.name : updateBundle.name
         updateBundle.price = data.price ? data.price : updateBundle.price
+        updateBundle.offer = data.offer ? data.offer : updateBundle.offer
         updateBundle.description = data.description ? data.description : updateBundle.description
         updateBundle.classNumber = data.classNumber ? data.classNumber : updateBundle.classNumber
         if(updateBundle.classNumber == 0 ){

@@ -53,6 +53,7 @@ export const BundleController = {
         const userSchema = Joi.object().keys({
             name: Joi.string().required(),
             price: Joi.number().required(),
+            offer: Joi.number(),
             description: Joi.string().required(),
             classNumber: Joi.number(),
             expirationDays: Joi.number().required(),
@@ -98,6 +99,7 @@ export const BundleController = {
         const userSchema = Joi.object().keys({
             name: Joi.string(),
             price: Joi.number(),
+            offer: Joi.number(),
             description: Joi.string(),
             classNumber: Joi.number(),
             expirationDays: Joi.number(),

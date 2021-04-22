@@ -48,7 +48,7 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
                 },
                 relations: ['fromPurchase']
             })*/
-            console.log(b.fromPurchase , purchase.id)
+            //console.log(b.fromPurchase , purchase.id)
             if (b.fromPurchase && purchase.id === b.fromPurchase.id && !b.isPass) {
                 bss.push(b)
             }

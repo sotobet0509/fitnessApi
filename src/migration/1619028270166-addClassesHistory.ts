@@ -1,15 +1,16 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class Survey11616536764617 implements MigrationInterface {
-    name = 'Survey11616536764617'
+export class addClassesHistory1619028270166 implements MigrationInterface {
+    name = 'addClassesHistory1619028270166'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query("CREATE TABLE `folios` (`id` int NOT NULL AUTO_INCREMENT, `folio` varchar(255) NOT NULL, `isAviable` tinyint NOT NULL DEFAULT 1, `purchase` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `redeemAt` datetime NULL, `expirationDate` datetime NOT NULL, `clientName` varchar(255) NOT NULL, `alternate_users_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `alternate_Users` (`id` varchar(36) NOT NULL, `email` varchar(255) NOT NULL, `password` varchar(255) NOT NULL, `name` varchar(255) NOT NULL, `contact` varchar(255) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `blackList` (`id` int NOT NULL AUTO_INCREMENT, `token` varchar(255) NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB");
-        await queryRunner.query("CREATE TABLE `bundles` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `price` float NOT NULL, `offer` float NOT NULL, `description` varchar(255) NOT NULL, `classNumber` int NOT NULL, `expirationDays` int NOT NULL, `passes` int NOT NULL, `isDeleted` tinyint NOT NULL, `isRecurrent` tinyint NOT NULL, `isUnlimited` tinyint NOT NULL DEFAULT 0, `isEspecial` tinyint NOT NULL DEFAULT 0, `especialDescription` varchar(255) NULL, `promotionExpirationDays` int NULL, `pictureUrl` varchar(255) NULL, `altermateUserId` int NOT NULL, `max` int NOT NULL DEFAULT 1, `memberLimit` int NOT NULL DEFAULT 0, `isGroup` tinyint NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `bundles` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `price` float NOT NULL, `offer` float NULL, `description` varchar(255) NOT NULL, `classNumber` int NOT NULL, `expirationDays` int NOT NULL, `passes` int NOT NULL, `isDeleted` tinyint NOT NULL, `isRecurrent` tinyint NOT NULL, `isUnlimited` tinyint NOT NULL DEFAULT 0, `isEspecial` tinyint NOT NULL DEFAULT 0, `especialDescription` varchar(255) NULL, `promotionExpirationDays` int NULL, `pictureUrl` varchar(255) NULL, `altermateUserId` int NOT NULL, `max` int NOT NULL DEFAULT 1, `memberLimit` int NOT NULL DEFAULT 0, `isGroup` tinyint NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `transactions` (`id` varchar(36) NOT NULL, `voucher` varchar(255) NULL, `date` datetime NOT NULL, `invoice` tinyint NOT NULL, `total` float NOT NULL, `comments` text NULL, `purchases_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `payment_methods` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `type` enum ('efectivo', 'tarjeta') NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `classesHistory` (`id` int NOT NULL AUTO_INCREMENT, `takenClasses` int NOT NULL, `takenPasses` int NOT NULL, `takenGroupClasses` int NOT NULL, `userId` varchar(36) NULL, UNIQUE INDEX `REL_47fa569dfb9baab89f3f56d872` (`userId`), PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `survey1` (`id` int NOT NULL AUTO_INCREMENT, `device` enum ('Mobile', 'Desktop') NOT NULL, `browser` varchar(255) NOT NULL, `conection` enum ('Mobile', 'WiFi') NOT NULL, `description` text NOT NULL, `url` varchar(255) NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `userId` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `user_items` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` varchar(255) NULL, `pictureUrl` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `categories` (`id` int NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL, `description` varchar(255) NULL, `type` varchar(255) NOT NULL, `user_items_id` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
@@ -27,6 +28,7 @@ export class Survey11616536764617 implements MigrationInterface {
         await queryRunner.query("CREATE TABLE `versions` (`id` int NOT NULL AUTO_INCREMENT, `version` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("ALTER TABLE `folios` ADD CONSTRAINT `FK_eef86d0781caf0af53c7b36bc17` FOREIGN KEY (`alternate_users_id`) REFERENCES `alternate_Users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `transactions` ADD CONSTRAINT `FK_ff9c524856f36515985a8015cb8` FOREIGN KEY (`purchases_id`) REFERENCES `purchases`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
+        await queryRunner.query("ALTER TABLE `classesHistory` ADD CONSTRAINT `FK_47fa569dfb9baab89f3f56d8720` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `survey1` ADD CONSTRAINT `FK_6978f3100dddc644faaa71152de` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `categories` ADD CONSTRAINT `FK_9b7d3d8bc0ed7588cf344746100` FOREIGN KEY (`user_items_id`) REFERENCES `user_items`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `user_categories` ADD CONSTRAINT `FK_011a48c21d9c70cab6ea18b120f` FOREIGN KEY (`User_id`) REFERENCES `users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
@@ -60,6 +62,7 @@ export class Survey11616536764617 implements MigrationInterface {
         await queryRunner.query("ALTER TABLE `user_categories` DROP FOREIGN KEY `FK_011a48c21d9c70cab6ea18b120f`");
         await queryRunner.query("ALTER TABLE `categories` DROP FOREIGN KEY `FK_9b7d3d8bc0ed7588cf344746100`");
         await queryRunner.query("ALTER TABLE `survey1` DROP FOREIGN KEY `FK_6978f3100dddc644faaa71152de`");
+        await queryRunner.query("ALTER TABLE `classesHistory` DROP FOREIGN KEY `FK_47fa569dfb9baab89f3f56d8720`");
         await queryRunner.query("ALTER TABLE `transactions` DROP FOREIGN KEY `FK_ff9c524856f36515985a8015cb8`");
         await queryRunner.query("ALTER TABLE `folios` DROP FOREIGN KEY `FK_eef86d0781caf0af53c7b36bc17`");
         await queryRunner.query("DROP TABLE `versions`");
@@ -77,6 +80,8 @@ export class Survey11616536764617 implements MigrationInterface {
         await queryRunner.query("DROP TABLE `categories`");
         await queryRunner.query("DROP TABLE `user_items`");
         await queryRunner.query("DROP TABLE `survey1`");
+        await queryRunner.query("DROP INDEX `REL_47fa569dfb9baab89f3f56d872` ON `classesHistory`");
+        await queryRunner.query("DROP TABLE `classesHistory`");
         await queryRunner.query("DROP TABLE `payment_methods`");
         await queryRunner.query("DROP TABLE `transactions`");
         await queryRunner.query("DROP TABLE `bundles`");
