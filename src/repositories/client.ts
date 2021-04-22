@@ -260,6 +260,7 @@ export const ClientRepository = {
     },
 
     async getClient(clientId: string) {
+        /*
         // let client = await createQueryBuilder(User)
         //     .leftJoinAndSelect('User.Purchase', 'Purchase')
         //     .leftJoinAndSelect('User.Booking', 'Booking')
@@ -289,7 +290,78 @@ export const ClientRepository = {
         return {
             ...c
         }
-        //return clientGroup;
+        //return clientGroup;*/
+
+
+
+        let currentDate = moment().tz("America/Mexico_City")
+        let pendingClasses = 0
+        let pendingClassesGroup = 0
+        let pendingPasses = 0
+        let client = await getRepository(User).findOne({
+            where: {
+                id: clientId
+            },
+            relations: ["ClassesHistory", 'Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Transaction', 'Purchase.Payment_method', 'User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items'],
+
+        })
+        
+        const purchases = await createQueryBuilder(Purchase)
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .andWhere('Purchase.users_id=:userId', { userId: client.id })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getMany();
+
+        let mainUser = ""
+
+        if (client.fromGroup) {
+            mainUser = client.fromGroup
+        } else {
+            mainUser = client.id
+        }
+        const groupPurchases = await createQueryBuilder(Purchase)
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .andWhere('Purchase.users_id=:userId', { userId: mainUser })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
+            .getMany();
+
+        for (var i in purchases) {
+            pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
+            pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
+        }
+
+        for (var i in groupPurchases) {
+            pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
+        }
+        delete client.googleId
+        delete client.fromGroup
+        delete client.isLeader
+        delete client.password
+        delete client.tempToken
+        delete client.isAdmin
+        delete client.groupName
+        delete client.changed
+        let takenC =  client.ClassesHistory.takenClasses
+        let takenP = client.ClassesHistory.takenPasses
+        let takenGC = client.ClassesHistory.takenGroupClasses
+        delete client.ClassesHistory
+
+        return {
+            ...client,
+            taken: takenC,
+            takenPasses: takenP,
+            takenGroup: takenGC,
+            pending: pendingClasses,
+            pendingPases: pendingPasses,
+            pendingGroup: pendingClassesGroup
+        }
+
     },
 
     async createClient(data: CustomerData) {
@@ -544,7 +616,7 @@ export const ClientRepository = {
             .andWhere("isAdmin = false")
             .limit(10)
             .getMany()
-        
+
         let data = []
         let currentDate = moment().tz("America/Mexico_City")
         for (var i in clients) {
@@ -565,15 +637,61 @@ export const ClientRepository = {
                 .addOrderBy("Schedule.start", "ASC")
                 .getOne();
 
-                if (!booking) {
-                    booking = null
-                }
-                data.push({
-                    ...clients[i],
-                    nextClass: booking
-                })
+            let pendingClasses = 0
+            let pendingClassesGroup = 0
+            let pendingPasses = 0
+
+            const purchases = await createQueryBuilder(Purchase)
+                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                .andWhere('Purchase.users_id=:userId', { userId: clients[i].id })
+                .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+                .getMany();
+
+            let mainUser = ""
+
+            if (clients[i].fromGroup) {
+                mainUser = clients[i].fromGroup
+            } else {
+                mainUser = clients[i].id
+            }
+            const groupPurchases = await createQueryBuilder(Purchase)
+                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+                .andWhere('Purchase.users_id=:userId', { userId: mainUser })
+                .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
+                .getMany();
+
+            for (var i in purchases) {
+                pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
+                pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
+            }
+
+            for (var i in groupPurchases) {
+                pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
+            }
+
+
+
+            if (!booking) {
+                booking = null
+            }
+            if (pendingPasses < 0) pendingPasses = 0
+            if (pendingClasses < 0) pendingClasses = 0
+            if (pendingClassesGroup < 0) pendingClassesGroup = 0
+
+            data.push({
+                ...clients[i],
+                nextClass: booking,
+                pending: pendingClasses,
+                pendingPasses: pendingPasses,
+                pendingGroup: pendingClassesGroup
+            })
         }
-        //console.log(data)
         return data
     }
 

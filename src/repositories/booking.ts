@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Repository } from 'typeorm'
+import { getRepository, getConnection, Repository, createQueryBuilder } from 'typeorm'
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Instructor } from '../entities/Instructors'
 import { InstructorController } from '../controllers/instructor'
@@ -100,8 +100,74 @@ export const BookingRepository = {
 
             await getRepository(Purchase).save(purchase)
             await getRepository(Booking).remove(booking)
-        }else{
+        } else {
             await getRepository(Booking).remove(booking)
         }
     },
+
+    async searchBooking(query: string, clientId: string) {
+        const bookings = await createQueryBuilder(Booking)
+            .leftJoinAndSelect("Booking.Schedule", "Schedule")
+            .leftJoinAndSelect("Booking.Seat", "Seat")
+            .leftJoinAndSelect("Schedule.Instructor", "Instructor")
+            .where("Booking.user_id =:client_Id", { client_Id: clientId })
+            .andWhere('Schedule.date like :query or Schedule.start like :query or Schedule.end like :query or Instructor.name like :query or Instructor.lastname like :query ', {
+                query: '%' + query + '%',
+            })
+            .limit(10)
+            .getMany()
+
+        for (var i in bookings) {
+            delete bookings[i].createdAt
+            delete bookings[i].assistance
+            delete bookings[i].Schedule.theme
+            delete bookings[i].Schedule.isPrivate
+            delete bookings[i].Schedule.Instructor.description
+            delete bookings[i].Schedule.Instructor.profilePicture
+            delete bookings[i].Schedule.Instructor.largePicture
+            delete bookings[i].Schedule.Instructor.email
+            delete bookings[i].Schedule.Instructor.password
+            delete bookings[i].Schedule.Instructor.createdAt
+            delete bookings[i].Schedule.Instructor.id
+        }
+        return bookings
+    },
+
+    async getClientBookings(page: string, clientId: string) {
+        const pages = parseInt(page)
+
+        let bookings = await createQueryBuilder(Booking)
+            .leftJoinAndSelect("Booking.Schedule", "Schedule")
+            .leftJoinAndSelect("Booking.Seat", "Seat")
+            .leftJoinAndSelect("Schedule.Instructor", "Instructor")
+            .where("Booking.user_id =:client_Id", { client_Id: clientId })
+            .skip(pages * 10)
+            .take(10)
+            .orderBy("Schedule.date","DESC")
+            .getMany()
+
+            let pageNumber= await createQueryBuilder(Booking)
+            .leftJoinAndSelect("Booking.Schedule", "Schedule")
+            .leftJoinAndSelect("Booking.Seat", "Seat")
+            .leftJoinAndSelect("Schedule.Instructor", "Instructor")
+            .where("Booking.user_id =:client_Id", { client_Id: clientId })
+            .orderBy("Schedule.date","DESC")
+            .getCount()
+
+            for (var i in bookings) {
+                delete bookings[i].createdAt
+                delete bookings[i].assistance
+                delete bookings[i].Schedule.theme
+                delete bookings[i].Schedule.isPrivate
+                delete bookings[i].Schedule.Instructor.description
+                delete bookings[i].Schedule.Instructor.profilePicture
+                delete bookings[i].Schedule.Instructor.largePicture
+                delete bookings[i].Schedule.Instructor.email
+                delete bookings[i].Schedule.Instructor.password
+                delete bookings[i].Schedule.Instructor.createdAt
+                delete bookings[i].Schedule.Instructor.id
+            }
+        return {bookings,pageNumber}
+    },
+
 }

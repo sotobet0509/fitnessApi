@@ -16,7 +16,7 @@ import { EditItems } from '../interfaces/items'
 import { GroupName, UserId } from '../interfaces/me'
 import { TokenService } from '../services/token'
 import { ClassesHistory } from '../entities/ClassesHistory'
-import { Console } from 'console'
+
 
 
 export const MeRepository = {
@@ -151,7 +151,7 @@ export const MeRepository = {
         relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User']
     })*/
     async getClasses(user: User) {
-        let client
+        /*let client
         client = await createQueryBuilder(User)
             .innerJoinAndSelect('User.Purchase', 'Purchase')
             .innerJoinAndSelect('User.Booking', 'Booking')
@@ -315,6 +315,58 @@ export const MeRepository = {
             takenGroup: boookingsArray.length,
             pendingPassesGroup: pendingGroupP,
             takenPassesGroup: boookingsPassesArray.length
+        }*/
+        let currentDate = moment().tz("America/Mexico_City")
+        let pendingClasses = 0
+        let pendingClassesGroup = 0
+        let pendingPasses = 0
+        let client = await getRepository(User).findOne({
+            where: {
+                id: user.id
+            },
+           relations:["ClassesHistory"]
+        })
+        const purchases = await createQueryBuilder(Purchase)
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .andWhere('Purchase.users_id=:userId', { userId: client.id })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .getMany();
+
+        let mainUser = ""
+
+        if (client.fromGroup) {
+            mainUser = client.fromGroup
+        } else {
+            mainUser = client.id
+        }
+        const groupPurchases = await createQueryBuilder(Purchase)
+            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+            .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
+            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
+            .andWhere('Purchase.users_id=:userId', { userId: mainUser })
+            .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
+            .getMany();
+
+        for (var i in purchases) {
+            pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
+            pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
+        }
+
+        for (var i in groupPurchases) {
+            pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
+        }
+
+        return {
+            taken: client.ClassesHistory.takenClasses,
+            takenPasses: client.ClassesHistory.takenPasses,
+            takenGroup: client.ClassesHistory.takenGroupClasses,
+            pending: pendingClasses,
+            pendingPases: pendingPasses,
+            pendingGroup: pendingClassesGroup
         }
     },
 
@@ -567,14 +619,10 @@ export const MeRepository = {
                     fromPurchase: allPurchases[i]
                 }
             })
-           
+
             if (bookings.length > 0) {
                 allPurchases[i].addedClasses -= bookings.length
-                if(allPurchases[i].id == 1990){
-                    console.log(allPurchases[i].id, allPurchases[i].addedClasses )
-                    //await getRepository(Purchase).save(allPurchases[i])
-                }
-                
+                await getRepository(Purchase).save(allPurchases[i])
             }
         }
     }

@@ -294,7 +294,7 @@ export const ScheduleRepository = {
 
         let p = await MeRepository.getClasses(client)
         pending = p.pending
-        pendingPasses = p.pendingPasses
+       // decomentar despues  pendingPasses = p.pendingPasses
 
         if (!scheduleExist.isPrivate) {
             if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
@@ -445,7 +445,7 @@ export const ScheduleRepository = {
 
         let p = await MeRepository.getClasses(client)
         pendingGroupC = p.pendingGroup
-        pendingGroupP = p.pendingPassesGroup
+        //descomentar despues pendingGroupP = p.pendingPassesGroup
 
         if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
@@ -559,7 +559,7 @@ export const ScheduleRepository = {
 
             let p = await MeRepository.getClasses(client)
             pendingGroupC = p.pendingGroup
-            pendingGroupP = p.pendingPassesGroup
+           //descomentar despues pendingGroupP = p.pendingPassesGroup
 
             if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
 
