@@ -175,7 +175,6 @@ export const LocationRepository = {
         const currentDay = moment(data.start).isoWeekday()
         for (var i in filteredSchedules2) {
             const filteredSchedule = filteredSchedules2[i]
-            //console.log(filteredSchedule)
             let day = moment(filteredSchedule.date).isoWeekday()
             if (day < currentDay) day = day + 7
             days[day - currentDay].push(filteredSchedule)
@@ -360,7 +359,6 @@ export const LocationRepository = {
         const currentDay = moment(data.start).isoWeekday()
         for (var i in filteredSchedules2) {
             const filteredSchedule = filteredSchedules2[i]
-            //console.log(filteredSchedule)
             let day = moment(filteredSchedule.date).isoWeekday()
             if (day < currentDay) day = day + 7
             days[day - currentDay].push(filteredSchedule)
@@ -454,17 +452,6 @@ export const LocationRepository = {
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         if (!room2) throw new ErrorResponse(404, 12, 'La sala no existe')
 
-
-        for (var i in room) {
-            for (var j in room[i].Schedules) {
-                if (room[i].Schedules[j].isPrivate) {
-                    delete room[i].Schedules[j]
-                }
-            }
-        }
-
-
-
         let filteredSchedules2 = []
         for (var i in room2) {
             const room3 = room2[i] as Room
@@ -546,7 +533,6 @@ export const LocationRepository = {
         const currentDay = moment(data.start).isoWeekday()
         for (var i in filteredSchedules2) {
             const filteredSchedule = filteredSchedules2[i]
-            //console.log(filteredSchedule)
             let day = moment(filteredSchedule.date).isoWeekday()
             if (day < currentDay) day = day + 7
             days[day - currentDay].push(filteredSchedule)
@@ -573,7 +559,7 @@ export const LocationRepository = {
 
 
     async getSchedules(page: string) {
-        const pages = parseInt(page)
+        const pages = parseInt(page) - 1
 
 
         const schedules = await createQueryBuilder(Schedule)
@@ -596,8 +582,6 @@ export const LocationRepository = {
             ])
             .leftJoinAndSelect("Schedule.Instructor", "Instructor")
             .leftJoinAndSelect("Schedule.Rooms", "Room")
-            .skip(pages * 10)
-            .take(10)
             .orderBy("Schedule.id", "DESC")
             .getCount()
 

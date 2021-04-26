@@ -484,7 +484,7 @@ export const PurchaseRepository = {
     },
 
     async getAllPurchases(page: string) {
-        const pages = parseInt(page)
+        const pages = parseInt(page) - 1
 
         let purchases = await createQueryBuilder(Purchase)
             .leftJoinAndSelect("Purchase.User", "User")
@@ -498,30 +498,27 @@ export const PurchaseRepository = {
                 "User.lastname",
                 "User.email"
             ])
-            .orderBy("Purchase.date","DESC")
+            .orderBy("Purchase.date", "DESC")
             .skip(pages * 10)
             .take(10)
             .getMany();
 
-            let pagesNumber = await createQueryBuilder(Purchase)
+        let pagesNumber = await createQueryBuilder(Purchase)
             .leftJoinAndSelect("Purchase.User", "User")
             .leftJoinAndSelect("Purchase.Transaction", "Transaction")
             .leftJoinAndSelect("Purchase.Bundle", "Bundle")
             .select([
                 "Purchase.id"
             ])
-            .orderBy("Purchase.date","DESC")
-            .skip(pages * 10)
-            .take(10)
+            .orderBy("Purchase.date", "DESC")
             .getCount()
-            
+
 
         /*const purchases = await getRepository(Purchase).find({
             relations: ['Transaction', 'User', 'Bundle']
         })*/
         if (!purchases) throw new ErrorResponse(404, 70, 'No hay compras registradas')
-        console.log(purchases)
-        return {purchases, pages: pagesNumber}
+        return { purchases, pages: pagesNumber }
     },
 
     async completePurchase(purchaseId: number) {
@@ -595,5 +592,104 @@ export const PurchaseRepository = {
 
         return purchases
     },
+
+    async searchClientPurchase(query: string, clientId: string) {
+        const purchases = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect("Purchase.User", "User")
+            .leftJoinAndSelect("Purchase.Transaction", "Transaction")
+            .leftJoinAndSelect("Purchase.Bundle", "Bundle")
+            .leftJoinAndSelect("Purchase.Payment_method", "Payment_method")
+            .where('Purchase.date like :query or Transaction.voucher like :query  or  Payment_method.type like :query or Transaction.total like :query or Bundle.name like :query or Purchase.expirationDate like :query', {
+                query: '%' + query + '%',
+            })
+            .andWhere('User.id =:client_id', { client_id: clientId })
+            .limit(10)
+            .orderBy("Purchase.date", "DESC")
+            .getMany()
+
+
+            for(var i in purchases){
+                delete purchases[i].User
+                delete purchases[i].Bundle.description
+                delete purchases[i].Bundle.especialDescription
+                delete purchases[i].Bundle.isDeleted 
+                delete purchases[i].Bundle.altermateUserId 
+                delete purchases[i].Bundle.isEspecial 
+                delete purchases[i].Bundle.isGroup
+                delete purchases[i].Bundle.classNumber 
+                delete purchases[i].Bundle.isRecurrent 
+                delete purchases[i].Bundle.isUnlimited
+                delete purchases[i].Bundle.price
+                delete purchases[i].Bundle.passes
+                delete purchases[i].Bundle.pictureUrl
+                delete purchases[i].Bundle.max
+                delete purchases[i].Bundle.memberLimit
+                delete purchases[i].Bundle.promotionExpirationDays
+                delete purchases[i].Bundle.offer
+                delete purchases[i].Bundle.expirationDays
+                delete purchases[i].addedClasses
+                delete purchases[i].addedPasses
+                delete purchases[i].pendingAmount
+                delete purchases[i].operationIds
+                delete purchases[i].Transaction.comments
+                delete purchases[i].Transaction.invoice
+            }
+        return purchases
+    },
+
+    async getClientPurchases(clientId: string, page: string) {
+    
+        const pages = parseInt(page) - 1
+        
+        const purchases = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect("Purchase.User", "User")
+            .leftJoinAndSelect("Purchase.Transaction", "Transaction")
+            .leftJoinAndSelect("Purchase.Bundle", "Bundle")
+            .leftJoinAndSelect("Purchase.Payment_method", "Payment_method")
+            .andWhere('User.id =:client_id', { client_id: clientId })
+            .skip(pages * 10)
+            .take(10)
+            .orderBy("Purchase.date", "DESC")
+            .getMany()
+
+            const pagesNumber = await createQueryBuilder(Purchase)
+            .leftJoinAndSelect("Purchase.User", "User")
+            .leftJoinAndSelect("Purchase.Transaction", "Transaction")
+            .leftJoinAndSelect("Purchase.Bundle", "Bundle")
+            .leftJoinAndSelect("Purchase.Payment_method", "Payment_method")
+            .andWhere('User.id =:client_id', { client_id: clientId })
+            .orderBy("Purchase.date", "DESC")
+            .getCount()
+
+
+            for(var i in purchases){
+                delete purchases[i].User
+                delete purchases[i].Bundle.description
+                delete purchases[i].Bundle.especialDescription
+                delete purchases[i].Bundle.isDeleted 
+                delete purchases[i].Bundle.altermateUserId 
+                delete purchases[i].Bundle.isEspecial 
+                delete purchases[i].Bundle.isGroup
+                delete purchases[i].Bundle.classNumber 
+                delete purchases[i].Bundle.isRecurrent 
+                delete purchases[i].Bundle.isUnlimited
+                delete purchases[i].Bundle.price
+                delete purchases[i].Bundle.passes
+                delete purchases[i].Bundle.pictureUrl
+                delete purchases[i].Bundle.max
+                delete purchases[i].Bundle.memberLimit
+                delete purchases[i].Bundle.promotionExpirationDays
+                delete purchases[i].Bundle.offer
+                delete purchases[i].Bundle.expirationDays
+                delete purchases[i].addedClasses
+                delete purchases[i].addedPasses
+                delete purchases[i].pendingAmount
+                delete purchases[i].operationIds
+                delete purchases[i].Transaction.comments
+                delete purchases[i].Transaction.invoice
+            }
+        return {purchases, pagesNumber }
+    },
 }
+
 

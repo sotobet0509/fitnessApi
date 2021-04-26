@@ -9,6 +9,7 @@ import * as moment from 'moment'
 import { Schedule } from '../entities/Schedules'
 import { Purchase } from '../entities/Purchases'
 import { DeleteBooking } from '../interfaces/booking'
+import { ClassesHistory } from '../entities/ClassesHistory'
 
 export const BookingRepository = {
 
@@ -19,7 +20,7 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule', 'fromPurchase']
+            relations: ['Schedule', 'fromPurchase', 'User']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
         const start = moment(booking.Schedule.date).set({
@@ -35,10 +36,45 @@ export const BookingRepository = {
                         id: booking.fromPurchase.id
                     }
                 })
-                privatePurchase.addedClasses -= 1
+                privatePurchase.addedClasses += 1
+
+                let classesHistory = await getRepository(ClassesHistory).findOne({
+                    where: {
+                        User: booking.User
+                    }
+                })
+
+                if (booking.isPass) {
+                    classesHistory.takenPasses -= 1
+                } else {
+                    classesHistory.takenClasses -= 1
+                }
+                await getRepository(ClassesHistory).save(classesHistory)
                 await getRepository(Purchase).save(privatePurchase)
+                await bookingRepository.remove(booking)
+            }else{
+                let purchase = await getRepository(Purchase).findOne({
+                    where: {
+                        id: booking.fromPurchase.id
+                    }
+                })
+                purchase.addedClasses += 1
+
+                let classesHistory = await getRepository(ClassesHistory).findOne({
+                    where: {
+                        User: booking.User
+                    }
+                })
+
+                if (booking.isPass) {
+                    classesHistory.takenPasses -= 1
+                } else {
+                    classesHistory.takenClasses -= 1
+                }
+                await getRepository(ClassesHistory).save(classesHistory)
+                await getRepository(Purchase).save(purchase)
+                await bookingRepository.remove(booking)
             }
-            await bookingRepository.remove(booking)
         } else {
             throw new ErrorResponse(409, 18, 'La reservacion ya no se puede eliminar')
         }
@@ -84,9 +120,15 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule', 'fromPurchase']
+            relations: ['Schedule', 'fromPurchase','User']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
+
+        let classesHistory = await getRepository(ClassesHistory).findOne({
+            where:{
+                User: booking.User
+            }
+        })
 
         if (data.discountClass) {
             let purchase = await getRepository(Purchase).findOne({
@@ -134,7 +176,7 @@ export const BookingRepository = {
     },
 
     async getClientBookings(page: string, clientId: string) {
-        const pages = parseInt(page)
+        const pages = parseInt(page) - 1
 
         let bookings = await createQueryBuilder(Booking)
             .leftJoinAndSelect("Booking.Schedule", "Schedule")
@@ -143,31 +185,31 @@ export const BookingRepository = {
             .where("Booking.user_id =:client_Id", { client_Id: clientId })
             .skip(pages * 10)
             .take(10)
-            .orderBy("Schedule.date","DESC")
+            .orderBy("Schedule.date", "DESC")
             .getMany()
 
-            let pageNumber= await createQueryBuilder(Booking)
+        let pageNumber = await createQueryBuilder(Booking)
             .leftJoinAndSelect("Booking.Schedule", "Schedule")
             .leftJoinAndSelect("Booking.Seat", "Seat")
             .leftJoinAndSelect("Schedule.Instructor", "Instructor")
             .where("Booking.user_id =:client_Id", { client_Id: clientId })
-            .orderBy("Schedule.date","DESC")
+            .orderBy("Schedule.date", "DESC")
             .getCount()
 
-            for (var i in bookings) {
-                delete bookings[i].createdAt
-                delete bookings[i].assistance
-                delete bookings[i].Schedule.theme
-                delete bookings[i].Schedule.isPrivate
-                delete bookings[i].Schedule.Instructor.description
-                delete bookings[i].Schedule.Instructor.profilePicture
-                delete bookings[i].Schedule.Instructor.largePicture
-                delete bookings[i].Schedule.Instructor.email
-                delete bookings[i].Schedule.Instructor.password
-                delete bookings[i].Schedule.Instructor.createdAt
-                delete bookings[i].Schedule.Instructor.id
-            }
-        return {bookings,pageNumber}
+        for (var i in bookings) {
+            delete bookings[i].createdAt
+            delete bookings[i].assistance
+            delete bookings[i].Schedule.theme
+            delete bookings[i].Schedule.isPrivate
+            delete bookings[i].Schedule.Instructor.description
+            delete bookings[i].Schedule.Instructor.profilePicture
+            delete bookings[i].Schedule.Instructor.largePicture
+            delete bookings[i].Schedule.Instructor.email
+            delete bookings[i].Schedule.Instructor.password
+            delete bookings[i].Schedule.Instructor.createdAt
+            delete bookings[i].Schedule.Instructor.id
+        }
+        return { bookings, pageNumber }
     },
 
 }

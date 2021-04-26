@@ -320,11 +320,14 @@ export const MeRepository = {
         let pendingClasses = 0
         let pendingClassesGroup = 0
         let pendingPasses = 0
+        let isUnlimited = false
+        let isUnlimitedGroup = false
+
         let client = await getRepository(User).findOne({
             where: {
                 id: user.id
             },
-           relations:["ClassesHistory"]
+            relations: ["ClassesHistory"]
         })
         const purchases = await createQueryBuilder(Purchase)
             .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
@@ -354,19 +357,37 @@ export const MeRepository = {
         for (var i in purchases) {
             pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
             pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
+            if(purchases[i].Bundle.isUnlimited){
+                isUnlimited = true
+            }
         }
 
         for (var i in groupPurchases) {
             pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
+            if(groupPurchases[i].Bundle.isUnlimited){
+                isUnlimitedGroup = true
+            }
         }
+        if (pendingClasses < 0) pendingClasses = 0
+        if (pendingClassesGroup < 0) pendingClassesGroup = 0
+        if (pendingPasses < 0) pendingPasses = 0
 
+        let nextExpirationDate: Date
+        if (purchases.length == 0) {
+            nextExpirationDate = null
+        } else {
+            nextExpirationDate = purchases[purchases.length - 1].expirationDate
+        }
         return {
             taken: client.ClassesHistory.takenClasses,
             takenPasses: client.ClassesHistory.takenPasses,
             takenGroup: client.ClassesHistory.takenGroupClasses,
             pending: pendingClasses,
-            pendingPases: pendingPasses,
-            pendingGroup: pendingClassesGroup
+            pendingPasses: pendingPasses,
+            pendingGroup: pendingClassesGroup,
+            isUnlimited: isUnlimited,
+            isUnlimitedGroup: isUnlimitedGroup,
+            nextExpirationDate: nextExpirationDate
         }
     },
 

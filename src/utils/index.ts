@@ -48,7 +48,6 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
                 },
                 relations: ['fromPurchase']
             })*/
-            //console.log(b.fromPurchase , purchase.id)
             if (b.fromPurchase && purchase.id === b.fromPurchase.id && !b.isPass) {
                 bss.push(b)
             }
@@ -79,10 +78,7 @@ export const getPendingClasses = async (purchases: Purchase[], bookings: Booking
         })
         if (contadorClasses <= 0 && contadorPasses <= 0) results.pop()
     }
-
-    //console.log(results)
     const orderedPurchases = orderPendingClassesByExpirationDay(results)
-    //console.log(orderedPurchases.length)
     return orderedPurchases
 }
 

@@ -107,7 +107,6 @@ export const BundleRepository = {
     },
 
     async createBundle(data: BundleSchema) {
-        console.log(data)
         let collaborator = new Alternate_users()
         if (!data.alternateUserId && data.isSpecial) {
             collaborator.email = data.email

@@ -213,7 +213,7 @@ export const ClientRepository = {
             }
         }
         */
-        const pages = parseInt(page)
+        const pages = parseInt(page) - 1
         let clients = await createQueryBuilder(User)
             .select([
                 "User.id",
@@ -231,8 +231,6 @@ export const ClientRepository = {
             .select([
                 "User.id"
             ])
-            .skip(pages * 10)
-            .take(10)
             .getCount();
 
         let data = []
@@ -254,7 +252,6 @@ export const ClientRepository = {
                 nextClass: booking
             })
         }
-        //console.log(data)
         return { data, pages: pagesNumber }
 
     },
@@ -302,10 +299,10 @@ export const ClientRepository = {
             where: {
                 id: clientId
             },
-            relations: ["ClassesHistory", 'Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Transaction', 'Purchase.Payment_method', 'User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items'],
+            relations: ["ClassesHistory", 'User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items'],
 
         })
-        
+
         const purchases = await createQueryBuilder(Purchase)
             .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
             .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
@@ -339,6 +336,12 @@ export const ClientRepository = {
         for (var i in groupPurchases) {
             pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
         }
+
+        if (pendingPasses < 0) pendingPasses = 0
+        if (pendingClasses < 0) pendingClasses = 0
+        if (pendingClassesGroup < 0) pendingClassesGroup = 0
+
+
         delete client.googleId
         delete client.fromGroup
         delete client.isLeader
@@ -347,7 +350,7 @@ export const ClientRepository = {
         delete client.isAdmin
         delete client.groupName
         delete client.changed
-        let takenC =  client.ClassesHistory.takenClasses
+        let takenC = client.ClassesHistory.takenClasses
         let takenP = client.ClassesHistory.takenPasses
         let takenGC = client.ClassesHistory.takenGroupClasses
         delete client.ClassesHistory
@@ -358,7 +361,7 @@ export const ClientRepository = {
             takenPasses: takenP,
             takenGroup: takenGC,
             pending: pendingClasses,
-            pendingPases: pendingPasses,
+            pendingPasses: pendingPasses,
             pendingGroup: pendingClassesGroup
         }
 
@@ -612,12 +615,16 @@ export const ClientRepository = {
             .where('name like :query or lastname like :query or email like :query', {
                 query: '%' + query + '%',
             })
+            .leftJoinAndSelect('User.ClassesHistory', 'ClassesHistory')
             .andWhere("isDeleted = false")
             .andWhere("isAdmin = false")
             .limit(10)
             .getMany()
 
         let data = []
+        let isUnlimited = false
+        let isUnlimitedGroup = false
+
         let currentDate = moment().tz("America/Mexico_City")
         for (var i in clients) {
             delete clients[i].password
@@ -669,10 +676,16 @@ export const ClientRepository = {
             for (var i in purchases) {
                 pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
                 pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
+                if (purchases[i].Bundle.isUnlimited) {
+                    isUnlimited = true
+                }
             }
 
             for (var i in groupPurchases) {
                 pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
+                if (groupPurchases[i].Bundle.isUnlimited) {
+                    isUnlimitedGroup = true
+                }
             }
 
 
@@ -684,12 +697,35 @@ export const ClientRepository = {
             if (pendingClasses < 0) pendingClasses = 0
             if (pendingClassesGroup < 0) pendingClassesGroup = 0
 
+            let taken = 0
+            let takenPasses = 0
+            let takenGruopClasses = 0
+            if(clients[i].ClassesHistory){
+                taken = clients[i].ClassesHistory.takenClasses
+                takenPasses = clients[i].ClassesHistory.takenPasses
+                takenGruopClasses = clients[i].ClassesHistory.takenGroupClasses
+                delete clients[i].ClassesHistory
+            }
+            
+            let nextExpirationDate: Date
+            if (purchases.length == 0) {
+                nextExpirationDate = null
+            } else {
+                nextExpirationDate = purchases[purchases.length - 1].expirationDate
+            }
+
             data.push({
                 ...clients[i],
                 nextClass: booking,
                 pending: pendingClasses,
                 pendingPasses: pendingPasses,
-                pendingGroup: pendingClassesGroup
+                pendingGroup: pendingClassesGroup,
+                taken: taken,
+                takenPasses: takenPasses,
+                takenGroup: takenGruopClasses,
+                isUnlimited: isUnlimited,
+                isUnlimitedGroup: isUnlimitedGroup,
+                nextExpirationDate: nextExpirationDate
             })
         }
         return data

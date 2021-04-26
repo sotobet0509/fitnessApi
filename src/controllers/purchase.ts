@@ -210,4 +210,27 @@ export const PurchaseController = {
             purchases
         })
     },
+
+    async searchClientPurchase(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+       
+        const purchases = await PurchaseRepository.searchClientPurchase(req.params.query, req.params.clientId)
+
+        return res.json({
+            success: true,
+            purchases
+        })
+    },
+
+    async getClientPurchases(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 46, "No autorizado")
+        let page = req.query.page.toString()
+
+        const purchases = await PurchaseRepository.getClientPurchases(req.params.clientId, page)
+
+        return res.json({
+            success: true,
+            purchases
+        })
+    },
 }
