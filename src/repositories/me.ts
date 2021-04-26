@@ -96,6 +96,7 @@ export const MeRepository = {
         //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         //     .getMany();
         const pages = parseInt(page) - 1
+        console.log(pages)
         let pagesNumber
         let purchases = await getRepository(Purchase).find({
             where: [
@@ -124,11 +125,10 @@ export const MeRepository = {
                     User: user,
                     status: null
                 }
-            ]
+            ],
+            relations: ['User', 'Bundle', 'Payment_method', 'Transaction']
         })
         pagesNumber = pagesNumber.length
-
-        
         let clases = 0
 
 
@@ -157,7 +157,8 @@ export const MeRepository = {
         // })
         //  let clasesTomadas = bookings.length
         return {
-            purchases
+            purchases,
+            pages: pagesNumber
             //taken: clasesTomadas,
             //pending: clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
         }
