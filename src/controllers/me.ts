@@ -24,7 +24,8 @@ export const MeController = {
     },*/
 
     async history(req: ExtendedRequest, res: Response) {
-        const history = await MeRepository.getHistory(req.user)
+        let page = req.query.page.toString()
+        const history = await MeRepository.getHistory(page,req.user)
         res.json({ success: true, data: history })
     },
 

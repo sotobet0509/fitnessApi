@@ -86,7 +86,7 @@ export const MeRepository = {
         }
     },
 
-    async getHistory(user: User) {
+    async getHistory(page:string, user: User) {
         // let purchases = await createQueryBuilder(Purchase)
         //     .innerJoinAndSelect('Purchase.User', 'User')
         //     .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
@@ -95,7 +95,8 @@ export const MeRepository = {
         //     .where('User.id=:idUser', { idUser: user.id })
         //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         //     .getMany();
-
+        const pages = parseInt(page) - 1
+        let pagesNumber
         let purchases = await getRepository(Purchase).find({
             where: [
                 {
@@ -108,8 +109,26 @@ export const MeRepository = {
                     status: null
                 }
             ],
+            skip:pages*10,
+            take:10,
             relations: ['User', 'Bundle', 'Payment_method', 'Transaction']
         })
+        pagesNumber = await getRepository(Purchase).find({
+            where: [
+                {
+                    User: user,
+                    status: status.FINISHED
+                },
+                {
+
+                    User: user,
+                    status: null
+                }
+            ]
+        })
+        pagesNumber = pagesNumber.length
+
+        
         let clases = 0
 
 
