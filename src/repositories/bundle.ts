@@ -11,25 +11,27 @@ import { PasswordService } from '../services/password'
 
 export const BundleRepository = {
     async getBundle(bundleId: number) {
-        
+
         const bundle = await getRepository(Bundle).findOne({
             where: {
                 id: bundleId
             }
         })
         if (!bundle) throw new ErrorResponse(404, 11, 'El paquete no existe')
-        
+
         let alternateUser
-        if(bundle.altermateUserId){
+        if (bundle.altermateUserId) {
             alternateUser = await getRepository(Alternate_users).findOne({
-                where:{
+                where: {
                     id: bundle.altermateUserId
                 }
             })
         }
-        
-        return {...bundle,
-            alternateUser}
+
+        return {
+            ...bundle,
+            alternateUser
+        }
     },
 
     async getAllBundles(userId: User) {
@@ -54,13 +56,13 @@ export const BundleRepository = {
                             name: Not("Paquete Prueba")
                         }
                     })
-                }  else {
+                } else {
                     bundles = await getRepository(Bundle).find({
                         where: {
                             name: Not("Paquete Prueba")
                         }
                     })
-                }    
+                }
 
             } else {
                 if (userId.fromGroup) {
@@ -69,7 +71,7 @@ export const BundleRepository = {
                             isGroup: false
                         }
                     })
-                }  else {
+                } else {
                     bundles = await getRepository(Bundle).find({})
                 }
             }
@@ -132,19 +134,20 @@ export const BundleRepository = {
         }
 
         let newBundle = new Bundle()
+        newBundle.isDeleted = false
         newBundle.name = data.name ? data.name : newBundle.name
         newBundle.price = data.price ? data.price : newBundle.price
         newBundle.offer = data.offer ? data.offer : newBundle.offer
         newBundle.description = data.description ? data.description : newBundle.description
         newBundle.classNumber = data.classNumber ? data.classNumber : newBundle.classNumber
-        if(newBundle.classNumber == 0 ){
+        if (newBundle.classNumber == 0) {
             newBundle.classNumber = 1
         }
         if (data.isUnlimited) newBundle.classNumber = 100
         newBundle.expirationDays = data.expirationDays ? data.expirationDays : newBundle.expirationDays
         newBundle.passes = data.passes ? data.passes : 0
         newBundle.isUnlimited = data.isUnlimited ? data.isUnlimited : newBundle.isUnlimited
-        if(data.isGroup){
+        if (data.isGroup) {
             newBundle.isGroup = data.isGroup ? data.isGroup : newBundle.isGroup
             newBundle.memberLimit = data.memberLimit ? data.memberLimit : newBundle.memberLimit
         }
@@ -212,7 +215,7 @@ export const BundleRepository = {
         updateBundle.offer = data.offer ? data.offer : updateBundle.offer
         updateBundle.description = data.description ? data.description : updateBundle.description
         updateBundle.classNumber = data.classNumber ? data.classNumber : updateBundle.classNumber
-        if(updateBundle.classNumber == 0 ){
+        if (updateBundle.classNumber == 0) {
             updateBundle.classNumber = 1
         }
         updateBundle.expirationDays = data.expirationDays ? data.expirationDays : updateBundle.expirationDays
@@ -224,11 +227,11 @@ export const BundleRepository = {
             updateBundle.isUnlimited = false
         }
 
-        if(data.isGroup){
+        if (data.isGroup) {
             updateBundle.isGroup = data.isGroup ? data.isGroup : updateBundle.isGroup
             updateBundle.memberLimit = data.memberLimit ? data.memberLimit : updateBundle.memberLimit
         }
-        if(updateBundle.isGroup && data.isGroup == false){
+        if (updateBundle.isGroup && data.isGroup == false) {
             updateBundle.isGroup = false
             updateBundle.memberLimit = 0
         }
