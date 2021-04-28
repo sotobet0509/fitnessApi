@@ -136,6 +136,7 @@ export const BundleRepository = {
         let newBundle = new Bundle()
         newBundle.isDeleted = false
         newBundle.isRecurrent = false
+        newBundle.altermateUserId = null
         newBundle.name = data.name ? data.name : newBundle.name
         newBundle.price = data.price ? data.price : newBundle.price
         newBundle.offer = data.offer ? data.offer : newBundle.offer
