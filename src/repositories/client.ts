@@ -620,6 +620,7 @@ export const ClientRepository = {
             .andWhere("isAdmin = false")
             .limit(10)
             .getMany()
+           
 
         let data = []
         let isUnlimited = false
@@ -634,7 +635,7 @@ export const ClientRepository = {
             delete clients[i].isAdmin
             delete clients[i].pictureUrl
             delete clients[i].tempToken
-
+            
             let booking = await createQueryBuilder(Booking)
                 .leftJoinAndSelect("Booking.Schedule", "Schedule")
                 .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
@@ -649,11 +650,12 @@ export const ClientRepository = {
             let pendingPasses = 0
 
             const purchases = await createQueryBuilder(Purchase)
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .leftJoinAndSelect('Purchase.User', 'User')
+                .where('Purchase.users_id=:userId', { userId: clients[i].id })
+                .andWhere('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
                 .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-                .andWhere('Purchase.users_id=:userId', { userId: clients[i].id })
                 .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
                 .getMany();
 
@@ -665,7 +667,7 @@ export const ClientRepository = {
                 mainUser = clients[i].id
             }
             const groupPurchases = await createQueryBuilder(Purchase)
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
                 .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
                 .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
@@ -673,17 +675,17 @@ export const ClientRepository = {
                 .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
                 .getMany();
 
-            for (var i in purchases) {
-                pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
-                pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
-                if (purchases[i].Bundle.isUnlimited) {
+            for (var j in purchases) {
+                               pendingPasses += (purchases[j].Bundle.passes + purchases[j].addedPasses)
+                pendingClasses += (purchases[j].Bundle.classNumber + purchases[j].addedClasses)
+                if (purchases[j].Bundle.isUnlimited) {
                     isUnlimited = true
                 }
             }
 
-            for (var i in groupPurchases) {
-                pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
-                if (groupPurchases[i].Bundle.isUnlimited) {
+            for (var j in groupPurchases) {
+                pendingClassesGroup += (groupPurchases[j].Bundle.classNumber + groupPurchases[j].addedClasses)
+                if (groupPurchases[j].Bundle.isUnlimited) {
                     isUnlimitedGroup = true
                 }
             }
