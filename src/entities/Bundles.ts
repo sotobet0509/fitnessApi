@@ -48,7 +48,7 @@ export class Bundle {
     @Column({nullable: true})
     pictureUrl: string
 
-    @Column('integer')
+    @Column('integer',{nullable: true})
     altermateUserId: number
 
     @Column({default: 1})
