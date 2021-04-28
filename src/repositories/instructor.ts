@@ -39,6 +39,7 @@ export const InstructorRepository = {
         instructor.description = data.description
         instructor.profilePicture = data.profilePicture
         instructor.largePicture = data.largePicture
+        instructor.isDeleted = false
 
         instructor = await instructorRepository.save(instructor)
 
