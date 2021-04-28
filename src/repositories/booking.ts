@@ -52,7 +52,7 @@ export const BookingRepository = {
                 await getRepository(ClassesHistory).save(classesHistory)
                 await getRepository(Purchase).save(privatePurchase)
                 await bookingRepository.remove(booking)
-            }else{
+            } else {
                 let purchase = await getRepository(Purchase).findOne({
                     where: {
                         id: booking.fromPurchase.id
@@ -120,29 +120,42 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule', 'fromPurchase','User']
+            relations: ['Schedule', 'fromPurchase', 'User']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
 
         let classesHistory = await getRepository(ClassesHistory).findOne({
-            where:{
+            where: {
                 User: booking.User
             }
         })
 
         if (data.discountClass) {
+
+            if (booking.isPass) {
+                classesHistory.takenPasses -= 1
+            } else {
+                classesHistory.takenClasses -= 1
+            }
+            await getRepository(ClassesHistory).save(classesHistory)
+            await getRepository(Booking).remove(booking)
+        } else {
             let purchase = await getRepository(Purchase).findOne({
                 where: {
                     id: booking.fromPurchase.id
                 }
             })
+            if (booking.isPass) {
+                classesHistory.takenPasses -= 1
+                purchase.addedPasses += 1
+            } else {
+                classesHistory.takenClasses -= 1
+                purchase.addedClasses += 1
+            }
             if (!purchase) throw new ErrorResponse(404, 14, 'La compra no existe')
 
-            purchase.addedClasses -= 1
-
+            await getRepository(ClassesHistory).save(classesHistory)
             await getRepository(Purchase).save(purchase)
-            await getRepository(Booking).remove(booking)
-        } else {
             await getRepository(Booking).remove(booking)
         }
     },

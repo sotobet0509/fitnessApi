@@ -48,9 +48,6 @@ const MeRouter = Router({ mergeParams: true })
  */
 MeRouter.get('/', h(checkToken), h(MeController.profile))
 
-//MeRouter.get('/cancion/mario', h(MeController.cancion))
-
-
 /**
  * @swagger
  * /me/history:

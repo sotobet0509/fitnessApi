@@ -18,11 +18,7 @@ export const MeController = {
         res.json({ success: true, data: profile })
 
     },
-   /* async cancion(req: ExtendedRequest, res: Response) {
-        const user = "hazme grande el agujero dame duro con tu vergon que los mecos caigan del cielo y las nalgas piñatas son, de repente las mamaditas se me antojan de corazón si te muerdo de a veces la verga te queda rojo el cabezon, pa que todo lo que este bueno este en punta de un vergon si las vergas son de colores las panochas tambien son en el cine las apañadas el sudor para desnudarnos lubricante en la panochita pa que entre bien el vergon picosita la verga dulcesito el pezón mamaditas  con nieve que me regalen un mejorcito sabor, panochita con meco pa follar para darle placer a todo lo que de pronto se queda triste se queda chori, who who who."
-        res.json({ success: true, Cancion: user })
-    },*/
-
+   
     async history(req: ExtendedRequest, res: Response) {
         let page = req.query.page.toString()
         const history = await MeRepository.getHistory(page,req.user)

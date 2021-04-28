@@ -132,16 +132,15 @@ export const LocationRepository = {
 
                 let soldout = false
                 if (available == 0) soldout = true
+                if(room3.Schedules[j].id == 492) soldout = true
 
                 delete room3.Schedules[j].Instructor.createdAt
-                delete room3.Schedules[j].Instructor.lastname
-                delete room3.Schedules[j].Instructor.description
                 delete room3.Schedules[j].Instructor.profilePicture
                 delete room3.Schedules[j].Instructor.largePicture
                 delete room3.Schedules[j].Instructor.email
                 delete room3.Schedules[j].Instructor.password
                 delete room3.Schedules[j].Instructor.isDeleted
-                delete room3.Schedules[j].Rooms.description
+
 
                 filteredSchedules2.push({
                     ...room3.Schedules[j],
@@ -295,7 +294,7 @@ export const LocationRepository = {
 
                 let soldout = false
                 if (available == 0) soldout = true
-
+                if(room3.Schedules[j].id == 492) soldout = true
                 delete room3.Schedules[j].Instructor.createdAt
                 delete room3.Schedules[j].Instructor.lastname
                 delete room3.Schedules[j].Instructor.description
@@ -307,7 +306,7 @@ export const LocationRepository = {
                 delete room3.Schedules[j].Rooms.description
                 delete room3.Schedules[j].Booking
 
-                const clientBookings = await getRepository(Booking).findOne({
+                const clientBookings = await getRepository(Booking).find({
                     where: {
                         Schedule: room3.Schedules[j],
                         User: client
@@ -470,6 +469,8 @@ export const LocationRepository = {
                 let soldout = false
                 if (available == 0) soldout = true
 
+                if(room3.Schedules[j].id == 492) soldout = true
+
                 delete room3.Schedules[j].Instructor.createdAt
                 delete room3.Schedules[j].Instructor.lastname
                 delete room3.Schedules[j].Instructor.description
@@ -481,7 +482,7 @@ export const LocationRepository = {
                 delete room3.Schedules[j].Rooms.description
                 delete room3.Schedules[j].Booking
 
-                const clientBookings = await getRepository(Booking).findOne({
+                const clientBookings = await getRepository(Booking).find({
                     where: {
                         Schedule: room3.Schedules[j],
                         User: client

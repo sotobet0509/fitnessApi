@@ -12,14 +12,12 @@ export const ScheduleController = {
         const scheduleId = parseInt(req.params.scheduleId)
         const schedule = await ScheduleRepository.getSchedule(scheduleId)
         res.json({ success: true, data: schedule })
-
     },
 
     async getClientSchedule(req: ExtendedRequest, res: Response) {
         const scheduleId = parseInt(req.params.scheduleId)
         const schedule = await ScheduleRepository.getClientSchedule(scheduleId, req.user)
         res.json({ success: true, data: schedule })
-
     },
 
     async booking(req: ExtendedRequest, res: Response) {
