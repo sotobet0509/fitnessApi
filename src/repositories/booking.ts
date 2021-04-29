@@ -36,7 +36,11 @@ export const BookingRepository = {
                         id: booking.fromPurchase.id
                     }
                 })
-                privatePurchase.addedClasses += 1
+                if (booking.isPass) {
+                    privatePurchase.addedPasses += 1
+                } else {
+                    privatePurchase.addedClasses += 1
+                }
 
                 let classesHistory = await getRepository(ClassesHistory).findOne({
                     where: {
@@ -58,7 +62,11 @@ export const BookingRepository = {
                         id: booking.fromPurchase.id
                     }
                 })
-                purchase.addedClasses += 1
+                if (booking.isPass) {
+                    purchase.addedPasses += 1
+                } else {
+                    purchase.addedClasses += 1
+                }
 
                 let classesHistory = await getRepository(ClassesHistory).findOne({
                     where: {
@@ -131,7 +139,6 @@ export const BookingRepository = {
         })
 
         if (data.discountClass) {
-
             if (booking.isPass) {
                 classesHistory.takenPasses -= 1
             } else {
