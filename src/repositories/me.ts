@@ -114,7 +114,7 @@ export const MeRepository = {
             take: 10,
             relations: ['User', 'Bundle', 'Payment_method', 'Transaction'],
             order:  {
-                expirationDate: "DESC"
+                expirationDate: "ASC"
             }
         })
         pagesNumber = await getRepository(Purchase).find({
