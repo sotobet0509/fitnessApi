@@ -86,7 +86,7 @@ export const MeRepository = {
         }
     },
 
-    async getHistory(page:string, user: User) {
+    async getHistory(page: string, user: User) {
         // let purchases = await createQueryBuilder(Purchase)
         //     .innerJoinAndSelect('Purchase.User', 'User')
         //     .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
@@ -110,9 +110,12 @@ export const MeRepository = {
                     status: null
                 }
             ],
-            skip:pages*10,
-            take:10,
-            relations: ['User', 'Bundle', 'Payment_method', 'Transaction']
+            skip: pages * 10,
+            take: 10,
+            relations: ['User', 'Bundle', 'Payment_method', 'Transaction'],
+            order:  {
+                expirationDate: "DESC"
+            }
         })
         pagesNumber = await getRepository(Purchase).find({
             where: [
@@ -377,14 +380,14 @@ export const MeRepository = {
         for (var i in purchases) {
             pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
             pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
-            if(purchases[i].Bundle.isUnlimited){
+            if (purchases[i].Bundle.isUnlimited) {
                 isUnlimited = true
             }
         }
 
         for (var i in groupPurchases) {
             pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
-            if(groupPurchases[i].Bundle.isUnlimited){
+            if (groupPurchases[i].Bundle.isUnlimited) {
                 isUnlimitedGroup = true
             }
         }
