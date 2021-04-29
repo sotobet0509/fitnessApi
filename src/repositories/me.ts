@@ -113,7 +113,7 @@ export const MeRepository = {
             skip: pages * 10,
             take: 10,
             relations: ['User', 'Bundle', 'Payment_method', 'Transaction'],
-            order:  {
+            order: {
                 expirationDate: "ASC"
             }
         })
@@ -345,6 +345,12 @@ export const MeRepository = {
         let pendingPasses = 0
         let isUnlimited = false
         let isUnlimitedGroup = false
+        let lastAvaliblePurchase = 0
+        let lastAvalibleGroupPurchase = 0
+
+        let purchasePendingClasses = 0
+        let purchasePendingClassesGroup = 0
+        let purchasePendingPasses = 0
 
         let client = await getRepository(User).findOne({
             where: {
@@ -359,6 +365,7 @@ export const MeRepository = {
             .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
             .andWhere('Purchase.users_id=:userId', { userId: client.id })
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
+            .orderBy('Purchase.expirationDate', "ASC")
             .getMany();
 
         let mainUser = ""
@@ -375,31 +382,47 @@ export const MeRepository = {
             .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
             .andWhere('Purchase.users_id=:userId', { userId: mainUser })
             .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
+            .orderBy('Purchase.expirationDate', "ASC")
             .getMany();
 
         for (var i in purchases) {
             pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
             pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
+            purchasePendingPasses = (purchases[i].Bundle.passes + purchases[i].addedPasses)
+            purchasePendingClasses = (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
             if (purchases[i].Bundle.isUnlimited) {
                 isUnlimited = true
+            }
+            if (purchasePendingClasses > 0 || purchasePendingPasses > 0) {
+                console.log(pendingPasses, pendingClasses, purchases[i].id)
+                lastAvaliblePurchase = parseInt(i)
             }
         }
 
         for (var i in groupPurchases) {
             pendingClassesGroup += (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
+            purchasePendingClassesGroup = (groupPurchases[i].Bundle.classNumber + groupPurchases[i].addedClasses)
             if (groupPurchases[i].Bundle.isUnlimited) {
                 isUnlimitedGroup = true
+            }
+            if (purchasePendingClassesGroup > 0 ) {
+                lastAvalibleGroupPurchase = parseInt(i)
             }
         }
         if (pendingClasses < 0) pendingClasses = 0
         if (pendingClassesGroup < 0) pendingClassesGroup = 0
         if (pendingPasses < 0) pendingPasses = 0
+        if (groupPurchases.length > 0) {
+            if (groupPurchases[lastAvalibleGroupPurchase].expirationDate > purchases[lastAvaliblePurchase].expirationDate) {
+                lastAvaliblePurchase = lastAvalibleGroupPurchase
+            }
+        }
 
         let nextExpirationDate: Date
         if (purchases.length == 0) {
             nextExpirationDate = null
         } else {
-            nextExpirationDate = purchases[purchases.length - 1].expirationDate
+            nextExpirationDate = purchases[lastAvaliblePurchase].expirationDate
         }
         return {
             taken: client.ClassesHistory.takenClasses,

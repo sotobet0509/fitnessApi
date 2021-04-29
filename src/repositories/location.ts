@@ -132,8 +132,7 @@ export const LocationRepository = {
 
                 let soldout = false
                 if (available == 0) soldout = true
-                if(room3.Schedules[j].id == 492) soldout = true
-
+               
                 delete room3.Schedules[j].Instructor.createdAt
                 delete room3.Schedules[j].Instructor.profilePicture
                 delete room3.Schedules[j].Instructor.largePicture
@@ -294,7 +293,6 @@ export const LocationRepository = {
 
                 let soldout = false
                 if (available == 0) soldout = true
-                if(room3.Schedules[j].id == 492) soldout = true
                 delete room3.Schedules[j].Instructor.createdAt
                 delete room3.Schedules[j].Instructor.lastname
                 delete room3.Schedules[j].Instructor.description
@@ -468,8 +466,6 @@ export const LocationRepository = {
 
                 let soldout = false
                 if (available == 0) soldout = true
-
-                if(room3.Schedules[j].id == 492) soldout = true
 
                 delete room3.Schedules[j].Instructor.createdAt
                 delete room3.Schedules[j].Instructor.lastname
