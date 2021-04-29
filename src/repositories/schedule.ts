@@ -255,7 +255,7 @@ export const ScheduleRepository = {
             if (!purchases) throw new ErrorResponse(409, 17, 'El usuario no puede reservar en esta clase')
 
             for (var i in purchases) {
-                if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') <= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
                     pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
@@ -320,11 +320,9 @@ export const ScheduleRepository = {
                 .getMany();
 
             for (var i in purchases) {
-                console.log("purchase",moment(purchases[i].expirationDate).format('YYYY-MM-DD'),"schedule", moment(scheduleExist.date).format('YYYY-MM-DD') )
                 if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
                     pendingPasses += (purchases[i].Bundle.passes + purchases[i].addedPasses)
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
-                    console.log(purchases[i].id)
                 } else {
                     continue
                 }
@@ -591,7 +589,7 @@ export const ScheduleRepository = {
             if (!purchases) throw new ErrorResponse(409, 17, 'El usuario no puede reservar en esta clase')
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') <= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
 
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
@@ -643,7 +641,7 @@ export const ScheduleRepository = {
                 .getMany();
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') <= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
                     continue
@@ -871,7 +869,7 @@ export const ScheduleRepository = {
             if (!purchases) throw new ErrorResponse(409, 17, 'El usuario no puede reservar en esta clase')
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') <= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
 
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
@@ -923,7 +921,7 @@ export const ScheduleRepository = {
                 .getMany();
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') <= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
                     continue
