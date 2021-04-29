@@ -673,7 +673,6 @@ export const PurchaseRepository = {
                 delete purchases[i].Bundle.classNumber 
                 delete purchases[i].Bundle.isRecurrent 
                 delete purchases[i].Bundle.isUnlimited
-                delete purchases[i].Bundle.price
                 delete purchases[i].Bundle.passes
                 delete purchases[i].Bundle.pictureUrl
                 delete purchases[i].Bundle.max
