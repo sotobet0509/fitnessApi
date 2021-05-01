@@ -9,6 +9,7 @@ import { Instructor } from '../entities/Instructors';
 import { User } from '../entities/Users';
 import { Seat } from '../entities/Seats'
 import { Booking } from '../entities/Bookings'
+import { Console } from 'console'
 
 
 /*moment.locale('en', {
@@ -49,7 +50,7 @@ export const LocationRepository = {
                 if (!scheduleExist) {
                     data.start = moment().isoWeek(moment(data.start).week()).startOf("isoWeek").add(-1, 'days').toDate()
                     days = [[], [], [], [], [], [], [], []]
-                    endDate = moment(data.start).add(8, 'days')
+                    endDate = moment(data.start).add(8, 'days')        
                 } else {
                     data.start = moment().isoWeek(moment(data.start).week() - 1).startOf("isoWeek").toDate()
                     days = [[], [], [], [], [], [], []]
@@ -65,74 +66,74 @@ export const LocationRepository = {
             days = [[], [], [], [], [], [], []]
             endDate = moment(data.start).add(7, 'days')
         }
+
         let room = await getRepository(Room).find({
             relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking', 'Schedules.Rooms']
         })
         let room2
-        if (days.length = 7) {
+        if (days.length == 7) {
             room2 = await createQueryBuilder(Room)
-                .leftJoinAndSelect("Room.Schedules", "Schedules")
-                .leftJoinAndSelect("Schedules.Instructor", "Instructor")
-                .leftJoinAndSelect("Schedules.Rooms", "Rooms")
-                .where('Date(Schedules.date)>=:cDate', { cDate: moment(data.start).format('YYYY-MM-DD') })
-                .andWhere('Date(Schedules.date)<:cuDate', { cuDate: moment(endDate).format('YYYY-MM-DD') })
-                .orderBy("Schedules.date", "ASC")
-                .addOrderBy("Schedules.start", "ASC")
-                .getMany()
-
+            .leftJoinAndSelect("Room.Schedules", "Schedules")
+            .leftJoinAndSelect("Schedules.Instructor", "Instructor")
+            .leftJoinAndSelect("Schedules.Rooms", "Rooms")
+            .where('Date(Schedules.date)>=:cDate', { cDate: moment(data.start).format('YYYY-MM-DD') })
+            .andWhere('Date(Schedules.date)<:cuDate', { cuDate: moment(endDate).format('YYYY-MM-DD') })
+            .orderBy("Schedules.date", "ASC")
+            .addOrderBy("Schedules.start", "ASC")
+            .getMany()
+            
         } else {
             room2 = await createQueryBuilder(Room)
-                .leftJoinAndSelect("Room.Schedules", "Schedules")
-                .leftJoinAndSelect("Schedules.Instructor", "Instructor")
-                .leftJoinAndSelect("Schedules.Rooms", "Rooms")
-                .where('Date(Schedules.date)>=:cDate', { cDate: moment(data.start).format('YYYY-MM-DD') })
-                .andWhere('Date(Schedules.date)<:cuDate', { cuDate: moment(endDate).format('YYYY-MM-DD') })
-                .orderBy("Schedules.date", "ASC")
-                .addOrderBy("Schedules.start", "ASC")
-                .getMany()
+            .leftJoinAndSelect("Room.Schedules", "Schedules")
+            .leftJoinAndSelect("Schedules.Instructor", "Instructor")
+            .leftJoinAndSelect("Schedules.Rooms", "Rooms")
+            .where('Date(Schedules.date)>=:cDate', { cDate: moment(data.start).format('YYYY-MM-DD') })
+            .andWhere('Date(Schedules.date)<:cuDate', { cuDate: moment(endDate).format('YYYY-MM-DD') })
+            .orderBy("Schedules.date", "ASC")
+            .addOrderBy("Schedules.start", "ASC")
+            .getMany()
         }
-
+        
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         if (!room2) throw new ErrorResponse(404, 12, 'La sala no existe')
-
         if (user) {
             if (!user.isAdmin) {
-                for (var i in room) {
-                    for (var j in room[i].Schedules) {
-                        if (room[i].Schedules[j].isPrivate) {
-                            delete room[i].Schedules[j]
+                for (var i in room2) {
+                    for (var j in room2[i].Schedules) {
+                        if (room2[i].Schedules[j].isPrivate) {
+                            delete room2[i].Schedules[j]
                         }
                     }
                 }
             }
         } else {
-            for (var i in room) {
-                for (var j in room[i].Schedules) {
-                    if (room[i].Schedules[j].isPrivate) {
-                        delete room[i].Schedules[j]
+            for (var i in room2) {
+                for (var j in room2[i].Schedules) {
+                    if (room2[i].Schedules[j].isPrivate) {
+                        delete room2[i].Schedules[j]
                     }
                 }
             }
         }
-
+        
         let filteredSchedules2 = []
         for (var i in room2) {
             const room3 = room2[i] as Room
             const seats = await createQueryBuilder(Seat)
-                .where('Seat.rooms_id =:roomId', { roomId: room3.id })
-                .getCount()
-
-
+            //.where('Seat.rooms_id =:roomId', { roomId: room3.id })
+            .getCount()
+            
+            
             for (var j in room3.Schedules) {
                 const bookings = await createQueryBuilder(Booking)
-                    .where('Booking.schedules_id =:scheduleId', { scheduleId: room3.Schedules[j].id })
-                    .getCount()
-
+                .where('Booking.schedules_id =:scheduleId', { scheduleId: room3.Schedules[j].id })
+                .getCount()
+                
                 const available = seats - bookings
-
+                
                 let soldout = false
                 if (available == 0) soldout = true
-               
+
                 delete room3.Schedules[j].Instructor.createdAt
                 delete room3.Schedules[j].Instructor.profilePicture
                 delete room3.Schedules[j].Instructor.largePicture
@@ -241,7 +242,7 @@ export const LocationRepository = {
             relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking', 'Schedules.Rooms']
         })
         let room2
-        if (days.length = 7) {
+        if (days.length == 7) {
             room2 = await createQueryBuilder(Room)
                 .leftJoinAndSelect("Room.Schedules", "Schedules")
                 .leftJoinAndSelect("Schedules.Instructor", "Instructor")
@@ -267,20 +268,21 @@ export const LocationRepository = {
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         if (!room2) throw new ErrorResponse(404, 12, 'La sala no existe')
 
-
-        for (var i in room) {
-            for (var j in room[i].Schedules) {
-                if (room[i].Schedules[j].isPrivate) {
-                    delete room[i].Schedules[j]
+        
+        for (var i in room2) {
+            for (var j in room2[i].Schedules) {
+                if (room2[i].Schedules[j].isPrivate) {
+                    delete room2[i].Schedules[j]
                 }
             }
         }
+
 
         let filteredSchedules2 = []
         for (var i in room2) {
             const room3 = room2[i] as Room
             const seats = await createQueryBuilder(Seat)
-                .where('Seat.rooms_id =:roomId', { roomId: room3.id })
+                //.where('Seat.rooms_id =:roomId', { roomId: room3.id })
                 .getCount()
 
 
@@ -309,7 +311,7 @@ export const LocationRepository = {
                         Schedule: room3.Schedules[j],
                         User: client
                     },
-                    relations:["Seat"]
+                    relations: ["Seat"]
                 })
 
                 if (!clientBookings) {
@@ -380,7 +382,7 @@ export const LocationRepository = {
         return days
     },
 
-    async getAdminLocationsByWeek(room_id: number, data: AdminLocationSchema) {
+    async getAdminLocationsByWeek(room_id: number, data: AdminLocationSchema, user: User) {
 
         const client = await getRepository(User).findOne({
             where: {
@@ -423,7 +425,7 @@ export const LocationRepository = {
             relations: ['Schedules', 'Schedules.Instructor', 'Schedules.Booking', 'Schedules.Rooms']
         })
         let room2
-        if (days.length = 7) {
+        if (days.length == 7) {
             room2 = await createQueryBuilder(Room)
                 .leftJoinAndSelect("Room.Schedules", "Schedules")
                 .leftJoinAndSelect("Schedules.Instructor", "Instructor")
@@ -448,12 +450,32 @@ export const LocationRepository = {
 
         if (!room) throw new ErrorResponse(404, 12, 'La sala no existe')
         if (!room2) throw new ErrorResponse(404, 12, 'La sala no existe')
+        
+        if (user) {
+            if (!user.isAdmin) {
+                for (var i in room2) {
+                    for (var j in room2[i].Schedules) {
+                        if (room2[i].Schedules[j].isPrivate) {
+                            delete room2[i].Schedules[j]
+                        }
+                    }
+                }
+            }
+        } else {
+            for (var i in room2) {
+                for (var j in room2[i].Schedules) {
+                    if (room2[i].Schedules[j].isPrivate) {
+                        delete room2[i].Schedules[j]
+                    }
+                }
+            }
+        }
 
         let filteredSchedules2 = []
         for (var i in room2) {
             const room3 = room2[i] as Room
             const seats = await createQueryBuilder(Seat)
-                .where('Seat.rooms_id =:roomId', { roomId: room3.id })
+               // .where('Seat.rooms_id =:roomId', { roomId: room3.id })
                 .getCount()
 
 
@@ -483,7 +505,7 @@ export const LocationRepository = {
                         Schedule: room3.Schedules[j],
                         User: client
                     },
-                    relations:["Seat"]
+                    relations: ["Seat"]
                 })
 
                 if (!clientBookings) {

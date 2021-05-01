@@ -96,7 +96,6 @@ export const MeRepository = {
         //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         //     .getMany();
         const pages = parseInt(page) - 1
-        console.log(pages)
         let pagesNumber
         let purchases = await getRepository(Purchase).find({
             where: [
@@ -394,7 +393,6 @@ export const MeRepository = {
                 isUnlimited = true
             }
             if (purchasePendingClasses > 0 || purchasePendingPasses > 0) {
-                console.log(pendingPasses, pendingClasses, purchases[i].id)
                 lastAvaliblePurchase = parseInt(i)
             }
         }

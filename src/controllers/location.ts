@@ -73,7 +73,7 @@ export const LocationController = {
         const data = <AdminLocationSchema>value
 
        
-        const schedules = await LocationRepository.getAdminLocationsByWeek(roomId, data)
+        const schedules = await LocationRepository.getAdminLocationsByWeek(roomId, data, req.user)
         res.json({ success: true, schedules })
     },
 
