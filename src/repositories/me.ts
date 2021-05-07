@@ -95,7 +95,7 @@ export const MeRepository = {
         //     .where('User.id=:idUser', { idUser: user.id })
         //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         //     .getMany();
-        const pages = parseInt(page) - 1
+        const pages = parseInt(page) - 2
         let pagesNumber
         let purchases = await getRepository(Purchase).find({
             where: [
