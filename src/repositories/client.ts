@@ -727,7 +727,7 @@ export const ClientRepository = {
                 takenGroup: takenGruopClasses,
                 isUnlimited: isUnlimited,
                 isUnlimitedGroup: isUnlimitedGroup,
-                nextExpirationDate: moment(nextExpirationDate).format('YYYY-MM-DD')
+                nextExpirationDate: nextExpirationDate
             })
         }
         return data

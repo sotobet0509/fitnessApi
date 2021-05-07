@@ -431,7 +431,7 @@ export const MeRepository = {
             pendingGroup: pendingClassesGroup,
             isUnlimited: isUnlimited,
             isUnlimitedGroup: isUnlimitedGroup,
-            nextExpirationDate: moment(nextExpirationDate).format('YYYY-MM-DD')
+            nextExpirationDate: nextExpirationDate
         }
     },
 
