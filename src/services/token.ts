@@ -37,7 +37,11 @@ export class TokenService {
     console.log("token:",token,"key:", process.env.JWT_PUBLIC_KEY )
     return new Promise((resolve, reject) => {
       jwt.verify(token, process.env.JWT_PUBLIC_KEY, { algorithms: ['RS256'] }, (err, payload: any) => {
-        if (err) reject(new ErrorResponse(403, 5, 'Not valid token'))
+        
+        if (err){
+          console.log(err)
+          reject(new ErrorResponse(403, 5, 'Not valid token'))
+        }       
         else resolve(payload)
       })
     })
