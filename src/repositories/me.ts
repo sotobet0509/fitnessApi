@@ -95,7 +95,7 @@ export const MeRepository = {
         //     .where('User.id=:idUser', { idUser: user.id })
         //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
         //     .getMany();
-        const pages = parseInt(page) - 2
+        const pages = parseInt(page) - 1
         let pagesNumber
         let purchases = await getRepository(Purchase).find({
             where: [
@@ -431,7 +431,7 @@ export const MeRepository = {
             pendingGroup: pendingClassesGroup,
             isUnlimited: isUnlimited,
             isUnlimitedGroup: isUnlimitedGroup,
-            nextExpirationDate: nextExpirationDate
+            nextExpirationDate: moment(nextExpirationDate).format('YYYY-MM-DD')
         }
     },
 
