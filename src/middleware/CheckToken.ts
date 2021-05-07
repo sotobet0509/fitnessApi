@@ -9,7 +9,6 @@ import { Alternate_users } from '../entities/alternateUsers'
 import { Instructor } from '../entities/Instructors'
 export async function checkToken(req: ExtendedRequest, res: Response, next: NextFunction) {
   //
-  console.log(req.header('Authorization'))
   const token = req.header('Authorization')
   if (!token) throw new ErrorResponse(403, 8, 'Forbidden')
   const payload = await TokenService.verifyToken(token)
