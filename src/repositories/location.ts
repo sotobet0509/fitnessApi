@@ -9,7 +9,7 @@ import { Instructor } from '../entities/Instructors';
 import { User } from '../entities/Users';
 import { Seat } from '../entities/Seats'
 import { Booking } from '../entities/Bookings'
-import { Console } from 'console'
+
 
 
 /*moment.locale('en', {
