@@ -2,13 +2,42 @@ import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { ImageRepository } from '../repositories/image'
+import { ErrorResponse } from '../errors/ErrorResponse'
+import { handleHomePicture } from '../services/files'
+import { ImageData } from '../interfaces/images'
+import { DataMissingError } from '../errors/DataMissingError'
 
 export const ImageController ={
 
-    async getBackgroundImages(req: ExtendedRequest, res: Response){
-        const images = await ImageRepository.getBackgroundImages()
+    async getHomeImages(req: ExtendedRequest, res: Response){
+        const images = await ImageRepository.getHomeImages()
         res.json({ success: true, data: images})
     },
+    async uploadImage(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const url = await handleHomePicture(req.files.file)
+        const images= await ImageRepository.uploadHomeImagePicture(url)
+        res.json({ success: true, data: images})
+    },
+    async changeImageStatus(req: ExtendedRequest, res: Response){
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+        const purchaseSchema = Joi.object().keys({
+            images: Joi.array().items(
+                Joi.number()
+            ).required()       
+        })
+        const { error, value } = purchaseSchema.validate(req.body)
+        if (error) {
+            throw new DataMissingError()
+        }
+
+        const data = <ImageData>value
+        const clientId = req.params.client_id
+        const images= await ImageRepository.changeImageStatus(data)
+
+        res.json({ success: true, data: images})
+    },
+
 
     
 }

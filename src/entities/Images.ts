@@ -7,4 +7,10 @@ export class Images {
 
     @Column()
     url: string
+
+    @Column({default: true})
+    status: boolean
+
+    @Column({nullable: true})
+    section: string
 }
