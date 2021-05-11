@@ -150,6 +150,7 @@ export const InstructorRepository = {
         .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
         .andWhere('Time(end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
         .getMany()
+        console.log(schedules)
 
        
 
