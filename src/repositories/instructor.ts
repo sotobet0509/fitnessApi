@@ -148,7 +148,7 @@ export const InstructorRepository = {
         .innerJoinAndSelect('Schedule.Instructor','Instructor')
         .where('Schedule.Instructor=:instructorId',{instructorId:data.id})
         .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
-        .andWhere('Time(end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+        .andWhere('Time(start)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
         .getMany()
         console.log(schedules)
 
