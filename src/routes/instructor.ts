@@ -131,7 +131,7 @@ InstructorRouter.patch('/delete/:instructor_id',h(checkToken), h(InstructorContr
 
 InstructorRouter.patch('/changeProfilePicture/:instructor_id',h(checkToken), h(InstructorController.changeInstructorProfilePicture))
 
-InstructorRouter.patch('/reasing/:instructorId',h(checkToken), h(InstructorController.reasignInstructor))
+InstructorRouter.patch('/reasign/:instructorId',h(checkToken), h(InstructorController.reasignInstructor))
 
 
 export { InstructorRouter }
