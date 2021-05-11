@@ -2,18 +2,32 @@ import { getRepository, getConnection, Repository, createQueryBuilder } from 'ty
 import { ErrorResponse } from '../errors/ErrorResponse'
 import { Instructor } from '../entities/Instructors'
 import { InstructorSchema } from '../interfaces/instructor'
+import { Schedule } from '../entities/Schedules'
+import moment = require('moment')
 
 export const InstructorRepository = {
     async getInstructor(instructorId: number) {
+        let exists= true
         const instructor = await getRepository(Instructor).findOne({
             where: {
                 id: instructorId
             }
         })
-
-        delete instructor.password
         if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
-        return instructor
+        delete instructor.password
+        let  currentDate  = moment()
+    
+        const scheduleExist = await createQueryBuilder(Schedule)
+        .innerJoinAndSelect('Schedule.instructors_id','instructor')
+        .where('instructor=:instructorId',{instructorId:instructor.id})
+        .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
+        .andWhere('Time(end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+        .getOne()
+
+        if (scheduleExist) exists
+        else exists= false
+
+        return {...instructor,"scheduleExists":exists}
     },
 
     async getAllInstructors() {
@@ -65,7 +79,7 @@ export const InstructorRepository = {
         await instructorRepository.save(updateInstructor)
     },
 
-    async changeInstructorStatus(instructorId: number) {
+    async changeisDeletedInstructor(instructorId: number) {
         const instructorRepository = getRepository(Instructor)
 
         const instructor = await getRepository(Instructor).findOne({

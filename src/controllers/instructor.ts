@@ -71,13 +71,13 @@ export const InstructorController = {
         res.json({ success: true })
     },
 
-    async changeInstructorStatus(req: ExtendedRequest, res: Response) {
+    async deleteInstructor(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
 
         const instructorId = parseInt(req.params.instructor_id)
 
 
-        await InstructorRepository.changeInstructorStatus(instructorId)
+        await InstructorRepository.changeisDeletedInstructor(instructorId)
         res.json({ success: true })
     },
 

@@ -127,8 +127,10 @@ InstructorRouter.post('/create',h(checkToken), h(InstructorController.createInst
 InstructorRouter.patch('/update',h(checkToken), h(InstructorController.updateInstructor))
 
 
-InstructorRouter.patch('/delete/:instructor_id',h(checkToken), h(InstructorController.changeInstructorStatus))
+InstructorRouter.patch('/delete/:instructor_id',h(checkToken), h(InstructorController.deleteInstructor))
 
 InstructorRouter.patch('/changeProfilePicture/:instructor_id',h(checkToken), h(InstructorController.changeInstructorProfilePicture))
+
+
 
 export { InstructorRouter }
