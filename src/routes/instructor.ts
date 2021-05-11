@@ -83,7 +83,7 @@ InstructorRouter.get('/', h(InstructorController.getAllInstructors))
  */
 InstructorRouter.get('/:instructor_id', h(InstructorController.getInstructor))
 
-InstructorRouter.get('/list/all', h(InstructorController.getAllInstructorsWithDeleted))
+InstructorRouter.get('/list/all', h(InstructorController.getVisibleInstructors))
 
 /**
  * @swagger

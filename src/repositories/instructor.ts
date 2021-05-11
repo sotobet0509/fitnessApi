@@ -45,7 +45,11 @@ export const InstructorRepository = {
     async getAllInstructors() {
 
         const instructors = await getRepository(Instructor).find({
-            isDeleted: false
+            where:{
+                isDeleted: false,
+                isVisible: true
+            }
+            
         })
 
         for (var i in instructors) {
@@ -119,8 +123,11 @@ export const InstructorRepository = {
 
         await InstructorRepository.save(instructor)
     },
-    async getAllInstructorsWithDeleted() {
+    async getVisibleInstructors() {
         const instructors = await getRepository(Instructor).find({
+            where: {
+                isDeleted: false
+            }
         })
 
         for (var i in instructors) {

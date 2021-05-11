@@ -92,8 +92,8 @@ export const InstructorController = {
         res.json({ success: true })
     },
     
-    async getAllInstructorsWithDeleted(req: ExtendedRequest, res: Response) {
-        const instructors = await InstructorRepository.getAllInstructorsWithDeleted()
+    async getVisibleInstructors(req: ExtendedRequest, res: Response) {
+        const instructors = await InstructorRepository.getVisibleInstructors()
         res.json({ success: true, data: instructors })
     },
 
