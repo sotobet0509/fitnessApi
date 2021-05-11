@@ -25,7 +25,6 @@ export const PurchaseController = {
         })
         const { error, value } = purchaseSchema.validate(req.body)
         if (error) {
-            console.log(error)
             throw new DataMissingError()
         }
 

@@ -7,7 +7,7 @@ import moment = require('moment')
 
 export const InstructorRepository = {
     async getInstructor(instructorId: number) {
-        let exists= true
+        let exists = false
         const instructor = await getRepository(Instructor).findOne({
             where: {
                 id: instructorId
@@ -15,19 +15,31 @@ export const InstructorRepository = {
         })
         if (!instructor) throw new ErrorResponse(404, 14, 'El instructor no existe')
         delete instructor.password
-        let  currentDate  = moment()
-    
+        let currentDate = moment().tz("America/Mexico_City")
         const scheduleExist = await createQueryBuilder(Schedule)
-        .innerJoinAndSelect('Schedule.Instructor','Instructor')
-        .where('Schedule.Instructor=:instructorId',{instructorId:instructor.id})
-        .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
-        .andWhere('Time(end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
-        .getOne()
+            .innerJoinAndSelect('Schedule.Instructor', 'Instructor')
+            .where('Schedule.Instructor=:instructorId', { instructorId: instructor.id })
+            .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
+            //.andWhere('Time(end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+            .orderBy("date", "ASC")
+            .getMany()
 
-        if (scheduleExist) exists
-        else exists= false
+        const currentTime = moment(currentDate).format('hh:mm:ss')
+        for (var i in scheduleExist) {
+            if (moment(scheduleExist[i].date).isSame(moment(currentDate).format('YYYY-MM-DD'))) {
+                const scheduleStart = moment(scheduleExist[i].start).format('hh:mm:ss')
 
-        return {...instructor,"scheduleExists":exists}
+                if (scheduleStart >= currentTime) {
+                    exists = true
+                    break
+                }
+            } else {
+                exists = true
+                break
+            }
+        }
+
+        return { ...instructor, "scheduleExists": exists }
     },
 
     async getAllInstructors() {
@@ -36,7 +48,7 @@ export const InstructorRepository = {
             isDeleted: false
         })
 
-        for(var i in instructors){
+        for (var i in instructors) {
             delete instructors[i].password
             delete instructors[i].email
             delete instructors[i].isDeleted
@@ -111,7 +123,7 @@ export const InstructorRepository = {
         const instructors = await getRepository(Instructor).find({
         })
 
-        for(var i in instructors){
+        for (var i in instructors) {
             delete instructors[i].password
             delete instructors[i].email
             delete instructors[i].createdAt
@@ -126,41 +138,51 @@ export const InstructorRepository = {
 
     //reasignInstructor
 
-    
-    async reassignInstructor(data: InstructorSchema, instructorId:number) {
+
+    async reassignInstructor(data: InstructorSchema, instructorId: number) {
         const currentInstructor = await getRepository(Instructor)
-        .findOne({ 
-            where: {
-            id: data.id
-        }
-        })
+            .findOne({
+                where: {
+                    id: instructorId
+                }
+            })
         if (!currentInstructor) throw new ErrorResponse(403, 14, 'El instructor no existe')
         const newInstructor = await getRepository(Instructor)
-        .findOne({ 
-            where: {
-            id: instructorId
-        }
-        })
+            .findOne({
+                where: {
+                    id: data.id
+                }
+            })
         if (!newInstructor) throw new ErrorResponse(403, 14, 'El instructor no existe')
 
-        let  currentDate  = moment()
+        let currentDate = moment().tz("America/Mexico_City")
         const schedules = await createQueryBuilder(Schedule)
-        .innerJoinAndSelect('Schedule.Instructor','Instructor')
-        .where('Schedule.Instructor=:instructorId',{instructorId:data.id})
-        .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
-        .andWhere('Time(start)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
-        .getMany()
-        console.log(schedules)
+            .innerJoinAndSelect('Schedule.Instructor', 'Instructor')
+            .where('Schedule.Instructor=:instructorId', { instructorId: currentInstructor.id })
+            .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
+            .getMany()
 
-       
+        /* for (var schedule in schedules) {
+               schedules[schedule].Instructor = newInstructor
+               await getRepository(Schedule).save(schedules[schedule])
+           }*/
 
-        for (var schedule in schedules){
-            schedules[schedule].Instructor=newInstructor
-            await getRepository(Schedule).save(schedules[schedule]) 
+
+        const currentTime = moment(currentDate).format('hh:mm:ss')
+        for (var i in schedules) {
+            if (moment(schedules[i].date).isSame(moment(currentDate).format('YYYY-MM-DD'))) {
+                const scheduleStart = moment(schedules[i].start).format('hh:mm:ss')
+
+                if (scheduleStart >= currentTime) {
+                    schedules[i].Instructor = newInstructor
+                    await getRepository(Schedule).save(schedules[i])
+                }
+            } else {
+                schedules[i].Instructor = newInstructor
+                await getRepository(Schedule).save(schedules[i])
+            }
         }
 
-        
-        
     },
 
 
