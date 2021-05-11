@@ -24,25 +24,16 @@ export const InstructorRepository = {
             .orderBy("date", "ASC")
             .getMany()
 
-        const currentTime = moment(currentDate).format('hh:mm:ss')
-        console.log(scheduleExist)
+        const currentTime = moment(currentDate).format('HH:mm:ss')
+
         for (var i in scheduleExist) {
             if (moment(scheduleExist[i].date).isSame(moment(currentDate).format('YYYY-MM-DD'))) {
-                const scheduleStart = moment(scheduleExist[i].start).format('hh:mm:ss')
-                if (scheduleExist[i].id == 592 || scheduleExist[i].id == 593) {
-                    console.log("soy de hoy", scheduleExist[i].start)
-                }
+                const scheduleStart = moment(moment(currentDate).format('YYYY-MM-DD') + ' ' + scheduleExist[i].start).format('HH:mm:ss')
                 if (scheduleStart >= currentTime) {
-                    if (scheduleExist[i].id == 592 || scheduleExist[i].id == 593) {
-                        console.log("entre al if", scheduleStart, currentTime)
-                    }
                     exists = true
                     break
                 }
             } else {
-                if (scheduleExist[i].id == 592 || scheduleExist[i].id == 593) {
-                    console.log("entre al else")
-                }
                 exists = true
                 break
             }
@@ -184,25 +175,15 @@ export const InstructorRepository = {
 
 
 
-        const currentTime = moment(currentDate).format('hh:mm:ss')
+        const currentTime = moment(currentDate).format('HH:mm:ss')
         for (var i in schedules) {
             if (moment(schedules[i].date).isSame(moment(currentDate).format('YYYY-MM-DD'))) {
-                const scheduleStart = moment(schedules[i].start).format('hh:mm:ss')
-                if (schedules[i].id == 592 || schedules[i].id == 593) {
-                    console.log("soy de hoy", schedules[i].start)
-                }
+                const scheduleStart = moment(moment(currentDate).format('YYYY-MM-DD') + ' ' + schedules[i].start).format('HH:mm:ss')
                 if (scheduleStart >= currentTime) {
-                    if (schedules[i].id == 592 || schedules[i].id == 593) {
-                        console.log("entre al if", scheduleStart, currentTime)
-                    }
                     schedules[i].Instructor = newInstructor
                     await getRepository(Schedule).save(schedules[i])
                 }
             } else {
-
-                if (schedules[i].id == 592 || schedules[i].id == 593) {
-                    console.log("entre al else")
-                }
                 schedules[i].Instructor = newInstructor
                 await getRepository(Schedule).save(schedules[i])
             }
