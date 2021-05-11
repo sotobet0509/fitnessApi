@@ -124,4 +124,43 @@ export const InstructorRepository = {
         return instructors
     },
 
+    //reasignInstructor
+
+    
+    async reasignInstructor(data: InstructorSchema, instructorId:number) {
+        const currentInstructor = await getRepository(Instructor)
+        .findOne({ 
+            where: {
+            id: data.id
+        }
+        })
+        if (!currentInstructor) throw new ErrorResponse(403, 14, 'El instructor no existe')
+        const newInstructor = await getRepository(Instructor)
+        .findOne({ 
+            where: {
+            id: instructorId
+        }
+        })
+        if (!newInstructor) throw new ErrorResponse(403, 14, 'El instructor no existe')
+
+        let  currentDate  = moment()
+        const schedules = await createQueryBuilder(Schedule)
+        .innerJoinAndSelect('Schedule.Instructor','Instructor')
+        .where('Schedule.Instructor=:instructorId',{instructorId:instructorId})
+        .andWhere('Date(date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
+        .andWhere('Time(end)>:cTime', { cTime: moment(currentDate).format("HH:mm:ss") })
+        .getMany()
+
+       
+
+        for (var schedule in schedules){
+            schedules[schedule].Instructor=newInstructor
+            await getRepository(Schedule).save(schedules[schedule]) 
+        }
+
+        
+        
+    },
+
+
 }

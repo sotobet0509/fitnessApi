@@ -96,4 +96,19 @@ export const InstructorController = {
         const instructors = await InstructorRepository.getAllInstructorsWithDeleted()
         res.json({ success: true, data: instructors })
     },
+
+    
+    async reasignInstructor(req: ExtendedRequest, res: Response) {
+        let id = parseInt(req.params.instructorId)
+        const instructorSchema = Joi.object().keys({
+            id: Joi.number().required()
+        })
+        const { error, value } = instructorSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <InstructorSchema>value
+        const instructors = await InstructorRepository.reasignInstructor(data,id)
+        res.json({ success: true, data: instructors })
+    },
+
+
 }
