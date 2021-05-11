@@ -45,13 +45,12 @@ export const InstructorRepository = {
     async getAllInstructors() {
 
         const instructors = await getRepository(Instructor).find({
-            isDeleted: false
+            isVisible: true
         })
 
         for (var i in instructors) {
             delete instructors[i].password
             delete instructors[i].email
-            delete instructors[i].isDeleted
         }
         return instructors
     },
