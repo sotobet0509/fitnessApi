@@ -127,7 +127,7 @@ export const InstructorRepository = {
     //reasignInstructor
 
     
-    async reasignInstructor(data: InstructorSchema, instructorId:number) {
+    async reassignInstructor(data: InstructorSchema, instructorId:number) {
         const currentInstructor = await getRepository(Instructor)
         .findOne({ 
             where: {

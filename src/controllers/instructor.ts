@@ -98,7 +98,7 @@ export const InstructorController = {
     },
 
     
-    async reasignInstructor(req: ExtendedRequest, res: Response) {
+    async reassignInstructor(req: ExtendedRequest, res: Response) {
         if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
 
         let id = parseInt(req.params.instructorId)
@@ -108,7 +108,7 @@ export const InstructorController = {
         const { error, value } = instructorSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <InstructorSchema>value
-        const instructors = await InstructorRepository.reasignInstructor(data,id)
+        const instructors = await InstructorRepository.reassignInstructor(data,id)
         res.json({ success: true, data: instructors })
     },
 
