@@ -23,6 +23,9 @@ export class Instructor {
    
     @Column()
     isDeleted: boolean
+    
+    @Column({default: true})
+    isVisible: boolean
 
     @CreateDateColumn()
     createdAt: Date
