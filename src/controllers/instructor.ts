@@ -99,6 +99,8 @@ export const InstructorController = {
 
     
     async reasignInstructor(req: ExtendedRequest, res: Response) {
+        if (!req.user.isAdmin) throw new ErrorResponse(401, 15, "No autorizado")
+
         let id = parseInt(req.params.instructorId)
         const instructorSchema = Joi.object().keys({
             id: Joi.number().required()
