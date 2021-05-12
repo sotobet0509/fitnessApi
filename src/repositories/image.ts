@@ -16,6 +16,7 @@ export const ImageRepository = {
    const imageRepository = getRepository(Images);
    const image = new Images()
    image.url=url
+   image.section= "Home"
    await imageRepository.save(image)
 },
 
