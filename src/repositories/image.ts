@@ -13,30 +13,26 @@ export const ImageRepository = {
   },
 
   async uploadHomeImagePicture(url: string) {
-   const imageRepository = getRepository(Images);
-   const image = new Images()
-   image.url=url
-   image.section= "Home"
-   await imageRepository.save(image)
-},
+    const imageRepository = getRepository(Images);
+    const image = new Images()
+    image.url = url
+    image.section = "Home"
+    await imageRepository.save(image)
+  },
 
 
   async changeImageStatus(data: ImageData) {
     const imageRepository = getRepository(Images);
-    let images = []
-    for (var i in data.images){
+    for (var i in data.images) {
       const id = data.images[i]
       const image = await getRepository(Images).findOne({
-          where: {
-              id: id
-          }
+        where: {
+          id: id
+        }
       })
-      if (!image) throw new ErrorResponse(404, 14, 'La imagen no existe '+data.images[i])
-      image[i].status = !image[i].status
+      if (!image) throw new ErrorResponse(404, 14, 'La imagen ' + data.images[i] + ' no existe')
+      image.status = !image.status
       await imageRepository.save(image)
     }
-   
-    
-    return images;
   },
 };

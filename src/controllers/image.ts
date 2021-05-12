@@ -32,10 +32,9 @@ export const ImageController ={
         }
 
         const data = <ImageData>value
-        const clientId = req.params.client_id
-        const images= await ImageRepository.changeImageStatus(data)
+        await ImageRepository.changeImageStatus(data)
 
-        res.json({ success: true, data: images})
+        res.json({ success: true})
     },
 
 
