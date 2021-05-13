@@ -13,4 +13,7 @@ export class Images {
 
     @Column({nullable: true})
     section: string
+
+    @Column()
+    name: string
 }

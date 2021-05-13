@@ -611,17 +611,32 @@ export const ClientRepository = {
     },
 
     async searchClient(query: string) {
-        const clients = await createQueryBuilder(User)
-            .where('name like :query or lastname like :query or email like :query', {
-                query: '%' + query + '%',
-            })
-            .leftJoinAndSelect('User.ClassesHistory', 'ClassesHistory')
-            .andWhere("isDeleted = false")
-            .andWhere("isAdmin = false")
-            .limit(10)
-            .getMany()
-           
+        const queryArray = query.split(" ")
+        let clients
+        if (queryArray.length == 1) {
+            clients = await createQueryBuilder(User)
+                .where('name like :query or lastname like :query or email like :query', {
+                    query: '%' + query + '%',
+                })
+                .leftJoinAndSelect('User.ClassesHistory', 'ClassesHistory')
+                .andWhere("isDeleted = false")
+                .andWhere("isAdmin = false")
+                .limit(20)
+                .getMany()
 
+        } else {
+            clients = await createQueryBuilder(User)
+                .where('(name like :query and lastname like :query2) or (name like :query3) ', {
+                    query: '%' + queryArray[0] + '%',
+                    query2: '%' + queryArray[1] + '%',
+                    query3: '%' + queryArray[0] + '%' + queryArray[1] + '%'
+                })
+                .leftJoinAndSelect('User.ClassesHistory', 'ClassesHistory')
+                .andWhere("isDeleted = false")
+                .andWhere("isAdmin = false")
+                .limit(20)
+                .getMany()
+        }
         let data = []
         let isUnlimited = false
         let isUnlimitedGroup = false
@@ -635,7 +650,7 @@ export const ClientRepository = {
             delete clients[i].isAdmin
             delete clients[i].pictureUrl
             delete clients[i].tempToken
-            
+
             let booking = await createQueryBuilder(Booking)
                 .leftJoinAndSelect("Booking.Schedule", "Schedule")
                 .where('Date(Schedule.date)>=:cDate', { cDate: moment(currentDate).format('YYYY-MM-DD') })
@@ -676,7 +691,7 @@ export const ClientRepository = {
                 .getMany();
 
             for (var j in purchases) {
-                               pendingPasses += (purchases[j].Bundle.passes + purchases[j].addedPasses)
+                pendingPasses += (purchases[j].Bundle.passes + purchases[j].addedPasses)
                 pendingClasses += (purchases[j].Bundle.classNumber + purchases[j].addedClasses)
                 if (purchases[j].Bundle.isUnlimited) {
                     isUnlimited = true
@@ -702,13 +717,13 @@ export const ClientRepository = {
             let taken = 0
             let takenPasses = 0
             let takenGruopClasses = 0
-            if(clients[i].ClassesHistory){
+            if (clients[i].ClassesHistory) {
                 taken = clients[i].ClassesHistory.takenClasses
                 takenPasses = clients[i].ClassesHistory.takenPasses
                 takenGruopClasses = clients[i].ClassesHistory.takenGroupClasses
                 delete clients[i].ClassesHistory
             }
-            
+
             let nextExpirationDate: Date
             if (purchases.length == 0) {
                 nextExpirationDate = null
@@ -728,9 +743,11 @@ export const ClientRepository = {
                 isUnlimited: isUnlimited,
                 isUnlimitedGroup: isUnlimitedGroup,
                 nextExpirationDate: nextExpirationDate
+                
             })
         }
-        return data
+        return {data,
+                pagesNumber: clients.length }
     }
 
 }

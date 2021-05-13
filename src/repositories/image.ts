@@ -11,12 +11,19 @@ export const ImageRepository = {
 
     return images;
   },
+  
+  async getAllImages() {
+    const images = await getRepository(Images).find()
 
-  async uploadHomeImagePicture(url: string) {
+    return images;
+  },
+
+  async uploadHomeImagePicture(url: string, name : string) {
     const imageRepository = getRepository(Images);
     const image = new Images()
     image.url = url
     image.section = "Home"
+    image.name = name
     await imageRepository.save(image)
   },
 

@@ -1,7 +1,7 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class init1620831623668 implements MigrationInterface {
-    name = 'init1620831623668'
+export class Init1620838496606 implements MigrationInterface {
+    name = 'Init1620838496606'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query("CREATE TABLE `folios` (`id` int NOT NULL AUTO_INCREMENT, `folio` varchar(255) NOT NULL, `isAviable` tinyint NOT NULL DEFAULT 1, `purchase` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `redeemAt` datetime NULL, `expirationDate` datetime NOT NULL, `clientName` varchar(255) NOT NULL, `alternate_users_id` varchar(36) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
@@ -24,7 +24,7 @@ export class init1620831623668 implements MigrationInterface {
         await queryRunner.query("CREATE TABLE `schedules` (`id` int NOT NULL AUTO_INCREMENT, `date` datetime NOT NULL, `end` time NOT NULL, `start` time NOT NULL, `theme` varchar(255) NULL, `isPrivate` tinyint NOT NULL DEFAULT 0, `instructors_id` int NULL, `roomsId` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `bookings` (`id` int NOT NULL AUTO_INCREMENT, `isPass` tinyint NOT NULL DEFAULT 0, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `assistance` tinyint NOT NULL DEFAULT 0, `schedules_id` int NULL, `seats_id` int NULL, `user_id` varchar(36) NULL, `fromPurchase` int NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `discounts` (`id` int NOT NULL AUTO_INCREMENT, `description` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
-        await queryRunner.query("CREATE TABLE `images` (`id` int NOT NULL AUTO_INCREMENT, `url` varchar(255) NOT NULL, `status` tinyint NOT NULL DEFAULT 1, `section` varchar(255) NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
+        await queryRunner.query("CREATE TABLE `images` (`id` int NOT NULL AUTO_INCREMENT, `url` varchar(255) NOT NULL, `status` tinyint NOT NULL DEFAULT 1, `section` varchar(255) NULL, `name` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("CREATE TABLE `versions` (`id` int NOT NULL AUTO_INCREMENT, `version` int NOT NULL, `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB");
         await queryRunner.query("ALTER TABLE `folios` ADD CONSTRAINT `FK_eef86d0781caf0af53c7b36bc17` FOREIGN KEY (`alternate_users_id`) REFERENCES `alternate_Users`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");
         await queryRunner.query("ALTER TABLE `transactions` ADD CONSTRAINT `FK_ff9c524856f36515985a8015cb8` FOREIGN KEY (`purchases_id`) REFERENCES `purchases`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION");

@@ -39,8 +39,8 @@ export async function handleSurvey1(file: UploadedFile) {
 
 export async function handleHomePicture(file: UploadedFile) {
     if(file.truncated) throw new ErrorResponse(400, 30, 'El archivo es demasiado grande')
-    const name = uuidv4()
-    let filename = name + file.name
+    
+    let filename = file.name
     filename = filename.trim()
 
     const url = `${config.profilePictureUrl}${filename}`
