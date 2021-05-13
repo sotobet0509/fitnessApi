@@ -14,6 +14,6 @@ export default {
   stripeApiKey: process.env.STRIPE_API_KEY,
   profilePictureUrl: process.env.PROFILE_PICTURES_URL,
   profileInstructorPictureUrl: process.env.PROFILE_INSTRUCTOR_PICTURES_URL,
-  questionsUrl: process.env.QUESTIONS_URL
-
+  questionsUrl: process.env.QUESTIONS_URL,
+  homeUrl: process.env.HOME_IMAGE_PICTURES_URL
 }

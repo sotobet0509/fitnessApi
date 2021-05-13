@@ -43,7 +43,7 @@ export async function handleHomePicture(file: UploadedFile) {
     let filename = file.name
     filename = filename.trim()
 
-    const url = `${config.profilePictureUrl}${filename}`
+    const url = `${config.homeUrl}${filename}`
     await file.mv(path.join(__dirname, `../../files/pictures/${filename}`))
     return url
 }
