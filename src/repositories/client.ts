@@ -35,6 +35,7 @@ export const ClientRepository = {
             .select([
                 "User.id"
             ])
+            .where("User.isDeleted=false")
             .getCount();
 
         let data = []
