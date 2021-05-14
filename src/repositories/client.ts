@@ -61,7 +61,7 @@ export const ClientRepository = {
     },
 
     async getClient(clientId: string) {
-        
+
         let currentDate = moment().tz("America/Mexico_City")
         let pendingClasses = 0
         let pendingClassesGroup = 0
@@ -175,7 +175,7 @@ export const ClientRepository = {
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
 
         client.isDeleted = true
-        const newMail = moment().format("YYYY-MM-DD").toString() + moment().format("HH:mm:ss").toString()+"@dominio.com"
+        const newMail = moment().format("YYYY-MM-DD").toString() + moment().format("HH:mm:ss").toString() + "@dominio.com"
         client.email = newMail
         await clientRepository.save(client)
 
@@ -390,25 +390,25 @@ export const ClientRepository = {
         let clients
         if (queryArray.length == 1) {
             clients = await createQueryBuilder(User)
-                .where('name like :query or lastname like :query or email like :query', {
+                .where("isDeleted =:status", { status: false })
+                .andWhere("User.isAdmin =:admin", { admin: false })
+                .andWhere('name like :query or lastname like :query or email like :query', {
                     query: '%' + query + '%',
                 })
                 .leftJoinAndSelect('User.ClassesHistory', 'ClassesHistory')
-                .andWhere("isDeleted = false")
-                .andWhere("isAdmin = false")
                 .limit(20)
                 .getMany()
 
         } else {
             clients = await createQueryBuilder(User)
-                .where('(name like :query and lastname like :query2) or (name like :query3) ', {
+                .where("isDeleted =:status", { status: false })
+                .andWhere("User.isAdmin =:admin", { admin: false })
+                .andWhere('(name like :query and lastname like :query2) or (name like :query3) ', {
                     query: '%' + queryArray[0] + '%',
                     query2: '%' + queryArray[1] + '%',
                     query3: '%' + queryArray[0] + '%' + queryArray[1] + '%'
                 })
                 .leftJoinAndSelect('User.ClassesHistory', 'ClassesHistory')
-                .andWhere("isDeleted = false")
-                .andWhere("isAdmin = false")
                 .limit(20)
                 .getMany()
         }
@@ -518,11 +518,13 @@ export const ClientRepository = {
                 isUnlimited: isUnlimited,
                 isUnlimitedGroup: isUnlimitedGroup,
                 nextExpirationDate: nextExpirationDate
-                
+
             })
         }
-        return {data,
-                pagesNumber: clients.length }
+        return {
+            data,
+            pagesNumber: clients.length
+        }
     }
 
 }
