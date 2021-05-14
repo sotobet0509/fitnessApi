@@ -29,7 +29,7 @@ export const AuthRepository = {
     customer.name = data.name
     customer.lastname = data.lastname
 
-    if(userData){
+    if (userData) {
       customer.fromGroup = userData.id
     }
 
@@ -123,7 +123,7 @@ export const AuthRepository = {
     customer.lastname = data.lastname
     customer.pictureUrl = data.pictureUrl
     customer.tempToken = null
-    if(userData){
+    if (userData) {
       customer.fromGroup = userData.id
     }
     customer = await customerRepository.save(customer)
@@ -210,7 +210,10 @@ export const AuthRepository = {
   async authenticateCustomer(data: LocalLoginData) {
     const customerRepository = getConnection().getRepository(User)
     const customer = await customerRepository.findOne({
-      where: { email: data.email.toLocaleLowerCase() },
+      where: {
+        email: data.email.toLocaleLowerCase(),
+        isDeleted : false
+      },
     })
 
     if (!customer?.password) throw new ErrorResponse(403, 4, 'Invalid Credentials')
@@ -268,7 +271,7 @@ export const AuthRepository = {
         email: mail
       }
     })
-    if(emailExist) available = false
+    if (emailExist) available = false
 
     return available
   },

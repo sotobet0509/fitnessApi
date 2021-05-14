@@ -24,7 +24,8 @@ export const MeRepository = {
         const repository = getRepository(User)
         const profile = await repository.findOne({
             where: {
-                id: id
+                id: id,
+                isDeleted: false
             },
             relations: ["User_categories", "User_categories.Categories", "User_categories.Categories.User_items"]
         })
@@ -87,14 +88,6 @@ export const MeRepository = {
     },
 
     async getHistory(page: string, user: User) {
-        // let purchases = await createQueryBuilder(Purchase)
-        //     .innerJoinAndSelect('Purchase.User', 'User')
-        //     .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-        //     .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
-        //     .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
-        //     .where('User.id=:idUser', { idUser: user.id })
-        //     //.andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-        //     .getMany();
         const pages = parseInt(page) - 1
         let pagesNumber
         let purchases = await getRepository(Purchase).find({
@@ -150,194 +143,14 @@ export const MeRepository = {
             purchases[i]['folio'] = folio
 
         }
-
-        // const bookingRepository = getRepository(Booking)
-        // const bookings = await bookingRepository.find({
-        //     where: {
-        //         User: user
-        //     }
-        // })
-        //  let clasesTomadas = bookings.length
+    
         return {
             purchases,
             pages: pagesNumber
-            //taken: clasesTomadas,
-            //pending: clases - clasesTomadas >= 0 ? clases - clasesTomadas : 0
         }
     },
 
-    /*let client = await getRepository(User).findOne({
-        where: {
-            id: user.id
-        },
-        relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User']
-    })*/
     async getClasses(user: User) {
-        /*let client
-        client = await createQueryBuilder(User)
-            .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .innerJoinAndSelect('User.Booking', 'Booking')
-            .innerJoinAndSelect('Booking.fromPurchase', 'fromPurchase')
-            .innerJoinAndSelect('Booking.Schedule', 'Schedule')
-            .innerJoinAndSelect('Booking.Seat', 'Seat')
-            .innerJoinAndSelect('Seat.Room', 'Room')
-            .innerJoinAndSelect('Room.Location', 'Location')
-            .innerJoinAndSelect('Schedule.Instructor', 'Instructor')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .innerJoinAndSelect('Purchase.Payment_method', 'Payment_method')
-            .innerJoinAndSelect('Purchase.Transaction', 'Transaction')
-            .leftJoinAndSelect('User.User_categories', 'User_categories')
-            .leftJoinAndSelect('User_categories.Categories', 'Categories')
-            .leftJoinAndSelect('Categories.User_items', 'User_items')
-            .where('User.id=:idUser', { idUser: user.id })
-            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
-            .getOne()
-        if (!client) {
-            client = await getRepository(User).findOne({
-                where: {
-                    id: user.id
-                },
-                relations: ['Purchase', 'Booking', 'Booking.Schedule', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.Seat.Room.Location', 'Booking.Schedule.Instructor', 'Purchase.Bundle', 'Purchase.Booking', 'Purchase.Booking.User', 'Purchase.Transaction', 'Purchase.Payment_method', 'User_categories', 'User_categories.Categories', 'User_categories.Categories.User_items']
-            })
-        }
-        let mainUser
-
-        if (client.fromGroup) {
-            mainUser = client.fromGroup
-        } else {
-            mainUser = client.id
-        }
-
-        let clientGroup = await createQueryBuilder(User)
-            .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('Bundle.isGroup=:isGroup', { isGroup: true })
-            .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
-            .getOne();
-
-        let boookingsArrayTotal: Booking[] = []
-        let boookingsArray: Booking[] = []
-        let boookingsPassesArray: Booking[] = []
-
-        let classesGroup: pendingClasses[]
-        if (clientGroup) {
-
-            for (const i in clientGroup.Purchase) {
-                let bookingsPurchases = await getRepository(Booking).find({
-                    where:
-                    {
-                        fromPurchase: clientGroup.Purchase[i].id,
-                        isPass: false
-                    }
-                })
-                let bookingsPassesPurchases = await getRepository(Booking).find({
-                    where:
-                    {
-                        fromPurchase: clientGroup.Purchase[i].id,
-                        isPass: true
-                    }
-                })
-                for (const j in bookingsPurchases) {
-                    boookingsArray.push(bookingsPurchases[j])
-                    boookingsArrayTotal.push(bookingsPurchases[j])
-                }
-                for (const j in bookingsPassesPurchases) {
-                    boookingsPassesArray.push(bookingsPassesPurchases[j])
-                    boookingsArrayTotal.push(bookingsPassesPurchases[j])
-                }
-            }
-
-            classesGroup = await getPendingClasses(clientGroup.Purchase, boookingsArrayTotal)
-            classesGroup = classesGroup.filter((p: pendingClasses) => {
-                let expirationDay = moment(p.purchase.expirationDate)
-                if (expirationDay.isBefore(moment())) return false
-                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-                return true
-            })
-        }
-
-
-        let pendingGroupC = 0
-        let pendingGroupP = 0
-        for (var i in classesGroup) {
-            pendingGroupC += classesGroup[i].pendingClasses
-            pendingGroupP += classesGroup[i].pendingPasses
-        }
-        let isUnlimitedGroup = false
-        for (var i in classesGroup) {
-            if (classesGroup[i].purchase.Bundle.isUnlimited) {
-                isUnlimitedGroup = true
-                break
-            }
-        }
-
-        const bookingsNoPasses = await createQueryBuilder(Booking)
-            .leftJoinAndSelect('Booking.User', 'User')
-            .leftJoinAndSelect('User.Purchase', 'Purchase')
-            .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('User.id=:idUser', { idUser: user.id })
-            .andWhere('Booking.isPass=:isPass', { isPass: false })
-            .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-            .getMany();
-
-        const passes = await createQueryBuilder(Booking)
-            .leftJoinAndSelect('Booking.User', 'User')
-            .innerJoinAndSelect('User.Purchase', 'Purchase')
-            .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-            .where('Bundle.isGroup=:isGroup', { isGroup: false })
-            .andWhere('Booking.isPass=:isPass', { isPass: true })
-            .andWhere('User.id=:idUser', { idUser: user.id })
-            .getMany();
-
-        let classes: pendingClasses[]
-        classes = await getPendingClasses(client.Purchase, client.Booking)
-
-        classes = classes.filter((p: pendingClasses) => {
-            let expirationDay = moment(p.purchase.expirationDate)
-            if (expirationDay.isBefore(moment())) return false
-            if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-            return true
-        })
-
-        let pendingC = 0
-        let pendingP = 0
-        for (var i in classes) {
-            pendingC += classes[i].pendingClasses
-            pendingP += classes[i].pendingPasses
-        }
-        let isUnlimited = false
-        for (var i in classes) {
-            if (classes[i].purchase.Bundle.isUnlimited) {
-                isUnlimited = true
-                break
-            }
-        }
-
-
-        let nextExpirationDate: Date
-        if (classes.length == 0) {
-            nextExpirationDate = null
-        } else {
-            nextExpirationDate = classes[classes.length - 1].purchase.expirationDate
-        }
-        let bookings = client.Booking
-        return {
-            ...client,
-            bookings,
-            taken: bookingsNoPasses.length,
-            pending: pendingC,
-            pendingPasses: pendingP,
-            takenPasses: passes.length,
-            compras: orderByExpirationDay(client.Purchase),
-            isUnlimited,
-            isUnlimitedGroup,
-            nextExpirationDate,
-            pendingGroup: pendingGroupC,
-            takenGroup: boookingsArray.length,
-            pendingPassesGroup: pendingGroupP,
-            takenPassesGroup: boookingsPassesArray.length
-        }*/
         let currentDate = moment().tz("America/Mexico_City")
         let pendingClasses = 0
         let pendingClassesGroup = 0
@@ -353,7 +166,8 @@ export const MeRepository = {
 
         let client = await getRepository(User).findOne({
             where: {
-                id: user.id
+                id: user.id,
+                isDeleted: false
             },
             relations: ["ClassesHistory"]
         })

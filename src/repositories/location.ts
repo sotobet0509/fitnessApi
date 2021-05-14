@@ -203,7 +203,8 @@ export const LocationRepository = {
 
         const client = await getRepository(User).findOne({
             where: {
-                id: user.id
+                id: user.id,
+                isDeleted: false
             }
         })
         if (!client) throw new ErrorResponse(404, 13, 'Usuario no existe')
@@ -335,26 +336,6 @@ export const LocationRepository = {
             }
         }
 
-
-        /*let filteredSchedules = []
-        for (var i in room) {
-            const schedules = room[i].Schedules
-            filteredSchedules = filteredSchedules.concat(schedules.filter((schedule: Schedule) => {
-                delete schedule.Instructor.password
-                delete schedule.Instructor.email
-                delete schedule.Instructor.largePicture
-                delete schedule.Instructor.profilePicture
-                delete schedule.Instructor.isDeleted
-                delete schedule.Instructor.description
-                delete schedule.Instructor.lastname
-                delete schedule.Instructor.createdAt
-
-                const date = moment(schedule.date)
-                if (date.isSameOrAfter(data.start) && date.isBefore(endDate)) return true
-                return false
-            }))
-        }*/
-
         const currentDay = moment(data.start).isoWeekday()
         for (var i in filteredSchedules2) {
             const filteredSchedule = filteredSchedules2[i]
@@ -362,7 +343,6 @@ export const LocationRepository = {
             if (day < currentDay) day = day + 7
             days[day - currentDay].push(filteredSchedule)
         }
-
 
         let temp = 0
         let flag = false
@@ -374,7 +354,6 @@ export const LocationRepository = {
                         flag = true
                     }
                     days[7].push(days[0][i])
-                    //days[0].splice(i, 1)
                 }
             }
             days[0].splice(temp, days[7].length)
@@ -386,7 +365,8 @@ export const LocationRepository = {
 
         const client = await getRepository(User).findOne({
             where: {
-                id: data.clientId
+                id: data.clientId,
+                isDeleted: false
             }
         })
         if (!client) throw new ErrorResponse(404, 13, 'Usuario no existe')
@@ -529,26 +509,6 @@ export const LocationRepository = {
             }
         }
 
-
-        /*let filteredSchedules = []
-        for (var i in room) {
-            const schedules = room[i].Schedules
-            filteredSchedules = filteredSchedules.concat(schedules.filter((schedule: Schedule) => {
-                delete schedule.Instructor.password
-                delete schedule.Instructor.email
-                delete schedule.Instructor.largePicture
-                delete schedule.Instructor.profilePicture
-                delete schedule.Instructor.isDeleted
-                delete schedule.Instructor.description
-                delete schedule.Instructor.lastname
-                delete schedule.Instructor.createdAt
-
-                const date = moment(schedule.date)
-                if (date.isSameOrAfter(data.start) && date.isBefore(endDate)) return true
-                return false
-            }))
-        }*/
-
         const currentDay = moment(data.start).isoWeekday()
         for (var i in filteredSchedules2) {
             const filteredSchedule = filteredSchedules2[i]
@@ -556,7 +516,6 @@ export const LocationRepository = {
             if (day < currentDay) day = day + 7
             days[day - currentDay].push(filteredSchedule)
         }
-
 
         let temp = 0
         let flag = false
@@ -568,7 +527,6 @@ export const LocationRepository = {
                         flag = true
                     }
                     days[7].push(days[0][i])
-                    //days[0].splice(i, 1)
                 }
             }
             days[0].splice(temp, days[7].length)

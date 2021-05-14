@@ -24,13 +24,6 @@ export const ScheduleRepository = {
             .where('Schedule.id=:id', { id: scheduleId })
             .getOne()
 
-        /*const schedule = await getRepository(Schedule).find({
-            where: {
-                id: scheduleId
-            },
-            relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
-        })*/
-
         if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
         const bookings = await getRepository(Booking).find({
@@ -96,7 +89,6 @@ export const ScheduleRepository = {
                 })
             }
         }
-
 
         return {
             ...schedule,
@@ -110,7 +102,8 @@ export const ScheduleRepository = {
 
         const client = await getRepository(User).findOne({
             where: {
-                id: user.id
+                id: user.id,
+                isDeleted: false
             }
         })
         if (!client) throw new ErrorResponse(404, 13, 'Usuario no existe')
@@ -118,14 +111,6 @@ export const ScheduleRepository = {
         let schedule = await createQueryBuilder(Schedule)
             .where('Schedule.id=:id', { id: scheduleId })
             .getOne()
-
-
-        /*const schedule = await getRepository(Schedule).find({
-            where: {
-                id: scheduleId
-            },
-            relations: ['Booking', 'Booking.Seat', 'Booking.Seat.Room', 'Booking.User', "Booking.User.User_categories", "Booking.User.User_categories.Categories"]
-        })*/
 
         if (!schedule) throw new ErrorResponse(404, 13, 'El horario no existe o esta vacio')
 
@@ -165,7 +150,6 @@ export const ScheduleRepository = {
                 .where('Seat.id NOT IN (:...seatId)', { seatId: occupied })
                 .getMany()
 
-
             let freeSeats = []
             for (var i in seat) {
                 freeSeats.push(seat[i].id)
@@ -193,8 +177,6 @@ export const ScheduleRepository = {
             }
         }
 
-
-
         return {
             ...schedule,
             available: filteredSeats
@@ -205,7 +187,8 @@ export const ScheduleRepository = {
         const client = await getRepository(User).findOne(
             {
                 where: {
-                    id: clientId
+                    id: clientId,
+                    isDeleted: false
                 }
             }
         )
@@ -216,7 +199,6 @@ export const ScheduleRepository = {
                 User: client
             }
         })
-
 
         const scheduleExist = await getRepository(Schedule).findOne({
             where: {
@@ -353,7 +335,6 @@ export const ScheduleRepository = {
                 if (purchaseId === null) throw new ErrorResponse(409, 17, 'No quedan clases disponibles')
             }
 
-
             const schedule = await getRepository(Booking).findOne({
                 where: {
                     Schedule: scheduleExist,
@@ -373,156 +354,6 @@ export const ScheduleRepository = {
             await getRepository(Purchase).save(purchases[purchasePosition])
             await getRepository(ClassesHistory).save(classesHistory)
         }
-
-
-
-
-        //const repository = getRepository(Purchase)
-        /*
-        let purchases = await createQueryBuilder(Purchase)
-            .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-            //.leftJoinAndSelect('Purchase.Payment_method', 'Payment_method')
-            //.leftJoinAndSelect('Purchase.Transaction', 'Transaction')
-            .where('Bundle.isGroup=:isGroup', { isGroup: false })
-            .andWhere('Purchase.users_id=:userId', { userId: client.id })
-            .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-            .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
-            .getMany()
-
-        // const purchases = await repository.find({
-        //     where: {
-        //         User: client,
-        //         isCanceled: false
-        //     },
-        //     relations: ['Bundle', 'Payment_method', "Transaction"]
-        // })
-
-        //nuevo flujo
-        const bookingRepository = getRepository(Booking)
-
-        // const bookings = await getRepository(Booking).find({
-        //     where: {
-        //         User: client
-        //     }
-        // })
-
-        // let bookings = await createQueryBuilder(User)
-        // .leftJoinAndSelect('User.Booking', 'Booking')
-        // .leftJoinAndSelect('Booking.fromPurchase', 'Purchase')
-        // .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-        // //.where('User.id=:userId', { userId: client.id })
-        // .andWhere('Bundle.isGroup=:isGroup', { isGroup: false })
-        // .getOne()
-
-
-        let boookingsArrayTotal: Booking[] = []
-        for (const i in purchases) {
-            let bookingsPurchases = await getRepository(Booking).find({
-                where:
-                {
-                    fromPurchase: purchases[i].id
-                },
-                relations: ['fromPurchase']
-
-            })
-            for (const j in bookingsPurchases) {
-                boookingsArrayTotal.push(bookingsPurchases[j])
-            }
-        }
-
-        let classes: pendingClasses[]
-        classes = await getPendingClasses(purchases, boookingsArrayTotal)
-
-        classes = classes.filter((p: pendingClasses) => {
-            let expirationDay = moment(p.purchase.expirationDate)
-            if (expirationDay.isBefore(moment())) return false
-            if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-            return true
-        })
-        let pending = 0
-        let pendingPasses = 0
-
-        let p = await MeRepository.getClasses(client)
-        pending = p.pending
-       // decomentar despues  pendingPasses = p.pendingPasses
-
-        if (!scheduleExist.isPrivate) {
-            if (pending <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
-
-            if (pendingPasses <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-        }
-
-        const schedule = await bookingRepository.findOne({
-            where: {
-                Schedule: scheduleExist,
-                Seat: seat
-            }
-        })
-        if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
-
-        let idPurchase = null
-        const currentDate = moment(scheduleExist.date)
-        if (!isPass) {
-            for (var i in classes) {
-                if (classes[i].pendingClasses != 0) {
-                    if (currentDate.isSameOrBefore(moment(classes[i].purchase.expirationDate))) {
-                        idPurchase = classes[i].purchase.id
-                        break
-                    }
-                }
-            }
-        } else {
-            for (var i in classes) {
-                if (classes[i].pendingPasses != 0) {
-                    if (currentDate.isSameOrBefore(moment(classes[i].purchase.expirationDate))) {
-                        idPurchase = classes[i].purchase.id
-                        break
-                    }
-                }
-            }
-        }
-
-        if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
-
-        const booking = new Booking()
-        if (scheduleExist.isPrivate) {
-            let privatePurchase = await createQueryBuilder(Purchase)
-                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Bundle.classNumber=:classNumber', { classNumber: 0 })
-                .andWhere('Purchase.addedClasses=:addedClasses', { addedClasses: 0 })
-                .andWhere('Purchase.users_id=:userId', { userId: client.id })
-                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-                .getOne()
-
-            if (!privatePurchase) throw new ErrorResponse(409, 49, 'El usuario no puede reservar esta clase')
-
-            privatePurchase.addedClasses += 1
-            await getRepository(Purchase).save(privatePurchase)
-
-            booking.Schedule = scheduleExist
-            booking.Seat = seat
-            booking.User = client
-            booking.isPass = isPass
-            booking.fromPurchase = privatePurchase
-        } else {
-            booking.Schedule = scheduleExist
-            booking.Seat = seat
-            booking.User = client
-            booking.isPass = isPass
-            booking.fromPurchase = idPurchase
-        }
-
-
-        // const currentPurchase = await getRepository(Purchase).findOne({
-        //     where: {
-        //         id: idPurchase
-        //     }
-        // })
-
-        await bookingRepository.save(booking)
-
-        return isPass ? pendingPasses - 1 : pendingPasses
-*/
     },
 
     async setBookingGroupByAdmin(scheduleId: number, seatId: number, clientId: string, isPass: boolean) {
@@ -530,7 +361,8 @@ export const ScheduleRepository = {
         const client = await getRepository(User).findOne(
             {
                 where: {
-                    id: clientId
+                    id: clientId,
+                    isDeleted: false
                 }
             }
         )
@@ -680,137 +512,15 @@ export const ScheduleRepository = {
             await getRepository(Purchase).save(purchases[purchasePosition])
             await getRepository(ClassesHistory).save(classesHistory)
         }
-
-
-
-        /*        
-            const scheduleExist = await getRepository(Schedule).findOne({
-                where: {
-                    id: scheduleId
-                }
-            })
-            if (!scheduleExist) throw new ErrorResponse(404, 16, 'Horario no existe')
-    
-            const seat = await getRepository(Seat).findOne({
-                where: {
-                    id: seatId
-                }
-            })
-            if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
-    
-            const client = await getRepository(User).findOne({
-                where: {
-                    id: clientId
-                }
-            })
-    
-            if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-            if (!client.isLeader) {
-                if (!client.fromGroup) throw new ErrorResponse(404, 14, 'El cliente no pertenece a ningún grupo')
-            }
-    
-            let mainUser
-    
-            if (client.fromGroup) {
-                mainUser = client.fromGroup
-            } else {
-                mainUser = client.id
-            }
-    
-            const liderPurchases = await createQueryBuilder(User)
-                .innerJoinAndSelect('User.Purchase', 'Purchase')
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Bundle.isGroup=:isGroup', { isGroup: true })
-                .andWhere('Purchase.users_id=:idUser', { idUser: mainUser })
-                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-                .getOne();
-    
-            let boookingsArrayTotal: Booking[] = []
-            for (const i in liderPurchases.Purchase) {
-                let bookingsPurchases = await getRepository(Booking).find({
-                    where:
-                    {
-                        fromPurchase: liderPurchases.Purchase[i].id
-                    }
-                })
-                for (const j in bookingsPurchases) {
-                    boookingsArrayTotal.push(bookingsPurchases[j])
-                }
-            }
-    
-            let classesGroup: pendingClasses[]
-            classesGroup = await getPendingClasses(liderPurchases.Purchase, boookingsArrayTotal)
-    
-            classesGroup = classesGroup.filter((p: pendingClasses) => {
-                let expirationDay = moment(p.purchase.expirationDate)
-                if (expirationDay.isBefore(moment())) return false
-                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-                return true
-            })
-    
-            let pendingGroupC = 0
-            let pendingGroupP = 0
-    
-            let p = await MeRepository.getClasses(client)
-            pendingGroupC = p.pendingGroup
-            //descomentar despues pendingGroupP = p.pendingPassesGroup
-    
-            if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
-    
-            //if (pendingGroupP <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-    
-            const schedule = await getRepository(Booking).findOne({
-                where: {
-                    Schedule: scheduleExist,
-                    Seat: seat
-                }
-            })
-            if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
-    
-            let idPurchase = null
-            const currentDate = moment(scheduleExist.date)
-    
-            if (!isPass) {
-                for (var i in classesGroup) {
-                    if (classesGroup[i].pendingClasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            idPurchase = classesGroup[i].purchase.id
-                            break
-                        }
-                    }
-                }
-            } else {
-                for (var i in classesGroup) {
-                    if (classesGroup[i].pendingPasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            idPurchase = classesGroup[i].purchase.id
-                            break
-                        }
-                    }
-                }
-            }
-    
-            if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
-    
-            const booking = new Booking()
-            booking.Schedule = scheduleExist
-            booking.Seat = seat
-            booking.User = client
-            booking.isPass = isPass
-            booking.fromPurchase = idPurchase
-    
-            const bookingRepository = getRepository(Booking)
-            await bookingRepository.save(booking)
-    
-            return isPass ? pendingGroupP - 1 : pendingGroupP*/
     },
 
     async setBookingGroup(scheduleId: number, seatId: number, clientId: string, isPass: boolean, user: User) {
-        
+
         const client = await getRepository(User).findOne(
             {
                 where: {
-                    id: user.id
+                    id: user.id,
+                    isDeleted: false
                 }
             }
         )
@@ -959,211 +669,7 @@ export const ScheduleRepository = {
             await getRepository(Booking).save(booking)
             await getRepository(Purchase).save(purchases[purchasePosition])
             await getRepository(ClassesHistory).save(classesHistory)
-        
         }
-        /*const scheduleExist = await getRepository(Schedule).findOne({
-            where: {
-                id: scheduleId
-            }
-        })
-        if (!scheduleExist) throw new ErrorResponse(404, 16, 'Horario no existe')
-
-        const seat = await getRepository(Seat).findOne({
-            where: {
-                id: seatId
-            }
-        })
-        if (!seat) throw new ErrorResponse(404, 16, 'El asiento no existe')
-
-        if (user.isLeader) {
-
-            const client = await getRepository(User).findOne({
-                where: {
-                    id: clientId
-                }
-            })
-
-            if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-            //if (client.fromGroup != user.id) throw new ErrorResponse(404, 14, 'El cliente no pertenece al grupo')
-
-            const liderPurchases = await createQueryBuilder(User)
-                .innerJoinAndSelect('User.Purchase', 'Purchase')
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Bundle.isGroup=:isGroup', { isGroup: true })
-                .andWhere('Purchase.users_id=:idUser', { idUser: user.id })
-                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-                .getOne();
-
-            let boookingsArrayTotal: Booking[] = []
-            for (const i in liderPurchases.Purchase) {
-                let bookingsPurchases = await getRepository(Booking).find({
-                    where:
-                    {
-                        fromPurchase: liderPurchases.Purchase[i].id
-                    }
-                })
-                for (const j in bookingsPurchases) {
-                    boookingsArrayTotal.push(bookingsPurchases[j])
-                }
-            }
-
-            let classesGroup: pendingClasses[]
-            classesGroup = await getPendingClasses(liderPurchases.Purchase, boookingsArrayTotal)
-
-            classesGroup = classesGroup.filter((p: pendingClasses) => {
-                let expirationDay = moment(p.purchase.expirationDate)
-                if (expirationDay.isBefore(moment())) return false
-                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-                return true
-            })
-
-            let pendingGroupC = 0
-            let pendingGroupP = 0
-
-            let p = await MeRepository.getClasses(client)
-            pendingGroupC = p.pendingGroup
-            //descomentar despues pendingGroupP = p.pendingPassesGroup
-
-            if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
-
-            //if (pendingGroupP <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-
-            const schedule = await getRepository(Booking).findOne({
-                where: {
-                    Schedule: scheduleExist,
-                    Seat: seat
-                }
-            })
-            if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
-
-            let idPurchase = null
-            const currentDate = moment(scheduleExist.date)
-
-            if (!isPass) {
-                for (var i in classesGroup) {
-                    if (classesGroup[i].pendingClasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            idPurchase = classesGroup[i].purchase.id
-                            break
-                        }
-                    }
-                }
-            } else {
-                for (var i in classesGroup) {
-                    if (classesGroup[i].pendingPasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            idPurchase = classesGroup[i].purchase.id
-                            break
-                        }
-                    }
-                }
-            }
-
-            if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
-
-            const booking = new Booking()
-            booking.Schedule = scheduleExist
-            booking.Seat = seat
-            booking.User = client
-            booking.isPass = isPass
-            booking.fromPurchase = idPurchase
-
-            const bookingRepository = getRepository(Booking)
-            await bookingRepository.save(booking)
-
-            return isPass ? pendingGroupP - 1 : pendingGroupP
-
-        } else {
-
-            if (!user.fromGroup) throw new ErrorResponse(404, 14, 'El cliente no pertenece a ningún grupo')
-            const liderPurchases = await createQueryBuilder(User)
-                .innerJoinAndSelect('User.Purchase', 'Purchase')
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Bundle.isGroup=:isGroup', { isGroup: true })
-                .andWhere('Purchase.users_id=:idUser', { idUser: user.fromGroup })
-                .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
-                .getOne();
-
-            let boookingsArrayTotal: Booking[] = []
-            for (const i in liderPurchases.Purchase) {
-                let bookingsPurchases = await getRepository(Booking).find({
-                    where:
-                    {
-                        fromPurchase: liderPurchases.Purchase[i].id
-                    }
-                })
-                for (const j in bookingsPurchases) {
-                    boookingsArrayTotal.push(bookingsPurchases[j])
-                }
-            }
-
-            let classesGroup: pendingClasses[]
-            classesGroup = await getPendingClasses(liderPurchases.Purchase, boookingsArrayTotal)
-
-            classesGroup = classesGroup.filter((p: pendingClasses) => {
-                let expirationDay = moment(p.purchase.expirationDate)
-                if (expirationDay.isBefore(moment())) return false
-                if (p.pendingClasses === 0 && p.pendingPasses === 0) return false
-                return true
-            })
-
-            let pendingGroupC = 0
-            let pendingGroupP = 0
-            for (var i in classesGroup) {
-                pendingGroupC += classesGroup[i].pendingClasses
-                pendingGroupP += classesGroup[i].pendingPasses
-            }
-
-            if (pendingGroupC <= 0 && !isPass) throw new ErrorResponse(409, 16, 'No quedan clases disponibles')
-
-            //if (pendingGroupP <= 0 && isPass) throw new ErrorResponse(409, 17, 'No quedan pases disponibles')
-
-            const schedule = await getRepository(Booking).findOne({
-                where: {
-                    Schedule: scheduleExist,
-                    Seat: seat
-                }
-            })
-            if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
-
-            let idPurchase = null
-            const currentDate = moment(scheduleExist.date)
-
-            if (!isPass) {
-                for (var i in classesGroup) {
-                    if (classesGroup[i].pendingClasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            idPurchase = classesGroup[i].purchase.id
-                            break
-                        }
-                    }
-                }
-            } else {
-                for (var i in classesGroup) {
-                    if (classesGroup[i].pendingPasses != 0) {
-                        if (currentDate.isSameOrBefore(moment(classesGroup[i].purchase.expirationDate))) {
-                            idPurchase = classesGroup[i].purchase.id
-                            break
-                        }
-                    }
-                }
-            }
-
-            if (idPurchase === null) throw new ErrorResponse(409, 49, 'La fecha seleccionada es después de la fecha de expiración de sus paquetes')
-
-            const booking = new Booking()
-            booking.Schedule = scheduleExist
-            booking.Seat = seat
-            booking.User = user
-            booking.isPass = isPass
-            booking.fromPurchase = idPurchase
-
-            const bookingRepository = getRepository(Booking)
-            await bookingRepository.save(booking)
-
-            return isPass ? pendingGroupP - 1 : pendingGroupP
-
-        }*/
     },
 
     async createSchedule(data: ScheduleSchema) {
@@ -1297,7 +803,7 @@ export const ScheduleRepository = {
         let currentDate = moment().tz("America/Mexico_City")
 
         if (currentDate.format('YYYY-MM-DD') != moment(booking.Schedule.date).format('YYYY-MM-DD')) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista el dia de la clase')
-        if (currentDate.add(20,'minutes').format("HH:mm:ss") < booking.Schedule.start.toString()) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista despues de la hora de inicio de la clase')
+        if (currentDate.add(20, 'minutes').format("HH:mm:ss") < booking.Schedule.start.toString()) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista despues de la hora de inicio de la clase')
 
         booking.assistance = !booking.assistance
 

@@ -19,7 +19,8 @@ export const PurchaseRepository = {
         const client = await getRepository(User).findOne(
             {
                 where: {
-                    id: clientId
+                    id: clientId,
+                    isDeleted: false
                 }
             }
         )
@@ -216,8 +217,6 @@ export const PurchaseRepository = {
                 }
             })
 
-
-
             const hasClasses = await getPendingClasses(allPurchases, allBookings)
 
             const pending = hasClasses.find(x => x.purchase.id == purchase.id)
@@ -243,7 +242,8 @@ export const PurchaseRepository = {
         const client = await getRepository(User).findOne(
             {
                 where: {
-                    id: clientId
+                    id: clientId,
+                    isDeleted: false
                 }
             }
         )
@@ -346,7 +346,8 @@ export const PurchaseRepository = {
     async buyClient(userId: string, operationId: string,) {
         const user = await getRepository(User).findOne({
             where: {
-                id: userId
+                id: userId,
+                isDeleted: false
             }
         })
         if (!user) throw new ErrorResponse(404, 47, 'El usuario no existe')
@@ -450,7 +451,8 @@ export const PurchaseRepository = {
     async inicializePurchase(client: User, data: InitialzePurchase) {
         const user = await getRepository(User).findOne({
             where: {
-                id: client.id
+                id: client.id,
+                isDeleted: false
             }
         })
         if (!user) throw new ErrorResponse(404, 14, 'El cliente no existe')
@@ -513,10 +515,6 @@ export const PurchaseRepository = {
             .orderBy("Purchase.date", "DESC")
             .getCount()
 
-
-        /*const purchases = await getRepository(Purchase).find({
-            relations: ['Transaction', 'User', 'Bundle']
-        })*/
         if (!purchases) throw new ErrorResponse(404, 70, 'No hay compras registradas')
         return { purchases, pages: pagesNumber }
     },
@@ -607,40 +605,38 @@ export const PurchaseRepository = {
             .orderBy("Purchase.date", "DESC")
             .getMany()
 
-
-            for(var i in purchases){
-                delete purchases[i].User
-                delete purchases[i].Bundle.description
-                delete purchases[i].Bundle.especialDescription
-                delete purchases[i].Bundle.isDeleted 
-                delete purchases[i].Bundle.altermateUserId 
-                delete purchases[i].Bundle.isEspecial 
-                delete purchases[i].Bundle.isGroup
-                delete purchases[i].Bundle.classNumber 
-                delete purchases[i].Bundle.isRecurrent 
-                delete purchases[i].Bundle.isUnlimited
-                delete purchases[i].Bundle.price
-                delete purchases[i].Bundle.passes
-                delete purchases[i].Bundle.pictureUrl
-                delete purchases[i].Bundle.max
-                delete purchases[i].Bundle.memberLimit
-                delete purchases[i].Bundle.promotionExpirationDays
-                delete purchases[i].Bundle.offer
-                delete purchases[i].Bundle.expirationDays
-                delete purchases[i].addedClasses
-                delete purchases[i].addedPasses
-                delete purchases[i].pendingAmount
-                delete purchases[i].operationIds
-                delete purchases[i].Transaction.comments
-                delete purchases[i].Transaction.invoice
-            }
+        for (var i in purchases) {
+            delete purchases[i].User
+            delete purchases[i].Bundle.description
+            delete purchases[i].Bundle.especialDescription
+            delete purchases[i].Bundle.isDeleted
+            delete purchases[i].Bundle.altermateUserId
+            delete purchases[i].Bundle.isEspecial
+            delete purchases[i].Bundle.isGroup
+            delete purchases[i].Bundle.classNumber
+            delete purchases[i].Bundle.isRecurrent
+            delete purchases[i].Bundle.isUnlimited
+            delete purchases[i].Bundle.price
+            delete purchases[i].Bundle.passes
+            delete purchases[i].Bundle.pictureUrl
+            delete purchases[i].Bundle.max
+            delete purchases[i].Bundle.memberLimit
+            delete purchases[i].Bundle.promotionExpirationDays
+            delete purchases[i].Bundle.offer
+            delete purchases[i].Bundle.expirationDays
+            delete purchases[i].addedClasses
+            delete purchases[i].addedPasses
+            delete purchases[i].pendingAmount
+            delete purchases[i].operationIds
+            delete purchases[i].Transaction.comments
+            delete purchases[i].Transaction.invoice
+        }
         return purchases
     },
 
     async getClientPurchases(clientId: string, page: string) {
-    
         const pages = parseInt(page) - 1
-        
+
         const purchases = await createQueryBuilder(Purchase)
             .leftJoinAndSelect("Purchase.User", "User")
             .leftJoinAndSelect("Purchase.Transaction", "Transaction")
@@ -652,7 +648,7 @@ export const PurchaseRepository = {
             .orderBy("Purchase.date", "DESC")
             .getMany()
 
-            const pagesNumber = await createQueryBuilder(Purchase)
+        const pagesNumber = await createQueryBuilder(Purchase)
             .leftJoinAndSelect("Purchase.User", "User")
             .leftJoinAndSelect("Purchase.Transaction", "Transaction")
             .leftJoinAndSelect("Purchase.Bundle", "Bundle")
@@ -661,33 +657,32 @@ export const PurchaseRepository = {
             .orderBy("Purchase.date", "DESC")
             .getCount()
 
-
-            for(var i in purchases){
-                delete purchases[i].User
-                delete purchases[i].Bundle.description
-                delete purchases[i].Bundle.especialDescription
-                delete purchases[i].Bundle.isDeleted 
-                delete purchases[i].Bundle.altermateUserId 
-                delete purchases[i].Bundle.isEspecial 
-                delete purchases[i].Bundle.isGroup
-                delete purchases[i].Bundle.classNumber 
-                delete purchases[i].Bundle.isRecurrent 
-                delete purchases[i].Bundle.isUnlimited
-                delete purchases[i].Bundle.passes
-                delete purchases[i].Bundle.pictureUrl
-                delete purchases[i].Bundle.max
-                delete purchases[i].Bundle.memberLimit
-                delete purchases[i].Bundle.promotionExpirationDays
-                delete purchases[i].Bundle.offer
-                delete purchases[i].Bundle.expirationDays
-                delete purchases[i].addedClasses
-                delete purchases[i].addedPasses
-                delete purchases[i].pendingAmount
-                delete purchases[i].operationIds
-                delete purchases[i].Transaction.comments
-                delete purchases[i].Transaction.invoice
-            }
-        return {purchases, pagesNumber }
+        for (var i in purchases) {
+            delete purchases[i].User
+            delete purchases[i].Bundle.description
+            delete purchases[i].Bundle.especialDescription
+            delete purchases[i].Bundle.isDeleted
+            delete purchases[i].Bundle.altermateUserId
+            delete purchases[i].Bundle.isEspecial
+            delete purchases[i].Bundle.isGroup
+            delete purchases[i].Bundle.classNumber
+            delete purchases[i].Bundle.isRecurrent
+            delete purchases[i].Bundle.isUnlimited
+            delete purchases[i].Bundle.passes
+            delete purchases[i].Bundle.pictureUrl
+            delete purchases[i].Bundle.max
+            delete purchases[i].Bundle.memberLimit
+            delete purchases[i].Bundle.promotionExpirationDays
+            delete purchases[i].Bundle.offer
+            delete purchases[i].Bundle.expirationDays
+            delete purchases[i].addedClasses
+            delete purchases[i].addedPasses
+            delete purchases[i].pendingAmount
+            delete purchases[i].operationIds
+            delete purchases[i].Transaction.comments
+            delete purchases[i].Transaction.invoice
+        }
+        return { purchases, pagesNumber }
     },
 }
 
