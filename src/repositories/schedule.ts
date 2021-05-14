@@ -1297,7 +1297,7 @@ export const ScheduleRepository = {
         let currentDate = moment().tz("America/Mexico_City")
 
         if (currentDate.format('YYYY-MM-DD') != moment(booking.Schedule.date).format('YYYY-MM-DD')) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista el dia de la clase')
-        if (currentDate.format("HH:mm:ss") < booking.Schedule.start.toString()) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista despues de la hora de inicio de la clase')
+        if (currentDate.add(20,'minutes').format("HH:mm:ss") < booking.Schedule.start.toString()) throw new ErrorResponse(409, 49, 'Solo se puede pasar lista despues de la hora de inicio de la clase')
 
         booking.assistance = !booking.assistance
 
