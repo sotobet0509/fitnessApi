@@ -16,6 +16,5 @@ export default {
   profileInstructorPictureUrl: process.env.PROFILE_INSTRUCTOR_PICTURES_URL,
   questionsUrl: process.env.QUESTIONS_URL,
   homeUrl: process.env.HOME_IMAGE_PICTURES_URL,
-  hs256: process.env.TOKEN_ENCRYPTION_HS,
-  rs256: process.env.TOKEN_ENCRYPTION_RS
+  encryptionToken: process.env.TOKEN_ENCRYPTION,
 }
