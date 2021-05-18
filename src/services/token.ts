@@ -1,6 +1,7 @@
 import { SignOptions } from 'jsonwebtoken'
 import * as jwt from 'jsonwebtoken'
 import { ErrorResponse } from '../errors/ErrorResponse'
+import config from '../config'
 
 export class TokenService {
   customerId: string
@@ -26,7 +27,7 @@ export class TokenService {
 
   private static generateAndSign(payload: object, signOptions: SignOptions): Promise<string> {
     return new Promise((resolve, reject) => {
-      jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { ...signOptions, algorithm: 'RS256' }, (err, token) => {
+      jwt.sign(payload, process.env.JWT_PRIVATE_KEY, { ...signOptions, algorithm: `${config.hs256}` }, (err, token) => {
         if (err) reject(new ErrorResponse(500, 500, 'Internal Server Error'))
         else resolve(token)
       })
@@ -35,7 +36,7 @@ export class TokenService {
 
   static verifyToken(token: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      jwt.verify(token, process.env.JWT_PUBLIC_KEY, { algorithms: ['RS256'] }, (err, payload: any) => {
+      jwt.verify(token, process.env.JWT_PUBLIC_KEY, { algorithms: `${config.hs256}` }, (err, payload: any) => {
         
         if (err){
           reject(new ErrorResponse(403, 5, 'Not valid token'))
