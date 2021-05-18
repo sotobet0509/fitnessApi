@@ -224,7 +224,7 @@ export const ScheduleRepository = {
         if (scheduleExist.isPrivate) {
             const purchases = await createQueryBuilder(Purchase)
                 .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                .where('Purchase.expirationDate>=:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('Purchase.expirationDate<:scheduleDate', { cDate: moment(scheduleExist.date).format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
                 .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
@@ -292,7 +292,7 @@ export const ScheduleRepository = {
 
             const purchases = await createQueryBuilder(Purchase)
                 .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Date(Purchase.expirationDate) >:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                .where('Date(Purchase.expirationDate) >=:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
                 .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
                 .andWhere('Purchase.users_id=:userId', { userId: client.id })
