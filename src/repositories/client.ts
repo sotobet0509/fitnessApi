@@ -414,8 +414,7 @@ export const ClientRepository = {
                 .getMany()
         }
         let data = []
-        let isUnlimited = false
-        let isUnlimitedGroup = false
+       
 
         let currentDate = moment().tz("America/Mexico_City")
         for (var i in clients) {
@@ -439,7 +438,9 @@ export const ClientRepository = {
             let pendingClasses = 0
             let pendingClassesGroup = 0
             let pendingPasses = 0
-
+            let isUnlimited = false
+            let isUnlimitedGroup = false
+            
             const purchases = await createQueryBuilder(Purchase)
                 .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
                 .leftJoinAndSelect('Purchase.User', 'User')
