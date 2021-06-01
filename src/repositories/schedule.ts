@@ -749,6 +749,9 @@ export const ScheduleRepository = {
                 await bookingRepository.remove(booking[i])
             }
         }
+        if(typeof data.theme === "undefined"){
+            updateSchedule.theme = null
+        }
 
         let instructor = new Instructor()
         instructor.id = data.instructor_id
@@ -760,8 +763,8 @@ export const ScheduleRepository = {
         updateSchedule.start = data.start ? data.start : updateSchedule.start
         updateSchedule.Instructor = instructor ? instructor : updateSchedule.Instructor
         updateSchedule.Rooms = room ? room : updateSchedule.Rooms
-        updateSchedule.theme = room ? data.theme : updateSchedule.theme
-        updateSchedule.isPrivate = room ? data.isPrivate : updateSchedule.isPrivate
+        updateSchedule.theme = data.theme ? data.theme : updateSchedule.theme
+        updateSchedule.isPrivate = data.isPrivate ? data.isPrivate : updateSchedule.isPrivate
         await scheduleRepository.save(updateSchedule)
     },
 
