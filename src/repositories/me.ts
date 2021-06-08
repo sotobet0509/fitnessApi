@@ -224,7 +224,7 @@ export const MeRepository = {
         if (pendingClasses < 0) pendingClasses = 0
         if (pendingClassesGroup < 0) pendingClassesGroup = 0
         if (pendingPasses < 0) pendingPasses = 0
-        if (groupPurchases.length > 0) {
+        if (groupPurchases.length > 0 && purchases.length > 0) {
             if (groupPurchases[lastAvalibleGroupPurchase].expirationDate > purchases[lastAvaliblePurchase].expirationDate) {
                 lastAvaliblePurchase = lastAvalibleGroupPurchase
             }
@@ -236,6 +236,21 @@ export const MeRepository = {
         } else {
             nextExpirationDate = purchases[lastAvaliblePurchase].expirationDate
         }
+
+        let nextGroupExpirationDate: Date
+        if (groupPurchases.length == 0) {
+            nextGroupExpirationDate = null
+        } else {
+            nextGroupExpirationDate = groupPurchases[groupPurchases.length - 1].expirationDate
+        }
+
+        if(pendingClasses == 0 && pendingPasses == 0){
+            nextExpirationDate = null
+        }
+        if(pendingClassesGroup == 0){
+            nextGroupExpirationDate = null
+        }
+
         return {
             taken: client.ClassesHistory.takenClasses,
             takenPasses: client.ClassesHistory.takenPasses,
@@ -245,7 +260,8 @@ export const MeRepository = {
             pendingGroup: pendingClassesGroup,
             isUnlimited: isUnlimited,
             isUnlimitedGroup: isUnlimitedGroup,
-            nextExpirationDate: nextExpirationDate
+            nextExpirationDate: nextExpirationDate,
+            nextGroupExpirationDate: nextGroupExpirationDate
         }
     },
 

@@ -414,7 +414,7 @@ export const ClientRepository = {
                 .getMany()
         }
         let data = []
-       
+
 
         let currentDate = moment().tz("America/Mexico_City")
         for (var i in clients) {
@@ -440,7 +440,7 @@ export const ClientRepository = {
             let pendingPasses = 0
             let isUnlimited = false
             let isUnlimitedGroup = false
-            
+
             const purchases = await createQueryBuilder(Purchase)
                 .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
                 .leftJoinAndSelect('Purchase.User', 'User')
@@ -482,8 +482,6 @@ export const ClientRepository = {
                 }
             }
 
-
-
             if (!booking) {
                 booking = null
             }
@@ -508,6 +506,20 @@ export const ClientRepository = {
                 nextExpirationDate = purchases[purchases.length - 1].expirationDate
             }
 
+            let nextGroupExpirationDate: Date
+            if (groupPurchases.length == 0) {
+                nextGroupExpirationDate = null
+            } else {
+                nextGroupExpirationDate = groupPurchases[groupPurchases.length - 1].expirationDate
+            }
+
+            if(pendingClasses == 0 && pendingPasses == 0){
+                nextExpirationDate = null
+            }
+            if(pendingClassesGroup == 0){
+                nextGroupExpirationDate = null
+            }
+
             data.push({
                 ...clients[i],
                 nextClass: booking,
@@ -519,8 +531,8 @@ export const ClientRepository = {
                 takenGroup: takenGruopClasses,
                 isUnlimited: isUnlimited,
                 isUnlimitedGroup: isUnlimitedGroup,
-                nextExpirationDate: nextExpirationDate
-
+                nextExpirationDate: nextExpirationDate,
+                nextGroupExpirationDate: nextGroupExpirationDate
             })
         }
         return {

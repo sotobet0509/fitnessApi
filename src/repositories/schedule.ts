@@ -421,7 +421,7 @@ export const ScheduleRepository = {
             if (!purchases) throw new ErrorResponse(409, 17, 'El usuario no puede reservar en esta clase')
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
 
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
@@ -435,7 +435,6 @@ export const ScheduleRepository = {
                     classesHistory.takenGroupClasses++
                     break
                 }
-
             }
 
             if (purchaseId === null) throw new ErrorResponse(409, 17, 'No quedan clases disponibles')
@@ -456,29 +455,26 @@ export const ScheduleRepository = {
             booking.isPass = isPass
 
             await getRepository(Booking).save(booking)
-            await getRepository(Booking).save(purchases[purchasePosition])
+            await getRepository(Purchase).save(purchases[purchasePosition])
             await getRepository(ClassesHistory).save(classesHistory)
 
         } else {
-
-            const purchases = await createQueryBuilder(Purchase)
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Date(Purchase.expirationDate) >:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                const purchases = await createQueryBuilder(Purchase)
+                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
                 .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
                 .andWhere('Purchase.users_id=:userId', { userId: mainUser })
                 .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
-                .andWhere('Bundle.isGroup=:isPrivate', { isPrivate: false })
                 .orderBy('Purchase.expirationDate', 'ASC')
                 .getMany();
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
                     continue
                 }
-
 
                 if (pendingClasses > 0) {
                     purchaseId = purchases[i].id
@@ -499,7 +495,6 @@ export const ScheduleRepository = {
                 }
             })
             if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
-
 
             let booking = new Booking
             booking.Schedule = scheduleExist
@@ -525,7 +520,7 @@ export const ScheduleRepository = {
             }
         )
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-
+    
         let classesHistory = await getRepository(ClassesHistory).findOne({
             where: {
                 User: client
@@ -579,7 +574,7 @@ export const ScheduleRepository = {
             if (!purchases) throw new ErrorResponse(409, 17, 'El usuario no puede reservar en esta clase')
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
 
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
@@ -593,7 +588,6 @@ export const ScheduleRepository = {
                     classesHistory.takenGroupClasses++
                     break
                 }
-
             }
 
             if (purchaseId === null) throw new ErrorResponse(409, 17, 'No quedan clases disponibles')
@@ -614,30 +608,26 @@ export const ScheduleRepository = {
             booking.isPass = isPass
 
             await getRepository(Booking).save(booking)
-            await getRepository(Booking).save(purchases[purchasePosition])
+            await getRepository(Purchase).save(purchases[purchasePosition])
             await getRepository(ClassesHistory).save(classesHistory)
 
         } else {
-
             const purchases = await createQueryBuilder(Purchase)
-                .innerJoinAndSelect('Purchase.Bundle', 'Bundle')
-                .where('Date(Purchase.expirationDate) >:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
+                .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
+                .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
                 .andWhere('Purchase.isCanceled=:isCanceled', { isCanceled: false })
                 .andWhere('Purchase.users_id=:userId', { userId: mainUser })
                 .andWhere('Bundle.isGroup=:isGroup', { isGroup: true })
-                .andWhere('Bundle.isGroup=:isPrivate', { isPrivate: false })
                 .orderBy('Purchase.expirationDate', 'ASC')
                 .getMany();
 
             for (var i in purchases) {
-                if (moment(purchases[i].date).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
+                if (moment(purchases[i].expirationDate).format('YYYY-MM-DD') >= moment(scheduleExist.date).format('YYYY-MM-DD')) {
                     pendingClasses += (purchases[i].Bundle.classNumber + purchases[i].addedClasses)
                 } else {
                     continue
                 }
-
-
                 if (pendingClasses > 0) {
                     purchaseId = purchases[i].id
                     purchasePosition = i
@@ -645,7 +635,6 @@ export const ScheduleRepository = {
                     classesHistory.takenGroupClasses++
                     break
                 }
-
             }
 
             if (purchaseId === null) throw new ErrorResponse(409, 17, 'No quedan clases disponibles')
@@ -657,7 +646,6 @@ export const ScheduleRepository = {
                 }
             })
             if (schedule) throw new ErrorResponse(409, 16, 'Horario no disponible')
-
 
             let booking = new Booking
             booking.Schedule = scheduleExist
@@ -749,7 +737,7 @@ export const ScheduleRepository = {
                 await bookingRepository.remove(booking[i])
             }
         }
-        if(typeof data.theme === "undefined"){
+        if (typeof data.theme === "undefined") {
             updateSchedule.theme = null
         }
 
