@@ -2,6 +2,7 @@ import { getRepository } from "typeorm";
 import { Images } from "../entities/Images";
 import { ErrorResponse } from "../errors/ErrorResponse";
 import { ImageData } from "../interfaces/images";
+import { replaceSpecialCharacters } from '../utils'
 
 export const ImageRepository = {
   async getHomeImages() {
@@ -23,7 +24,7 @@ export const ImageRepository = {
     const image = new Images()
     image.url = url
     image.section = "Home"
-    image.name = name
+    image.name = replaceSpecialCharacters(name)
     await imageRepository.save(image)
   },
 
