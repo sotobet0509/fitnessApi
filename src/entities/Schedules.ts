@@ -6,22 +6,22 @@ import { Room } from './Rooms'
 
 @Entity({name: 'schedules'})
 export class Schedule {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', {comment: "Identificador numérico del horario"})
     id: number
 
-    @Column()
+    @Column({comment: "Fecha en que se dara la clase"})
     date: Date
 
-    @Column('time')
+    @Column('time', {comment: "Hora en que termina la clase"})
     end : Date
 
-    @Column('time')
+    @Column('time', {comment: "Hora en que comienza la clase"})
     start: Date
 
-    @Column({nullable: true})
+    @Column({nullable: true, comment: "Tematica de la clase"})
     theme:string
 
-    @Column({default: false})
+    @Column({default: false, comment: "Bandera que indica si la clase es publica o privada"})
     isPrivate: boolean
 
     @ManyToOne(type => Instructor, Instructor => Instructor.Schedule)

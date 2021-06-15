@@ -4,10 +4,10 @@ import { Room } from './Rooms'
 
 @Entity({name: 'seats'})
 export class Seat {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', {comment: "Identificador numérico del asiento"})
     id: number
 
-    @Column()
+    @Column({comment: "Número del asiento"})
     number: string
 
     @OneToMany(type => Booking, Booking => Booking.Seat)

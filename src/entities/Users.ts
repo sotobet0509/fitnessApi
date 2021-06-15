@@ -6,59 +6,59 @@ import { Survey1 } from './Survey1'
 import { User_categories } from './UserCategories'
 
 
-@Entity({name: 'users'})
+@Entity({ name: 'users' })
 export class User {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn('uuid', { comment: "Identificador del tipo UUID del usuario" })
     id: string
 
-    @Column()
+    @Column({ comment: "Nombre del usuario" })
     name: string
 
-    @Column()
+    @Column({ comment: "Correo electrónico del usuario" })
     email: string
 
-    @Column({nullable: true })
+    @Column({ nullable: true, comment: "Apellido del usuario" })
     lastname: string
 
-    @Column({nullable: true })
+    @Column({ nullable: true, comment: "Contraseña del usuario hasheada" })
     password: string
 
-    @Column('text',{nullable: true })
+    @Column('text', { nullable: true, comment: "Path de la foto de perfil del usuario" })
     pictureUrl: string
 
-    @Column({nullable: true })
+    @Column({ nullable: true, comment: "Contraseña del usuario hasheada" })
     facebookId: string
 
-    @Column( {nullable: true })
+    @Column({ nullable: true, comment: "Identificador para usuarios registrados por google" })
     googleId: string
 
-    @Column({nullable: true })
+    @Column({ nullable: true, comment: "Token temporal cambio de contraseñas" })
     tempToken: string
 
-    @Column( {default: false})
+    @Column({ default: false, comment: "Bandera para indicar si el usuario es administrador" })
     isAdmin: boolean
-    
-    @Column({default: false})
+
+    @Column({ default: false, comment: "Borrado logico del usuario" })
     isDeleted: boolean
 
-    @CreateDateColumn()
+    @CreateDateColumn({ comment: "Fecha en que se registro el usuario" })
     createdAt: Date
 
-    @Column({default: false})
+    @Column({ default: false, comment: "Bandera para indicar si es lider de un paquete grupal" })
     isLeader: boolean
 
-    @Column( {nullable: true })
+    @Column({ nullable: true, comment: "Identificador del usuario lider del grupo al que pertence el usuario" })
     fromGroup: string
 
-    @Column( {nullable: true })
+    @Column({ nullable: true, comment: "Nombre del grupo al que pertenece el usuario" })
     groupName: string
 
-    @Column({default: 0})
+    @Column({ default: 0, comment: "Cambios disponibles para editar el grupo" })
     changed: number
 
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking[]
-    
+
     @OneToMany(type => Purchase, Purchase => Purchase.User)
     Purchase: Purchase[]
 

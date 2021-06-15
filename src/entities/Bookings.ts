@@ -6,16 +6,16 @@ import { User } from './Users'
 
 @Entity({name: 'bookings'})
 export class Booking {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', {comment: "Identificador numérico de la reservación"})
     id: number
 
-    @Column({default: false})
+    @Column({default: false, comment: "Bandera para indicar si es reservación de tipo Clase o Pase"})
     isPass: boolean
 
-    @CreateDateColumn()
+    @CreateDateColumn({comment: "Fecha en la que fue creada la reservación"})
     createdAt: Date
 
-    @Column({default: false})
+    @Column({default: false, comment: "Bandera para pasar lista de los usuarios que acuden a la clase"})
     assistance: boolean
 
     @ManyToOne(type => Schedule, Schedule => Schedule.Booking)

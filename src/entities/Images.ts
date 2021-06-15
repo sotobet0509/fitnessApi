@@ -1,19 +1,19 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
 
-@Entity({name: 'images'})
+@Entity({ name: 'images' })
 export class Images {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', { comment: "Identificador numérico de la imagen" })
     id: number
 
-    @Column()
+    @Column({ comment: "Path de la imagen" })
     url: string
 
-    @Column({default: true})
+    @Column({ default: true, comment: "Bandera para indicar si la imagen esta activa o no" })
     status: boolean
 
-    @Column({nullable: true})
+    @Column({ nullable: true, comment: "Sección a la que pertenece la imagen" })
     section: string
 
-    @Column()
+    @Column({comment: "Nombre de la imagen"})
     name: string
 }

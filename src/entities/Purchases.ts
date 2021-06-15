@@ -14,31 +14,31 @@ export enum status {
 
 @Entity({ name: 'purchases' })
 export class Purchase {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', { comment: "Identificador numérico de la compra" })
     id: number
 
-    @Column()
+    @Column({ comment: "Fecha en que es registrada la compra" })
     date: Date
 
-    @Column({ default: 0 })
+    @Column({ default: 0, comment: "Número de clases extra o descontadas de la compra" })
     addedClasses: number
 
-    @Column({ default: 0 })
+    @Column({ default: 0, comment: "Número de pases extra o descontadas de la compra" })
     addedPasses: number
 
-    @Column({ default: false })
+    @Column({ default: false, comment: "Bandera para cancelar compras" })
     isCanceled: boolean
 
-    @Column({ nullable: true, default: "1990-01-01 00:00:00" })
+    @Column({ nullable: true, default: "1990-01-01 00:00:00", comment: "Fecha en que expira la compra del paquete" })
     expirationDate: Date
 
-    @Column('enum', {enum: status, nullable: true})
+    @Column('enum', { enum: status, nullable: true, comment: "Estado en el que se encuentra la compra" })
     status: status
 
-    @Column('float', {default: 0})
+    @Column('float', { default: 0, comment: "Monto del paquete cuando fue iniciada la compra"})
     pendingAmount: number
 
-    @Column({default: ""})
+    @Column({ comment: "Identificador que corresponde a la transacción realizada por evopayments" })
     operationIds: string
 
     @ManyToOne(type => Bundle, Bundle => Bundle.purchase)

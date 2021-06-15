@@ -1,15 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import { Room } from './Rooms'
 
-@Entity({name: 'locations'})
+@Entity({ name: 'locations' })
 export class Location {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', { comment: "Identificador numérico de la locación" })
     id: number
 
-    @Column()
+    @Column({ comment: "Nombre de la locación" })
     name: string
 
-    @Column('text')
+    @Column('text', { comment: "Dirección de la locación" })
     address: string
 
     @OneToMany(type => Room, Room => Room.Location)

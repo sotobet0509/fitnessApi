@@ -1,14 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinColumn, ManyToOne, CreateDateColumn } from 'typeorm'
 
-@Entity({name: 'versions'})
+@Entity({ name: 'versions' })
 export class Version {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', { comment: "Identificador numérico de la versión" })
     id: number
 
-    @Column()
+    @Column({ comment: "Número de versión" })
     version: number
 
-    @CreateDateColumn()
-    createdAt: Date  
+    @CreateDateColumn({ comment: "Fecha en que fue creada la versión" })
+    createdAt: Date
 
 }

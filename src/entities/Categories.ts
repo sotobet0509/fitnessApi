@@ -4,16 +4,16 @@ import { User_items } from './User_items'
 
 @Entity({name: 'categories'})
 export class Categories {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', {comment: "Identificador numérico de las categorías"})
     id: number
 
-    @Column()
+    @Column({comment: "Nombre de la categoría"})
     name: string
 
-    @Column({nullable: true})
+    @Column({nullable: true, comment: "Descripción de la categoría"})
     description: string
 
-    @Column()
+    @Column({comment: "Tipo de categoría"})
     type: string
 
     @ManyToOne(type => User_items, User_items => User_items.Categories)

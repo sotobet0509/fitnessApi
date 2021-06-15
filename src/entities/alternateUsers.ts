@@ -4,19 +4,19 @@ import { Folios } from './Folios'
 
 @Entity({name: 'alternate_Users'})
 export class Alternate_users {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn('uuid' ,{comment: "Identificador del tipo UUID del usuario colaborador"})
     id: string
     
-    @Column()
+    @Column({comment: "Correo electrónico del usuario colaborador"})
     email: string
 
-    @Column()
+    @Column({comment: "	Contraseña haseada del usuario colaborador"})
     password: string
 
-    @Column()
+    @Column({comment: "Nombre del usuario colaborador"})
     name: string
 
-    @Column({nullable: true})
+    @Column({nullable: true, comment: "Datos de contacto del usuario colaborador"})
     contact: string
 
     @OneToMany(type => Folios, Folios => Folios.Alternate_users)

@@ -234,7 +234,7 @@ export const MeRepository = {
         if (purchases.length == 0) {
             nextExpirationDate = null
         } else {
-            nextExpirationDate = purchases[lastAvaliblePurchase].expirationDate
+            nextExpirationDate = purchases[purchases.length -1 ].expirationDate
         }
 
         let nextGroupExpirationDate: Date

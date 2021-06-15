@@ -5,13 +5,13 @@ import { Seat } from './Seats'
  
 @Entity({name: 'rooms'})
 export class Room {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', {comment: "Identificador numérico del salón"})
     id: number
 
-    @Column()
+    @Column({comment: "Nombre del salon"})
     name: string
 
-    @Column('text')
+    @Column('text',{comment: "Descripción del salón"})
     description: string
 
     @ManyToOne(type => Location, Location => Location.Room)

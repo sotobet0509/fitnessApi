@@ -2,13 +2,13 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinColu
 
 @Entity({name: 'blackList'})
 export class BlackList {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', {comment: "Identificador numérico de la lista negra"})
     id: number
 
-    @Column()
+    @Column({comment: "Token del usuario a ingresar en lista negra"})
     token: string
 
-    @CreateDateColumn()
+    @CreateDateColumn({comment: "Fecha en que se ingreso a la lista negra"})
     createdAt: Date  
 
 }

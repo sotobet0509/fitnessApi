@@ -11,27 +11,27 @@ export enum conection {
     WIFI = 'WiFi'
 }
 
-@Entity({name: 'survey1'})
+@Entity({ name: 'survey1' })
 export class Survey1 {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', { comment: "Identificador numérico del cuestionario" })
     id: number
 
-    @Column('enum',{enum: device})
+    @Column('enum', { enum: device, comment: "Dispositivo desde el que se realizó la compra" })
     device: device
 
-    @Column()
-    browser: string  
+    @Column({comment: "Navegador desde el que se realizó la compra"})
+    browser: string
 
-    @Column('enum',{enum: conection})
-    conection: conection  
+    @Column('enum', { enum: conection, comment: "Tipo de Acceso a internet con el que se realizó la compra" })
+    conection: conection
 
-    @Column('text')
+    @Column('text', {comment: "Detelles de lo sucedido durante la compra"})
     description: string
 
-    @Column({nullable : true})
+    @Column({ nullable: true, comment: "Path donde se encuentra la imagen de evidencia de lo sucedido durante la compra" })
     url: string
 
-    @CreateDateColumn()
+    @CreateDateColumn({comment: "Fecha en la que se registro la encuesta"})
     createdAt: Date
 
     @ManyToOne(type => User, User => User.Survey1)

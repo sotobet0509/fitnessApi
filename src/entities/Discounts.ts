@@ -1,10 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
 
-@Entity({name: 'discounts'})
+@Entity({ name: 'discounts' })
 export class Discounts {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn('increment', { comment: "Identificador del descuento" })
     id: number
-    
-    @Column()
+
+    @Column({ comment: "Motivo del descuento" })
     description: string
 }
