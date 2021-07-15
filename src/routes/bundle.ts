@@ -112,9 +112,9 @@ BundleRouter.get('/', h(BundleController.getAllBundles))
 
 BundleRouter.get('/:bundle_id', h(BundleController.getBundle))
 
-BundleRouter.patch('/updateall', h(BundleController.updatePasses))
-
 BundleRouter.get('/discount/all', h(BundleController.getAllDiscounts))
+
+BundleRouter.patch('/updateall', h(BundleController.updatePasses))
 
 BundleRouter.post('/create',h(checkToken), h(BundleController.createBundle))
 

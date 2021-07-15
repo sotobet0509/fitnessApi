@@ -7,6 +7,14 @@ import { checkToken } from '../middleware/CheckToken'
 
 const PurchaseRouter = Router({ mergeParams: true })
 
+PurchaseRouter.get('/all',h(checkToken), h(PurchaseController.getAllPurchases))
+
+PurchaseRouter.get('/search/:query',h(checkToken), h(PurchaseController.searchPurchase))
+
+PurchaseRouter.get('/search/:clientId/:query',h(checkToken), h(PurchaseController.searchClientPurchase))
+
+PurchaseRouter.get('/client/:clientId',h(checkToken), h(PurchaseController.getClientPurchases))
+
 /**
  * @swagger
  * /purchase/client/{client_id}:
@@ -48,21 +56,13 @@ PurchaseRouter.post('/createSession', h(PurchaseController.createSession))
 
 PurchaseRouter.post('/init',h(checkToken), h(PurchaseController.inicializePurchase))
 
-PurchaseRouter.get('/all',h(checkToken), h(PurchaseController.getAllPurchases))
-
-PurchaseRouter.get('/search/:query',h(checkToken), h(PurchaseController.searchPurchase))
-
-PurchaseRouter.get('/search/:clientId/:query',h(checkToken), h(PurchaseController.searchClientPurchase))
-
-PurchaseRouter.get('/client/:clientId',h(checkToken), h(PurchaseController.getClientPurchases))
+PurchaseRouter.patch('/buy/:operationId', h(checkToken), h(PurchaseController.buyClient))
 
 PurchaseRouter.patch('/update/:purchase_id/bundle/:bundle_id', h(checkToken), h(PurchaseController.upgradeBundle))
 
 PurchaseRouter.patch('/client/:client_id/purchase/:purchase_id', h(checkToken), h(PurchaseController.buyExtra))
 
 PurchaseRouter.patch('/updateall', h(checkToken), h(PurchaseController.updateAll))
-
-PurchaseRouter.patch('/buy/:operationId', h(checkToken), h(PurchaseController.buyClient))
 
 PurchaseRouter.patch('/update-expiration-date',h(checkToken), h(PurchaseController.updateExpiarationDate))
 

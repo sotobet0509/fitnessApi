@@ -80,13 +80,13 @@ LocationRouter.get('/', h(LocationController.getAllLocations))
  */
 LocationRouter.get('/:location_id', h(LocationController.getLocation))
 
+LocationRouter.get('/schedules/all',h(checkToken), h(LocationController.getSchedules))
+
 LocationRouter.post('/room/:room_id/schedules', h(LocationController.getLocationsByWeek))
 
 LocationRouter.post('/client/room/:room_id/schedules',h(checkToken), h(LocationController.getClientLocationsByWeek))
 
 LocationRouter.post('/admin/room/:room_id/schedules',h(checkToken), h(LocationController.getAdminLocationsByWeek))
-
-LocationRouter.get('/schedules/all',h(checkToken), h(LocationController.getSchedules))
 
 LocationRouter.patch('/instructor/all',h(checkInstructorToken), h(LocationController.getInstructorSchedules))
 

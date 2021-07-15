@@ -9,42 +9,6 @@ const ClientRouter = Router({ mergeParams: true })
 /**
  * @swagger
  * /clients/:
- *   post:
- *     description: Crear un nuevo cliente desde el administrador (requiere token de usuario tipo admin)
- *     security:
- *      - ApiKeyAuth:
- *        type: apiKey
- *        in: header
- *        name: Authorization
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: body
- *         in: body
- *         required: true
- *         schema:
- *          type: object
- *          properties:
- *           name:
- *            type: string
- *            required: true
- *           lastname:
- *            type: string
- *            required: true
- *           email:
- *            type: string
- *            required: true
- *     responses:
- *       200:
- *         description: Sesión iniciada correctamente
- *       500:
- *         description: Server error
- */
-ClientRouter.post( '/', h(checkToken), h(ClientController.createClient))
-
-/**
- * @swagger
- * /clients/:
  *   get:
  *     description: Obtiene los datos de todos los usuarios (requiere token de usuario admin)
  *     produces:
@@ -192,11 +156,47 @@ ClientRouter.get('/', h(checkToken), h(ClientController.getAllClients))
  */
 ClientRouter.get('/:client_id',  h(checkToken), h(ClientController.getClient))
 
-ClientRouter.get('/member/list',h(checkToken), h(ClientController.getAllMembers))
-
 ClientRouter.get('/member/client/:client_id',h(checkToken), h(ClientController.getMembers))
 
+ClientRouter.get('/member/list',h(checkToken), h(ClientController.getAllMembers))
+
 ClientRouter.get('/search/:query',h(checkToken), h(ClientController.searchClient))
+
+/**
+ * @swagger
+ * /clients/:
+ *   post:
+ *     description: Crear un nuevo cliente desde el administrador (requiere token de usuario tipo admin)
+ *     security:
+ *      - ApiKeyAuth:
+ *        type: apiKey
+ *        in: header
+ *        name: Authorization
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         schema:
+ *          type: object
+ *          properties:
+ *           name:
+ *            type: string
+ *            required: true
+ *           lastname:
+ *            type: string
+ *            required: true
+ *           email:
+ *            type: string
+ *            required: true
+ *     responses:
+ *       200:
+ *         description: Sesión iniciada correctamente
+ *       500:
+ *         description: Server error
+ */
+ ClientRouter.post( '/', h(checkToken), h(ClientController.createClient))
 
 ClientRouter.patch('/update',h(checkToken), h(ClientController.updateClient))
 

@@ -459,7 +459,7 @@ export const ScheduleRepository = {
             await getRepository(ClassesHistory).save(classesHistory)
 
         } else {
-                const purchases = await createQueryBuilder(Purchase)
+            const purchases = await createQueryBuilder(Purchase)
                 .leftJoinAndSelect('Purchase.Bundle', 'Bundle')
                 .where('Purchase.expirationDate>:cDate', { cDate: currentDate.format('YYYY-MM-DD') })
                 .andWhere('(Purchase.status IN ("Completada") OR Purchase.status IS null)')
@@ -520,7 +520,7 @@ export const ScheduleRepository = {
             }
         )
         if (!client) throw new ErrorResponse(404, 14, 'El cliente no existe')
-    
+
         let classesHistory = await getRepository(ClassesHistory).findOne({
             where: {
                 User: client
@@ -726,7 +726,7 @@ export const ScheduleRepository = {
             where: {
                 Schedule: updateSchedule
             },
-            relations: ['User']
+            relations: ['User', 'User.ClassesHistory', 'fromPurchase', 'fromPurchase.Bundle']
         })
 
         if (data.deleteBookings) {
@@ -734,6 +734,20 @@ export const ScheduleRepository = {
                 if (data.sendEmail) {
                     await sendUpdateBooking(booking[i].User.email)
                 }
+                if (booking[i].fromPurchase.Bundle.isGroup) {
+                    booking[i].User.ClassesHistory.takenGroupClasses -= 1
+                    booking[i].fromPurchase.addedClasses += 1
+                } else {
+                    if (booking[i].isPass) {
+                        booking[i].User.ClassesHistory.takenPasses -= 1
+                        booking[i].fromPurchase.addedPasses += 1
+                    } else {
+                        booking[i].User.ClassesHistory.takenClasses -= 1
+                        booking[i].fromPurchase.addedClasses += 1
+                    }
+                }
+                await getRepository(Purchase).save(booking[i].fromPurchase)
+                await getRepository(ClassesHistory).save(booking[i].User.ClassesHistory)
                 await bookingRepository.remove(booking[i])
             }
         }
@@ -772,11 +786,24 @@ export const ScheduleRepository = {
             where: {
                 Schedule: schedule
             },
-            relations: ['User']
+            relations: ['User', 'User.ClassesHistory', 'fromPurchase', 'fromPurchase.Bundle']
         })
 
         for (var i in booking) {
-            //await sendDeleteBooking(booking[i].User.email)
+            if (booking[i].fromPurchase.Bundle.isGroup) {
+                booking[i].User.ClassesHistory.takenGroupClasses -= 1
+                booking[i].fromPurchase.addedClasses += 1
+            } else {
+                if (booking[i].isPass) {
+                    booking[i].User.ClassesHistory.takenPasses -= 1
+                    booking[i].fromPurchase.addedPasses += 1
+                } else {
+                    booking[i].User.ClassesHistory.takenClasses -= 1
+                    booking[i].fromPurchase.addedClasses += 1
+                }
+            }
+            await getRepository(Purchase).save(booking[i].fromPurchase)
+            await getRepository(ClassesHistory).save(booking[i].User.ClassesHistory)
             await bookingRepository.remove(booking[i])
         }
 

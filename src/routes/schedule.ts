@@ -147,10 +147,9 @@ ScheduleRouter.post('/create',h(checkToken), h(ScheduleController.createSchedule
 
 ScheduleRouter.patch('/update',h(checkToken), h(ScheduleController.updateSchedule))
 
-ScheduleRouter.delete('/:schedule_id',h(checkToken), h(ScheduleController.deleteSchedule))
-
 ScheduleRouter.patch('/assistance/:booking_id',h(checkToken), h(ScheduleController.setAssistance))
 
+ScheduleRouter.delete('/:schedule_id',h(checkToken), h(ScheduleController.deleteSchedule))
 
 
 export { ScheduleRouter }
