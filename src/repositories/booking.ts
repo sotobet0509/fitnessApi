@@ -100,7 +100,7 @@ export const BookingRepository = {
             where: {
                 Schedule: schedule
             },
-            relations: ['Seat', 'User', 'User.User_categories', 'User.User_categories.Categories', 'User.User_categories.Categories.User_items']
+            relations: ['Seat', 'User','fromPurchase','fromPurchase.Bundle', 'User.User_categories', 'User.User_categories.Categories', 'User.User_categories.Categories.User_items']
         })
 
         let data = []
@@ -115,8 +115,9 @@ export const BookingRepository = {
                 start: schedule.start,
                 end: schedule.end,
                 isPass: booking.isPass,
-                items: booking.User,
-                assistance: booking.assistance
+                items: booking.User.User_categories,
+                assistance: booking.assistance,
+                bundle: booking.fromPurchase.Bundle.name
             })
         }
         return data
