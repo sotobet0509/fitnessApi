@@ -20,7 +20,7 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule', 'fromPurchase', 'User']
+            relations: ['Schedule', 'fromPurchase', 'User', 'fromPurchase.Bundle']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
         const start = moment(booking.Schedule.date).set({
@@ -50,9 +50,12 @@ export const BookingRepository = {
 
                 if (booking.isPass) {
                     classesHistory.takenPasses -= 1
-                } else {
+                } else if (!booking.isPass && !booking.fromPurchase.Bundle.isGroup) {
                     classesHistory.takenClasses -= 1
+                } else if (!booking.isPass && booking.fromPurchase.Bundle.isGroup) {
+                    classesHistory.takenGroupClasses -= 1
                 }
+
                 await getRepository(ClassesHistory).save(classesHistory)
                 await getRepository(Purchase).save(privatePurchase)
                 await bookingRepository.remove(booking)
@@ -76,9 +79,12 @@ export const BookingRepository = {
 
                 if (booking.isPass) {
                     classesHistory.takenPasses -= 1
-                } else {
+                } else if (!booking.isPass && !booking.fromPurchase.Bundle.isGroup) {
                     classesHistory.takenClasses -= 1
+                } else if (!booking.isPass && booking.fromPurchase.Bundle.isGroup) {
+                    classesHistory.takenGroupClasses -= 1
                 }
+
                 await getRepository(ClassesHistory).save(classesHistory)
                 await getRepository(Purchase).save(purchase)
                 await bookingRepository.remove(booking)
@@ -100,7 +106,7 @@ export const BookingRepository = {
             where: {
                 Schedule: schedule
             },
-            relations: ['Seat', 'User','fromPurchase','fromPurchase.Bundle', 'User.User_categories', 'User.User_categories.Categories', 'User.User_categories.Categories.User_items']
+            relations: ['Seat', 'User', 'fromPurchase', 'fromPurchase.Bundle', 'User.User_categories', 'User.User_categories.Categories', 'User.User_categories.Categories.User_items']
         })
 
         let data = []
@@ -129,7 +135,7 @@ export const BookingRepository = {
             where: {
                 id: bookingId
             },
-            relations: ['Schedule', 'fromPurchase', 'User']
+            relations: ['Schedule', 'fromPurchase', 'User', 'fromPurchase.Bundle']
         })
         if (!booking) throw new ErrorResponse(404, 14, 'La reservacion no existe')
 
@@ -142,8 +148,10 @@ export const BookingRepository = {
         if (data.discountClass) {
             if (booking.isPass) {
                 classesHistory.takenPasses -= 1
-            } else {
+            } else if (!booking.isPass && !booking.fromPurchase.Bundle.isGroup) {
                 classesHistory.takenClasses -= 1
+            } else if (!booking.isPass && booking.fromPurchase.Bundle.isGroup) {
+                classesHistory.takenGroupClasses -= 1
             }
             await getRepository(ClassesHistory).save(classesHistory)
             await getRepository(Booking).remove(booking)
@@ -153,13 +161,26 @@ export const BookingRepository = {
                     id: booking.fromPurchase.id
                 }
             })
+
+
+            if (booking.isPass) {
+                classesHistory.takenPasses -= 1
+                purchase.addedPasses += 1
+            } else if (!booking.isPass && !booking.fromPurchase.Bundle.isGroup) {
+                purchase.addedClasses += 1
+                classesHistory.takenClasses -= 1
+            } else if (!booking.isPass && booking.fromPurchase.Bundle.isGroup) {
+                classesHistory.takenGroupClasses -= 1
+                purchase.addedClasses += 1
+            }
+            /*
             if (booking.isPass) {
                 classesHistory.takenPasses -= 1
                 purchase.addedPasses += 1
             } else {
                 classesHistory.takenClasses -= 1
                 purchase.addedClasses += 1
-            }
+            }*/
             if (!purchase) throw new ErrorResponse(404, 14, 'La compra no existe')
 
             await getRepository(ClassesHistory).save(classesHistory)

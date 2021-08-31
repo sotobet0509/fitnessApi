@@ -26,7 +26,7 @@ export class User {
     @Column('text', { nullable: true, comment: "Path de la foto de perfil del usuario" })
     pictureUrl: string
 
-    @Column({ nullable: true, comment: "Contraseña del usuario hasheada" })
+    @Column({ nullable: true, comment: "Identificador para usuarios registrados por facebook" })
     facebookId: string
 
     @Column({ nullable: true, comment: "Identificador para usuarios registrados por google" })
@@ -55,7 +55,7 @@ export class User {
 
     @Column({ default: 0, comment: "Cambios disponibles para editar el grupo" })
     changed: number
-
+    
     @OneToMany(type => Booking, Booking => Booking.User)
     Booking: Booking[]
 

@@ -12,6 +12,7 @@ import { sendActivationUrl } from '../services/mail';
 import { GroupName, UserId } from '../interfaces/me';
 
 import { TokenService } from '../services/token';
+import { ClassesHistory } from '../entities/ClassesHistory';
 
 export const ClientRepository = {
     async getAllClients(page: string) {
@@ -344,14 +345,16 @@ export const ClientRepository = {
 
             if (purchaseStatus) {
                 groupStatus = true
-                const bookings = await getRepository(Booking).find({
-                    where: {
-                        fromPurchase: purchaseStatus.id
-                    }
-                })
-                pending = (purchaseStatus.Bundle.classNumber - bookings.length)
+
+                
+                // const bookings = await getRepository(Booking).find({
+                //     where: {
+                //         fromPurchase: purchaseStatus.id
+                //     }
+                // })
+                 pending =purchaseStatus.Bundle.classNumber + purchaseStatus.addedClasses
                 if (pending == 0) {
-                    groupStatus = false
+                     groupStatus = false
                 }
 
             } else {
@@ -513,10 +516,10 @@ export const ClientRepository = {
                 nextGroupExpirationDate = groupPurchases[groupPurchases.length - 1].expirationDate
             }
 
-            if(pendingClasses == 0 && pendingPasses == 0){
+            if (pendingClasses == 0 && pendingPasses == 0) {
                 nextExpirationDate = null
             }
-            if(pendingClassesGroup == 0){
+            if (pendingClassesGroup == 0) {
                 nextGroupExpirationDate = null
             }
 
