@@ -6,25 +6,25 @@ export class CatalogoEjercicios {
     @PrimaryGeneratedColumn('increment', { comment: "Identificador numérico del ejercicio" })
     id: number
 
-    @Column({ comment: "Cadera" })
+    @Column({ comment: "nombre_ejercicio" })
     nombre_ejercicio: string
 
-    @Column({ comment: "Cadera" })
+    @Column({ comment: "series" })
     serie: string
 
-    @Column({ comment: "Cadera" })
+    @Column({ comment: "repeticiones" })
     repeticiones: string
 
-    @Column({ comment: "Cadera" })
+    @Column({ comment: "peso" })
     peso: string
 
-    @Column({ comment: "Cadera" })
+    @Column({ comment: "descanso" })
     descanso: string
 
-    @Column({ comment: "Cadera" })
+    @Column({ comment: "notas" })
     notas: string
 
-    @Column('text', { comment: "Cadera" })
+    @Column('text', { comment: "urlReferencia" })
     urlReferencia: string
 
     @OneToMany(type => Ejercicios, Ejercicios => Ejercicios.Ejercicio)
