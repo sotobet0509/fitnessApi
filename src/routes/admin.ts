@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { MeController } from '../controllers/me'
 import * as h from 'express-async-handler'
 import {checkToken} from '../middleware/CheckToken'
 import { AdminController } from '../controllers/admin'

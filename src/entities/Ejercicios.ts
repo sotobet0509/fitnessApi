@@ -1,5 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated, ManyToMany, OneToOne, JoinColumn, ManyToOne } from 'typeorm'
-import { CatalogoEjercicios } from './CatalogoEjercicios'
+import { CategoriaEjercicios } from './CategoriasEjercicios'
+import { Descansos } from './Descansos'
+import { NombreEjercicio } from './NombreEjercicios'
+import { Repeticiones } from './Repeticiones'
+import { Series } from './Series'
 import { Usuario } from './Usuarios'
 
 @Entity({ name: 'ejercicios' })
@@ -17,11 +21,30 @@ export class Ejercicios {
     @JoinColumn({name: 'id_usuario'})
     Usuario: Usuario
 
-    @ManyToOne(type => CatalogoEjercicios, CatalogoEjercicios => CatalogoEjercicios.Ejercicio)
-    @JoinColumn({name: 'id_ejercicio'})
-    Ejercicio: CatalogoEjercicios
+    @OneToOne(type => CategoriaEjercicios, CategoriaEjercicios => CategoriaEjercicios.id)
+    @JoinColumn()
+    Categoria_ejercicio: CategoriaEjercicios
 
+    @OneToOne(type => NombreEjercicio, NombreEjercicio => NombreEjercicio.id)
+    @JoinColumn()
+    Nombre_ejercicio: NombreEjercicio
 
+    @OneToOne(type => Series, Series => Series.id)
+    @JoinColumn()
+    Series: Series
+
+    @OneToOne(type => Repeticiones, Repeticiones => Repeticiones.id)
+    @JoinColumn()
+    Repeticiones: Repeticiones
+
+    @Column({ comment: "Peso" })
+    Peso: string
    
+    @OneToOne(type => Descansos, Descansos => Descansos.id)
+    @JoinColumn()
+    Descansos: Descansos
+    
+    @Column({ comment: "Notas" })
+    Notas: string
 
 }

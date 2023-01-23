@@ -12,6 +12,7 @@ import * as fileupload from 'express-fileupload'
 import { AuthRouter } from '../routes/auth'
 import { MeRouter } from '../routes/me'
 import { AdminRouter } from '../routes/admin'
+import { CataloguesRouter } from '../routes/catalogue'
 
 
 export default class ExpressApp {
@@ -45,6 +46,7 @@ export default class ExpressApp {
     this.application.use('/auth', AuthRouter)
     this.application.use('/patient',MeRouter)
     this.application.use('/admin',AdminRouter)
+    this.application.use('/catalogues',CataloguesRouter)
  
   }
 

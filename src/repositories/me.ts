@@ -44,7 +44,7 @@ export const MeRepository = {
             where:{
                 Usuario:id
             },
-            relations: ["Ejercicio"]
+            relations: ["Descansos","Repeticiones","Series","Nombre_ejercicio","Categoria_ejercicio"]
         })
         return exercises
     },

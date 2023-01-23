@@ -60,9 +60,16 @@ export const AdminController = {
     async setExercise(req:ExtendedRequest,res:Response){
         const idUsuario = req.params.idUsuario
         const exerciseSchema = Joi.object().keys({
-            id_ejercicio: Joi.number().required()
+            nombre_ejercicio: Joi.number().required(),
+            categoria_ejercicio: Joi.number().required(),
+            series: Joi.number().required(),
+            peso: Joi.string().required(),
+            repeticiones: Joi.number().required(),
+            descansos: Joi.number().required(),
+            notas: Joi.string().required()
         })
         const { error, value } = exerciseSchema.validate(req.body)
+        console.log(error)
         if (error) throw new DataMissingError()
         const data = <ExerciseSchema>value
         await AdminRepository.setExercise(idUsuario,data)

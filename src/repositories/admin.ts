@@ -1,13 +1,18 @@
 import { getRepository } from "typeorm"
-import { CatalogoEjercicios } from "../entities/CatalogoEjercicios"
+import { CategoriaEjercicios } from "../entities/CategoriasEjercicios"
 import { Citas } from "../entities/Citas"
 import { DatosProgreso } from "../entities/DatosProgreso"
 import { Ejercicios } from "../entities/Ejercicios"
 import { FotosUsuarios } from "../entities/FotosUsuarios"
+import { NombreEjercicio } from "../entities/NombreEjercicios"
+import { Series } from "../entities/Series"
 import { Usuario } from "../entities/Usuarios"
+import { Repeticiones } from "../entities/Repeticiones"
+import { DataMissingError } from "../errors/DataMissingError"
 import { DateSchema } from "../interfaces/date"
 import { ExerciseSchema } from "../interfaces/exercise"
 import { ProgressSchema } from "../interfaces/progress"
+import { Descansos } from "../entities/Descansos"
 
 export const AdminRepository = {
     async uploadProfilePicture(url: string, user: Usuario) {
@@ -144,15 +149,42 @@ export const AdminRepository = {
       },
 
       async setExercise(id:string,data: ExerciseSchema){
-        let idEjercicio  = data.id_ejercicio
-
-        const repository = getRepository(CatalogoEjercicios)
-        const ejercicio = await repository.findOne({
+        
+       let peso= data.peso
+    
+       let notas=  data.notas
+        //hacer validaciones de datos que provienen de catalogos
+        const CategoryRepository  =getRepository(CategoriaEjercicios)
+        const categoria = await CategoryRepository.findOne({
             where:{
-                id:idEjercicio
+                id:data.series
+            }
+        })
+        const NombreEjercicioRepository  =getRepository(NombreEjercicio)
+        const nombre = await NombreEjercicioRepository.findOne({
+            where:{
+                id:data.nombre_ejercicio
+            }
+        })
+        const RepeticionesRepository  =getRepository(Repeticiones)
+        const repeticiones = await RepeticionesRepository.findOne({
+            where:{
+                id:data.repeticiones
             }
         })
 
+        const DescansosRepository  =getRepository(Descansos)
+        const descansos = await DescansosRepository.findOne({
+            where:{
+                id:data.descansos
+            }
+        })
+        const SeriesRepository  =getRepository(Series)
+        const series = await SeriesRepository.findOne({
+            where:{
+                id: data.categoria_ejercicio
+            }
+        })
         const UserRepository  =getRepository(Usuario)
         const user = await UserRepository.findOne({
             where:{
@@ -165,7 +197,13 @@ export const AdminRepository = {
         Exercise.fecha_ejercicio= new Date()
         Exercise.completado=false
         Exercise.Usuario=user
-        Exercise.Ejercicio = ejercicio
+        Exercise.Categoria_ejercicio = categoria
+        Exercise.Nombre_ejercicio=nombre
+        Exercise.Series=series
+        Exercise.Repeticiones=repeticiones
+        Exercise.Peso=peso
+        Exercise.Descansos=descansos
+        Exercise.Notas=notas
         exercisesRepo.save(Exercise)
 
 
