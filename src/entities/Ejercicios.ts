@@ -21,26 +21,26 @@ export class Ejercicios {
     @JoinColumn({name: 'id_usuario'})
     Usuario: Usuario
 
-    @OneToOne(type => CategoriaEjercicios, CategoriaEjercicios => CategoriaEjercicios.id)
+    @ManyToOne(type => CategoriaEjercicios, CategoriaEjercicios => CategoriaEjercicios.id)
     @JoinColumn()
     Categoria_ejercicio: CategoriaEjercicios
 
-    @OneToOne(type => NombreEjercicio, NombreEjercicio => NombreEjercicio.id)
+    @ManyToOne(type => NombreEjercicio, NombreEjercicio => NombreEjercicio.id)
     @JoinColumn()
     Nombre_ejercicio: NombreEjercicio
 
-    @OneToOne(type => Series, Series => Series.id)
+    @ManyToOne(type => Series, Series => Series.id)
     @JoinColumn()
     Series: Series
 
-    @OneToOne(type => Repeticiones, Repeticiones => Repeticiones.id)
+    @ManyToOne(type => Repeticiones, Repeticiones => Repeticiones.id)
     @JoinColumn()
     Repeticiones: Repeticiones
 
     @Column({ comment: "Peso" })
     Peso: string
    
-    @OneToOne(type => Descansos, Descansos => Descansos.id)
+    @ManyToOne(type => Descansos, Descansos => Descansos.id)
     @JoinColumn()
     Descansos: Descansos
     
