@@ -16,4 +16,5 @@ export default {
   questionsUrl: process.env.QUESTIONS_URL,
   homeUrl: process.env.HOME_IMAGE_PICTURES_URL,
   encryptionToken: process.env.TOKEN_ENCRYPTION,
+  dietUrl: process.env.DIET_URL
 }

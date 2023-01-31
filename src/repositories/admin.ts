@@ -93,20 +93,20 @@ export const AdminRepository = {
         const dietaRepository = getRepository(Dietas)
         const dietaAnterior = await dietaRepository.findOne({
             where:{
-                idUsuario:id
+                Usuario:id
             }
         })
         if (dietaAnterior){
             await dietaRepository.delete(dietaAnterior)
         }
-        else{
+       
             const dieta = new Dietas()
             dieta.url = url
             dieta.Usuario = user
             dieta.fecha_dieta=new Date()
             await dietaRepository.save(dieta)
 
-        }     
+           
       },
 
       async getActivityPictures(id :string){
