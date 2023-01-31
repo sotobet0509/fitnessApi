@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { MeRepository } from '../repositories/me'
-import { handleActivityPicture, handleProfilePicture } from '../services/files'
+import { handleActivityPicture, handleDietFile, handleProfilePicture } from '../services/files'
 import { AdminRepository } from '../repositories/admin'
 import { DataMissingError } from '../errors/DataMissingError'
 import { ExerciseSchema } from '../interfaces/exercise'
@@ -57,6 +57,12 @@ export const AdminController = {
         res.json({ success: true })
     },
 
+    async changePatientStatus(req:ExtendedRequest,res:Response){
+        const idUsuario= req.params.idUsuario
+        await AdminRepository.changePatientStatus(idUsuario) 
+        res.json({ success: true })
+    },
+
     async setExercise(req:ExtendedRequest,res:Response){
         const idUsuario = req.params.idUsuario
         const exerciseSchema = Joi.object().keys({
@@ -107,6 +113,13 @@ export const AdminController = {
         const idUsuario= req.params.idUsuario
         const url = await handleActivityPicture(req.files.file)
         const images = await AdminRepository.uploadActivityPicture(url, idUsuario)
+        res.json({ success: true, data: images })
+    },
+
+    async uploadDiet(req:ExtendedRequest,res:Response){
+        const idUsuario= req.params.idUsuario
+        const url = await handleDietFile(req.files.file)
+        const images = await AdminRepository.uploadDietFile(url, idUsuario)
         res.json({ success: true, data: images })
     },
 

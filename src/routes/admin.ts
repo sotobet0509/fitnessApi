@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import * as h from 'express-async-handler'
 import {checkToken} from '../middleware/CheckToken'
+
 import { AdminController } from '../controllers/admin'
 
 const AdminRouter = Router({ mergeParams: true })
@@ -18,4 +19,7 @@ AdminRouter.get('/patients/dates/:id',h(checkToken),h(AdminController.getSingleD
 AdminRouter.post('/patients/set-date/:idUsuario',h(checkToken),h(AdminController.setDate))
 AdminRouter.post('/upload-activity-picture/:idUsuario', h(checkToken), h(AdminController.uploadImage))
 AdminRouter.post('/patients/progress/:idUsuario',h(checkToken),h(AdminController.postPatientProgress))
+AdminRouter.post('/diets/uploadDiet/:idUsuario',h(checkToken),h(AdminController.uploadDiet))
+AdminRouter.patch('/patients/change-status/:idUsuario', h(checkToken), h(AdminController.changePatientStatus))
+
 export { AdminRouter }

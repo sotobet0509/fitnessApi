@@ -22,6 +22,13 @@ async profile(req: ExtendedRequest, res: Response) {
 
 },
 
+async getDiet(req: ExtendedRequest, res: Response) {
+    const user = req.user
+    const profile = await MeRepository.getDiet(user.idUsuario)
+    res.json({ success: true, data: profile })
+
+},
+
 async getDates (req:ExtendedRequest,res:Response){
     const user = req.user
     const dates  = await MeRepository.getDates(user.idUsuario)

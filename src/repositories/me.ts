@@ -1,5 +1,6 @@
 import { getRepository } from "typeorm"
 import { Citas } from "../entities/Citas"
+import { Dietas } from "../entities/Dietas"
 import { Ejercicios } from "../entities/Ejercicios"
 import { FotosUsuarios } from "../entities/FotosUsuarios"
 import { Usuario } from "../entities/Usuarios"
@@ -36,6 +37,16 @@ export const MeRepository = {
             }
         })
         return dates
+    },
+
+    async getDiet (id: string){
+        const repository = getRepository(Dietas)
+        const dieta = await repository.find({
+            where:{
+                Usuario:id
+            }
+        })
+        return dieta
     },
     
     async getExercises (id:string){

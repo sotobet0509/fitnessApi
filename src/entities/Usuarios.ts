@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Generated, ManyToMany, OneToOne } from 'typeorm'
 import { Citas } from './Citas'
 import { DatosProgreso } from './DatosProgreso'
+import { Dietas } from './Dietas'
 import { Ejercicios } from './Ejercicios'
 import { FotosUsuarios } from './FotosUsuarios'
 
@@ -46,6 +47,9 @@ export class Usuario {
 
     @OneToMany(type => Citas, Citas => Citas.Usuario)
     Cita: Citas[]
+
+    @OneToMany(type => Dietas, Dietas => Dietas.Usuario)
+    Dietas: Citas[]
 
     @OneToMany(type => DatosProgreso, Datos => Datos.Usuario)
     Datos: DatosProgreso[]

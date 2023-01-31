@@ -12,4 +12,5 @@ MeRouter.get('/exercises',h(checkToken),h(MeController.getExercises))
 MeRouter.post('/upload-activity-picture', h(checkToken), h(MeController.uploadImage))
 MeRouter.get('/activity-pictures',h(checkToken),h(MeController.getActivityPictures))
 MeRouter.patch('/exercises/mark-exercise-as-completed/:idEjercicio',h(checkToken),h(MeController.markExerciseAsCompleted))
+MeRouter.get('/diet',h(checkToken),h(MeController.getDiet))
 export { MeRouter }

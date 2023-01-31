@@ -13,6 +13,7 @@ import { DateSchema } from "../interfaces/date"
 import { ExerciseSchema } from "../interfaces/exercise"
 import { ProgressSchema } from "../interfaces/progress"
 import { Descansos } from "../entities/Descansos"
+import { Dietas } from "../entities/Dietas"
 
 export const AdminRepository = {
     async uploadProfilePicture(url: string, user: Usuario) {
@@ -76,6 +77,36 @@ export const AdminRepository = {
         image.Usuario = user
         image.fecha_foto=new Date()
         await imageRepository.save(image)
+      },
+
+
+      async uploadDietFile(url: string, id : string) {
+        const repository = getRepository(Usuario)
+        const user = await repository.findOne({
+            where:{
+                esAdministrador:false,
+                activo:true,
+                idUsuario:id
+            }
+            
+        })
+        const dietaRepository = getRepository(Dietas)
+        const dietaAnterior = await dietaRepository.findOne({
+            where:{
+                idUsuario:id
+            }
+        })
+        if (dietaAnterior){
+            await dietaRepository.delete(dietaAnterior)
+        }
+        else{
+            const dieta = new Dietas()
+            dieta.url = url
+            dieta.Usuario = user
+            dieta.fecha_dieta=new Date()
+            await dietaRepository.save(dieta)
+
+        }     
       },
 
       async getActivityPictures(id :string){
@@ -145,6 +176,18 @@ export const AdminRepository = {
         }) 
 
         User.seccion_ejercicios=!User.seccion_ejercicios
+        repository.save(User)
+      },
+
+      async changePatientStatus(id:string){
+        const repository  = getRepository(Usuario)
+        let User  = await repository.findOne({
+            where:{
+                idUsuario:id
+            }
+        }) 
+
+        User.activo=!User.activo
         repository.save(User)
       },
 

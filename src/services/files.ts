@@ -27,3 +27,15 @@ export async function handleActivityPicture(file: UploadedFile) {
     await file.mv(path.join(__dirname, `../../files/pictures/${filename}`))
     return url
 }
+
+export async function handleDietFile(file: UploadedFile) {
+    if (file.truncated) throw new ErrorResponse(400, 30, 'El archivo es demasiado grande')
+
+    let filename = file.name
+    filename = filename.trim()
+    filename = replaceSpecialCharacters(filename)
+
+    const url = `${config.homeUrl}${filename}`
+    await file.mv(path.join(__dirname, `../../files/diets/${filename}`))
+    return url
+}
