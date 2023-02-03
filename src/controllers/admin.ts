@@ -33,6 +33,13 @@ export const AdminController = {
 
     },
 
+    async getPatientExercises(req:ExtendedRequest,res:Response){
+        const idUsuario= req.params.idUsuario
+        const exercises = await AdminRepository.getExercises(idUsuario)
+        res.json ({succes:true,data:exercises})
+
+    },
+
     async getPatientById(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario
         const user = await AdminRepository.getUserById(idUsuario)

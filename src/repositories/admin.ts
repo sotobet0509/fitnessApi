@@ -54,9 +54,9 @@ export const AdminRepository = {
         const repository = getRepository(Ejercicios)
         const exercises  = await repository.find({
             where:{
-                id_usuario:id
+                Usuario:id
             },
-            relations: ["CatalogoEjercicios"]
+            relations: ["Categoria_ejercicio","Nombre_ejercicio","Series","Repeticiones","Descansos"]
         })
         return exercises
     },
