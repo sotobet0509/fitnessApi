@@ -50,11 +50,12 @@ export const AdminRepository = {
         
     },
     
-    async getExercises (id:string){
+    async getExercises (id:string,fecha : string){
         const repository = getRepository(Ejercicios)
         const exercises  = await repository.find({
             where:{
-                Usuario:id
+                Usuario:id,
+                fecha_ejercicio:fecha
             },
             relations: ["Categoria_ejercicio","Nombre_ejercicio","Series","Repeticiones","Descansos"]
         })
