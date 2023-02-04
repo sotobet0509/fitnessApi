@@ -35,7 +35,8 @@ export const AdminController = {
 
     async getPatientExercises(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario
-        const exercises = await AdminRepository.getExercises(idUsuario)
+        const fecha = req.params.fecha
+        const exercises = await AdminRepository.getExercises(idUsuario,fecha)
         res.json ({succes:true,data:exercises})
 
     },
