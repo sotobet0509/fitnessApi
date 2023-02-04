@@ -21,5 +21,5 @@ AdminRouter.post('/upload-activity-picture/:idUsuario', h(checkToken), h(AdminCo
 AdminRouter.post('/patients/progress/:idUsuario',h(checkToken),h(AdminController.postPatientProgress))
 AdminRouter.post('/diets/uploadDiet/:idUsuario',h(checkToken),h(AdminController.uploadDiet))
 AdminRouter.patch('/patients/change-status/:idUsuario', h(checkToken), h(AdminController.changePatientStatus))
-AdminRouter.get('/patients/exercises/:idUsuario',h(checkToken), h(AdminController.getPatientExercises))
+AdminRouter.get('/patients/exercises/:idUsuario/:fecha',h(checkToken), h(AdminController.getPatientExercises))
 export { AdminRouter }
