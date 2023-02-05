@@ -238,7 +238,9 @@ export const AdminRepository = {
 
         const exercisesRepo = getRepository(Ejercicios)
         const Exercise  = new Ejercicios()
-        Exercise.fecha_ejercicio= new Date()
+        var dateAndTime = new Date()
+        var fecha = new Date(dateAndTime.toDateString());
+        Exercise.fecha_ejercicio= fecha
         Exercise.completado=false
         Exercise.Usuario=user
         Exercise.Categoria_ejercicio = categoria
