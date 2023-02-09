@@ -201,7 +201,7 @@ export const AdminRepository = {
         const CategoryRepository  =getRepository(CategoriaEjercicios)
         const categoria = await CategoryRepository.findOne({
             where:{
-                id:data.series
+                id:data.categoria_ejercicio
             }
         })
         const NombreEjercicioRepository  =getRepository(NombreEjercicio)
@@ -226,7 +226,7 @@ export const AdminRepository = {
         const SeriesRepository  =getRepository(Series)
         const series = await SeriesRepository.findOne({
             where:{
-                id: data.categoria_ejercicio
+                id: data.series
             }
         })
         const UserRepository  =getRepository(Usuario)
