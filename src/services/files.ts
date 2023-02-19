@@ -35,7 +35,7 @@ export async function handleDietFile(file: UploadedFile) {
     filename = filename.trim()
     filename = replaceSpecialCharacters(filename)
 
-    const url = `${config.homeUrl}${filename}`
+    const url = `${config.dietUrl}${filename}`
     await file.mv(path.join(__dirname, `../../files/diets/${filename}`))
     return url
 }
