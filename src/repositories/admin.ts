@@ -125,8 +125,7 @@ export const AdminRepository = {
         const repository= getRepository(Usuario)
         const patients = await repository.find({
             where:{
-                esAdministrador:false,
-                activo:true
+                esAdministrador:false
             }
         })
         return patients
