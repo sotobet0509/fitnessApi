@@ -136,7 +136,6 @@ export const AdminRepository = {
         const user = await repository.findOne({
             where:{
                 esAdministrador:false,
-                activo:true,
                 idUsuario:id
             }
             
