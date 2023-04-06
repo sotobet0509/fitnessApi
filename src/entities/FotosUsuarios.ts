@@ -12,6 +12,9 @@ export class FotosUsuarios {
     @Column({comment:"Fecha de creación de la foto"})
     fecha_foto: Date
 
+    @Column({comment:"Categoria de la foto"})
+    categoria: string
+
     @ManyToOne(type => Usuario, Usuario => Usuario.Foto)
     @JoinColumn({name: 'id_usuario'})
     Usuario: Usuario

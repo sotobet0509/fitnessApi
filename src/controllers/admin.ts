@@ -41,6 +41,13 @@ export const AdminController = {
 
     },
 
+    async getPatientSteps(req:ExtendedRequest,res:Response){
+        const idUsuario= req.params.idUsuario
+        const fecha = req.params.fecha
+        const steps = await AdminRepository.getSteps(idUsuario,fecha)
+        res.json ({succes:true,data:steps})
+    },
+
     async getPatientById(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario
         const user = await AdminRepository.getUserById(idUsuario)

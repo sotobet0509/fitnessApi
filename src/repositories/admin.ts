@@ -14,6 +14,7 @@ import { ExerciseSchema } from "../interfaces/exercise"
 import { ProgressSchema } from "../interfaces/progress"
 import { Descansos } from "../entities/Descansos"
 import { Dietas } from "../entities/Dietas"
+import { Pasos } from "../entities/PasosUsuarios"
 
 export const AdminRepository = {
     async uploadProfilePicture(url: string, user: Usuario) {
@@ -62,6 +63,17 @@ export const AdminRepository = {
         return exercises
     },
 
+    async getSteps (id:string,fecha : string){
+        const repository = getRepository(Pasos)
+        const pasos  = await repository.find({
+            where:{
+                Usuario:id,
+                fecha_registro:fecha
+            }
+    
+        })
+        return pasos
+    },
     async uploadActivityPicture(url: string, id : string) {
         const repository = getRepository(Usuario)
         const user = await repository.findOne({
@@ -300,7 +312,6 @@ export const AdminRepository = {
         progress.grasa_corporal=data.grasa_corporal
         progress.imc=data.imc
         progress.peso=data.peso
-        progress.pasos=0
 
         progressRepository.save(progress)
       }

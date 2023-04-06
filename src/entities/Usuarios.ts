@@ -4,6 +4,7 @@ import { DatosProgreso } from './DatosProgreso'
 import { Dietas } from './Dietas'
 import { Ejercicios } from './Ejercicios'
 import { FotosUsuarios } from './FotosUsuarios'
+import { Pasos } from './PasosUsuarios'
 
 
 
@@ -56,6 +57,9 @@ export class Usuario {
 
     @OneToMany(type => Ejercicios, Ejercicios => Ejercicios.Usuario)
     Ejercicio: Ejercicios[]
+
+    @OneToMany(type => Pasos, Pasos => Pasos.Usuario)
+    Pasos: Pasos[]
     
 
 }

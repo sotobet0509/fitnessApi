@@ -24,9 +24,6 @@ export class DatosProgreso {
     @Column({ comment: "Cadera" })
     cadera: string
 
-    @Column({ comment: "Pasos" })
-    pasos: number
-
     @Column({comment:"Fecha registro"})
     fecha_registro: Date
 
