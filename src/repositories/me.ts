@@ -3,6 +3,7 @@ import { Citas } from "../entities/Citas"
 import { Dietas } from "../entities/Dietas"
 import { Ejercicios } from "../entities/Ejercicios"
 import { FotosUsuarios } from "../entities/FotosUsuarios"
+import { Pasos } from "../entities/PasosUsuarios"
 import { Usuario } from "../entities/Usuarios"
 
 export const MeRepository = {
@@ -37,6 +38,16 @@ export const MeRepository = {
             }
         })
         return dates
+    },
+
+    async getSteps (id: string){
+        const repository = getRepository(Pasos)
+        const pasos = await repository.find({
+            where:{
+                Usuario:id
+            }
+        })
+        return pasos
     },
 
     async getDiet (id: string){

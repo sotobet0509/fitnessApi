@@ -35,6 +35,12 @@ async getDates (req:ExtendedRequest,res:Response){
     res.json ({success:true,data:dates})
 },
 
+async getSteps (req:ExtendedRequest,res:Response){
+    const user = req.user
+    const dates  = await MeRepository.getSteps(user.idUsuario)
+    res.json ({success:true,data:dates})
+},
+
 async getExercises (req:ExtendedRequest,res:Response){
     const user = req.user
     const exercises  = await MeRepository.getExercises(user.idUsuario)
