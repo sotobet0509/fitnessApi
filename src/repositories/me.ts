@@ -5,6 +5,8 @@ import { Ejercicios } from "../entities/Ejercicios"
 import { FotosUsuarios } from "../entities/FotosUsuarios"
 import { Pasos } from "../entities/PasosUsuarios"
 import { Usuario } from "../entities/Usuarios"
+import { StepsSchema } from "../interfaces/steps"
+import { ImageSchema } from "../interfaces/image"
 
 export const MeRepository = {
     async uploadProfilePicture(url: string, user: Usuario) {
@@ -40,11 +42,23 @@ export const MeRepository = {
         return dates
     },
 
-    async getSteps (id: string){
+    async setSteps (user: Usuario,data: StepsSchema){
+        const stepsRepo = getRepository(Pasos)
+        const pasos  = new Pasos()
+         var dateAndTime = new Date()
+        var fecha = new Date(dateAndTime.toDateString());
+        pasos.Usuario= user
+        pasos.cantidad = data.cantidad
+        pasos.fecha_registro=fecha
+        stepsRepo.save(pasos)
+    },
+
+    async getSteps (id: Usuario,fecha : string){
         const repository = getRepository(Pasos)
         const pasos = await repository.find({
             where:{
-                Usuario:id
+                Usuario:id,
+                fecha_registro:fecha
             }
         })
         return pasos
@@ -71,12 +85,14 @@ export const MeRepository = {
         return exercises
     },
 
-    async uploadActivityPicture(url: string, user : Usuario) {
+    async uploadActivityPicture(url: string, user : Usuario, data :ImageSchema) {
         const imageRepository = getRepository(FotosUsuarios);
+        const cat = data.categoria
         const image = new FotosUsuarios()
         image.url = url
         image.Usuario = user
         image.fecha_foto=new Date()
+        image.categoria =cat
         await imageRepository.save(image)
       },
 

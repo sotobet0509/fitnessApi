@@ -10,6 +10,9 @@ export class NombreEjercicio {
     @Column({ comment: "nombre_ejercicio" })
     nombre_ejercicio: string
 
+    @Column({ comment: "gif ejercicio" })
+    url_gif: string
+
     @OneToMany(type => NombreCategoriaEjercicios, NombreCategoriaEjercicios => NombreCategoriaEjercicios.NombreEjercicio)
     nombre_categoria: NombreCategoriaEjercicios[]
 

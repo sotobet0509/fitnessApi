@@ -15,6 +15,7 @@ import { ProgressSchema } from "../interfaces/progress"
 import { Descansos } from "../entities/Descansos"
 import { Dietas } from "../entities/Dietas"
 import { Pasos } from "../entities/PasosUsuarios"
+import { ImageSchema } from "../interfaces/image"
 
 export const AdminRepository = {
     async uploadProfilePicture(url: string, user: Usuario) {
@@ -74,8 +75,9 @@ export const AdminRepository = {
         })
         return pasos
     },
-    async uploadActivityPicture(url: string, id : string) {
+    async uploadActivityPicture(url: string, id : string, data :ImageSchema) {
         const repository = getRepository(Usuario)
+        const cat = data.categoria
         const user = await repository.findOne({
             where:{
                 esAdministrador:false,
@@ -89,6 +91,7 @@ export const AdminRepository = {
         image.url = url
         image.Usuario = user
         image.fecha_foto=new Date()
+        image.categoria=cat
         await imageRepository.save(image)
       },
 

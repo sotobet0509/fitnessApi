@@ -3,7 +3,9 @@ import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
 import { MeRepository } from '../repositories/me'
 import { handleActivityPicture, handleProfilePicture } from '../services/files'
-
+import { DataMissingError } from '../errors/DataMissingError'
+import { StepsSchema } from '../interfaces/steps'
+import { ImageSchema } from '../interfaces/image'
 export const MeController = {
 
 async uploadProfilePicture(req: ExtendedRequest, res: Response) {
@@ -37,8 +39,21 @@ async getDates (req:ExtendedRequest,res:Response){
 
 async getSteps (req:ExtendedRequest,res:Response){
     const user = req.user
-    const dates  = await MeRepository.getSteps(user.idUsuario)
+    const dates  = await MeRepository.getSteps(user,req.params.fecha)
     res.json ({success:true,data:dates})
+},
+
+async postSteps(req:ExtendedRequest,res:Response){
+    const user = req.user
+    const stepsSchema = Joi.object().keys({
+        cantidad: Joi.string().required()
+    })
+    const { error, value } = stepsSchema.validate(req.body)
+    console.log(error)
+    if (error) throw new DataMissingError()
+    const data = <StepsSchema>value
+    await MeRepository.setSteps(user,data)
+    res.json({success:true})
 },
 
 async getExercises (req:ExtendedRequest,res:Response){
@@ -48,9 +63,15 @@ async getExercises (req:ExtendedRequest,res:Response){
 },
 
 async uploadImage(req: ExtendedRequest, res: Response) {
-    const url = await handleActivityPicture(req.files.file)
     const user = req.user
-    const images = await MeRepository.uploadActivityPicture(url, user)
+    const url = await handleActivityPicture(req.files.file)
+    const ImageSchema = Joi.object().keys({
+        categoria:Joi.string().required()
+    })
+    const { error, value } = ImageSchema.validate(req.body)  
+    if (error) throw new DataMissingError()
+    const data = <ImageSchema>value
+    const images = await MeRepository.uploadActivityPicture(url, user,data)
     res.json({ success: true, data: images })
 },
 

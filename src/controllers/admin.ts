@@ -8,6 +8,7 @@ import { DataMissingError } from '../errors/DataMissingError'
 import { ExerciseSchema } from '../interfaces/exercise'
 import { DateSchema } from '../interfaces/date'
 import { ProgressSchema } from '../interfaces/progress'
+import { ImageSchema } from '../interfaces/image'
 
 export const AdminController = {
 
@@ -127,7 +128,16 @@ export const AdminController = {
     async uploadImage(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario
         const url = await handleActivityPicture(req.files.file)
-        const images = await AdminRepository.uploadActivityPicture(url, idUsuario)
+        const ImageSchema = Joi.object().keys({
+            categoria:Joi.string().required()
+        })
+
+        const { error, value } = ImageSchema.validate(req.body)
+        console.log(req.body)
+        console.log (error)
+        if (error) throw new DataMissingError()
+        const data = <ImageSchema>value
+        const images = await AdminRepository.uploadActivityPicture(url, idUsuario,data)
         res.json({ success: true, data: images })
     },
 
