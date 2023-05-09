@@ -151,12 +151,32 @@ export const AdminController = {
     async postPatientProgress(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario
         const progressSchema = Joi.object().keys({
-            peso:Joi.string().required(), 
-            imc : Joi.string().required(), 
-            grasa_corporal :Joi.string().required(), 
-            cintura :Joi.string().required(), 
-            abdomen :Joi.string().required(), 
-            cadera :Joi.string().required()
+            //pliegues
+            pliegues_Tricipital:  Joi.string(),
+            pliegues_Subescapular:  Joi.number(),
+            pliegues_Bicipital:  Joi.number(),
+            pliegues_Cresta_ilíaca :  Joi.number(),
+            pliegues_Supraespinal:  Joi.number(),
+            pliegues_Abdominal:  Joi.number(),
+            pliegues_Muslo:  Joi.number(),
+            pliegues_Pantorrilla:  Joi.number(),
+
+            //perimetros
+        
+            perimetros_cintura: Joi.string(),
+            perimetros_abdomen:  Joi.string(),
+            perimetros_cadera:  Joi.string(),
+            perimetros_brazo_contraido:  Joi.string(),
+            perimetros_muslo:  Joi.string(),
+            perimetros_pantorrilla:  Joi.string(),
+            //resultados
+
+            resultados_peso:  Joi.string(),
+            resultados_grasa_corporal:  Joi.string(),
+            resultados_kg_grasa:  Joi.string(),
+            resultados_kg_musculo:  Joi.string(),
+            resultados_suma_pliegues:  Joi.number()
+
         })
 
         const { error, value } = progressSchema.validate(req.body)

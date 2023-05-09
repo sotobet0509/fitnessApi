@@ -308,13 +308,27 @@ export const AdminRepository = {
         const progressRepository = getRepository(DatosProgreso)
         const progress = new DatosProgreso()
         progress.Usuario=user
-        progress.abdomen=data.abdomen
-        progress.cadera=data.cadera
-        progress.cintura=data.cintura
+        progress.pliegues_Tricipital=data.pliegues_Tricipital
+        progress.pliegues_Subescapular=data.pliegues_Subescapular
+        progress.pliegues_Bicipital=data.pliegues_Bicipital
+        progress.pliegues_Cresta_ilíaca=data.pliegues_Cresta_ilíaca
+        progress.pliegues_Supraespinal=data.pliegues_Supraespinal
+        progress.pliegues_Abdominal=data.pliegues_Abdominal
+        progress.pliegues_Muslo=data.pliegues_Muslo
+        progress.pliegues_Pantorrilla=data.pliegues_Pantorrilla
+        progress.perimetros_cintura=data.perimetros_cintura
+        progress.perimetros_abdomen=data.perimetros_abdomen
+        progress.perimetros_cadera=data.perimetros_cadera
+        progress.perimetros_brazo_contraido=data.perimetros_brazo_contraido
+        progress.perimetros_muslo=data.perimetros_muslo
+        progress.perimetros_pantorrilla=data.perimetros_pantorrilla
+        progress.resultados_peso=data.resultados_peso
+        progress.resultados_kg_grasa=data.resultados_peso
+        progress.resultados_grasa_corporal=data.resultados_grasa_corporal
+        progress.resultados_kg_musculo=data.resultados_kg_musculo
+        progress.resultados_suma_pliegues=data.resultados_suma_pliegues
         progress.fecha_registro=new Date()
-        progress.grasa_corporal=data.grasa_corporal
-        progress.imc=data.imc
-        progress.peso=data.peso
+     
 
         progressRepository.save(progress)
       }

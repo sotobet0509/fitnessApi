@@ -1,13 +1,6 @@
 import { Request, Response } from 'express'
 import Joi = require('@hapi/joi')
 import { ExtendedRequest } from '../../types'
-import { MeRepository } from '../repositories/me'
-import { handleActivityPicture, handleProfilePicture } from '../services/files'
-import { AdminRepository } from '../repositories/admin'
-import { DataMissingError } from '../errors/DataMissingError'
-import { ExerciseSchema } from '../interfaces/exercise'
-import { DateSchema } from '../interfaces/date'
-import { ProgressSchema } from '../interfaces/progress'
 import { CatalogsRepository } from '../repositories/catalogues'
 
 export const CataloguesController = {
