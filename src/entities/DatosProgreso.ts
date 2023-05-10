@@ -7,7 +7,7 @@ export class DatosProgreso {
     id: number
     //pliegues
     @Column({ comment: "pliegues_Tricipital" })
-    pliegues_Tricipital: string
+    pliegues_Tricipital: number
 
     @Column({ comment: "pliegues_Subescapular" })
     pliegues_Subescapular: number

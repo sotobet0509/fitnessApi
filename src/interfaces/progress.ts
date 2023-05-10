@@ -1,7 +1,7 @@
 export interface ProgressSchema {
 
     //pliegues
-    pliegues_Tricipital: string,
+    pliegues_Tricipital: number,
     pliegues_Subescapular: number,
     pliegues_Bicipital: number,
     pliegues_Cresta_ilíaca : number,

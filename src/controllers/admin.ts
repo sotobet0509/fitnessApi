@@ -152,7 +152,7 @@ export const AdminController = {
         const idUsuario= req.params.idUsuario
         const progressSchema = Joi.object().keys({
             //pliegues
-            pliegues_Tricipital:  Joi.string(),
+            pliegues_Tricipital:  Joi.number(),
             pliegues_Subescapular:  Joi.number(),
             pliegues_Bicipital:  Joi.number(),
             pliegues_Cresta_ilíaca :  Joi.number(),
