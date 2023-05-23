@@ -9,6 +9,7 @@ import { ExerciseSchema } from '../interfaces/exercise'
 import { DateSchema } from '../interfaces/date'
 import { ProgressSchema } from '../interfaces/progress'
 import { ImageSchema } from '../interfaces/image'
+import { NotesSchema } from '../interfaces/notes'
 
 export const AdminController = {
 
@@ -33,6 +34,22 @@ export const AdminController = {
         res.json ({success:true, data:patients})
 
     },
+
+    async addComment(req:ExtendedRequest,res:Response){
+        const idUsuario= req.params.idUsuario
+        const exerciseId= req.params.idEjercicio
+        const notesSchema = Joi.object().keys({
+            notas: Joi.string().required()
+        })
+
+        const { error, value } = notesSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <NotesSchema>value
+        const patient = await AdminRepository.addComment(idUsuario,data,exerciseId)
+        res.json ({success:true})
+
+    },
+
 
     async getPatientExercises(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario

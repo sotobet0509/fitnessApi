@@ -16,6 +16,7 @@ import { Descansos } from "../entities/Descansos"
 import { Dietas } from "../entities/Dietas"
 import { Pasos } from "../entities/PasosUsuarios"
 import { ImageSchema } from "../interfaces/image"
+import { NotesSchema } from "../interfaces/notes"
 
 export const AdminRepository = {
     async uploadProfilePicture(url: string, user: Usuario) {
@@ -191,6 +192,19 @@ export const AdminRepository = {
 
         User.seccion_ejercicios=!User.seccion_ejercicios
         repository.save(User)
+      },
+
+      async addComment(id : string,data :NotesSchema,idEjercicio:string){
+        const repository  = getRepository(Ejercicios)
+        let ejercicio  = await repository.findOne({
+            where:{
+                id:idEjercicio,
+                Usuario:id
+            }
+        }) 
+
+        ejercicio.Notas=data.notas
+        repository.save(ejercicio)
       },
 
       async changePatientStatus(id:string){

@@ -6,8 +6,24 @@ import { handleActivityPicture, handleProfilePicture } from '../services/files'
 import { DataMissingError } from '../errors/DataMissingError'
 import { StepsSchema } from '../interfaces/steps'
 import { ImageSchema } from '../interfaces/image'
+import { NotesSchema } from '../interfaces/notes'
 export const MeController = {
 
+
+    async addComment(req:ExtendedRequest,res:Response){
+        const user = req.user
+        const exerciseId= req.params.idEjercicio
+        const notesSchema = Joi.object().keys({
+            notas: Joi.string().required()
+        })
+
+        const { error, value } = notesSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <NotesSchema>value
+        const patient = await MeRepository.addComment(user.idUsuario,data,exerciseId)
+        res.json ({success:true})
+
+    },
 async uploadProfilePicture(req: ExtendedRequest, res: Response) {
     const url = await handleProfilePicture(req.files.file)
     const user = req.user

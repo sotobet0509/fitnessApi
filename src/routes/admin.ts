@@ -23,4 +23,5 @@ AdminRouter.post('/diets/uploadDiet/:idUsuario',h(checkToken),h(AdminController.
 AdminRouter.patch('/patients/change-status/:idUsuario', h(checkToken), h(AdminController.changePatientStatus))
 AdminRouter.get('/patients/exercises/:idUsuario/:fecha',h(checkToken), h(AdminController.getPatientExercises))
 AdminRouter.get('/patients/steps/:idUsuario/:fecha',h(checkToken), h(AdminController.getPatientSteps))
+AdminRouter.patch('/patients/exercises/add-comment/:idUsuario/:idEjercicio',h(checkToken), h(AdminController.addComment))
 export { AdminRouter }
