@@ -18,8 +18,23 @@ export const MeRepository = {
                 Usuario:id
             }
         }) 
-
-        ejercicio.Notas=data.notas
+        const userRepository = getRepository(Usuario)
+        const admin = await userRepository.findOne({
+            where: {
+                idUsuario: id,
+                activo: true
+            }
+        }) 
+        const notasArray = ejercicio.Notas
+        const nota = {
+            Nombre:admin.nombre,
+            nota: data.notas
+        };
+        const comentario= JSON.stringify({
+            comentario: nota
+        });
+        notasArray.push(comentario)
+        ejercicio.Notas = notasArray
         repository.save(ejercicio)
       },
 

@@ -194,7 +194,7 @@ export const AdminRepository = {
         repository.save(User)
       },
 
-      async addComment(id : string,data :NotesSchema,idEjercicio:string){
+      async addComment(id : string,data :NotesSchema,idEjercicio:string,adminId:string){
         const repository  = getRepository(Ejercicios)
         let ejercicio  = await repository.findOne({
             where:{
@@ -202,8 +202,23 @@ export const AdminRepository = {
                 Usuario:id
             }
         }) 
-
-        ejercicio.Notas=data.notas
+        const userRepository = getRepository(Usuario)
+        const admin = await userRepository.findOne({
+            where: {
+                idUsuario: adminId,
+                activo: true
+            },
+        })
+        const notasArray = ejercicio.Notas
+        const nota = {
+            Nombre:admin.nombre,
+            nota: data.notas
+        };
+        const comentario= JSON.stringify({
+            comentario: nota
+        });
+        notasArray.push(comentario)
+        ejercicio.Notas = notasArray
         repository.save(ejercicio)
       },
 
@@ -219,11 +234,10 @@ export const AdminRepository = {
         repository.save(User)
       },
 
-      async setExercise(id:string,data: ExerciseSchema){
-        
+      async setExercise(id:string,data: ExerciseSchema,adminId :string){
+       
        let peso= data.peso
-    
-       let notas=  data.notas
+
         //hacer validaciones de datos que provienen de catalogos
         const CategoryRepository  =getRepository(CategoriaEjercicios)
         const categoria = await CategoryRepository.findOne({
@@ -263,6 +277,12 @@ export const AdminRepository = {
             }
         })
 
+        const admin =await UserRepository.findOne({
+            where:{
+                idUsuario:adminId
+            }
+        })
+
         const exercisesRepo = getRepository(Ejercicios)
         const Exercise  = new Ejercicios()
         var dateAndTime = new Date()
@@ -276,7 +296,16 @@ export const AdminRepository = {
         Exercise.Repeticiones=repeticiones
         Exercise.Peso=peso
         Exercise.Descansos=descansos
-        Exercise.Notas=notas
+        const notasArray = []
+        const nota = {
+            Nombre:admin.nombre,
+            nota: data.notas
+        };
+        const comentario= JSON.stringify({
+            comentario: nota
+        });
+        notasArray.push(comentario)
+        Exercise.Notas = notasArray
         exercisesRepo.save(Exercise)
 
 

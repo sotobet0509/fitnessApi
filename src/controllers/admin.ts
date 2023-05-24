@@ -38,6 +38,7 @@ export const AdminController = {
     async addComment(req:ExtendedRequest,res:Response){
         const idUsuario= req.params.idUsuario
         const exerciseId= req.params.idEjercicio
+        const user = req.user
         const notesSchema = Joi.object().keys({
             notas: Joi.string().required()
         })
@@ -45,7 +46,7 @@ export const AdminController = {
         const { error, value } = notesSchema.validate(req.body)
         if (error) throw new DataMissingError()
         const data = <NotesSchema>value
-        const patient = await AdminRepository.addComment(idUsuario,data,exerciseId)
+        const patient = await AdminRepository.addComment(idUsuario,data,exerciseId,user.idUsuario)
         res.json ({success:true})
 
     },
@@ -98,6 +99,7 @@ export const AdminController = {
 
     async setExercise(req:ExtendedRequest,res:Response){
         const idUsuario = req.params.idUsuario
+        const user = req.user
         const exerciseSchema = Joi.object().keys({
             nombre_ejercicio: Joi.number().required(),
             categoria_ejercicio: Joi.number().required(),
@@ -111,7 +113,7 @@ export const AdminController = {
         console.log(error)
         if (error) throw new DataMissingError()
         const data = <ExerciseSchema>value
-        await AdminRepository.setExercise(idUsuario,data)
+        await AdminRepository.setExercise(idUsuario,data,user.idUsuario)
         res.json({success:true})
     },
 
