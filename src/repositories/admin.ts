@@ -55,6 +55,7 @@ export const AdminRepository = {
     
     async getExercises (id:string,fecha : string){
         const repository = getRepository(Ejercicios)
+       
         const exercises  = await repository.find({
             where:{
                 Usuario:id,
@@ -62,7 +63,12 @@ export const AdminRepository = {
             },
             relations: ["Categoria_ejercicio","Nombre_ejercicio","Series","Repeticiones","Descansos"]
         })
-        return exercises
+       
+        
+       
+      
+      return exercises
+
     },
 
     async getSteps (id:string,fecha : string){
@@ -209,16 +215,11 @@ export const AdminRepository = {
                 activo: true
             },
         })
-        const notasArray = ejercicio.Notas
-        const nota = {
-            Nombre:admin.nombre,
-            nota: data.notas
-        };
-        const comentario= JSON.stringify({
-            comentario: nota
-        });
-        notasArray.push(comentario)
-        ejercicio.Notas = notasArray
+
+        ejercicio.Notas.push({
+            Nombre: admin.nombre,
+            nota: data.notas,
+          })
         repository.save(ejercicio)
       },
 
@@ -296,16 +297,7 @@ export const AdminRepository = {
         Exercise.Repeticiones=repeticiones
         Exercise.Peso=peso
         Exercise.Descansos=descansos
-        const notasArray = []
-        const nota = {
-            Nombre:admin.nombre,
-            nota: data.notas
-        };
-        const comentario= JSON.stringify({
-            comentario: nota
-        });
-        notasArray.push(comentario)
-        Exercise.Notas = notasArray
+        Exercise.Notas = [{ Nombre: admin.nombre, nota: data.notas }]
         exercisesRepo.save(Exercise)
 
 

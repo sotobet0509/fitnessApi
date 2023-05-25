@@ -44,7 +44,6 @@ export class Ejercicios {
     @JoinColumn()
     Descansos: Descansos
     
-    @Column({ type: 'simple-array', nullable: true,comment:'notas' })
-    Notas: string[]
-
+    @Column('json')
+    Notas: { Nombre: string; nota: string }[]
 }

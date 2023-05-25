@@ -25,16 +25,10 @@ export const MeRepository = {
                 activo: true
             }
         }) 
-        const notasArray = ejercicio.Notas
-        const nota = {
-            Nombre:admin.nombre,
-            nota: data.notas
-        };
-        const comentario= JSON.stringify({
-            comentario: nota
-        });
-        notasArray.push(comentario)
-        ejercicio.Notas = notasArray
+        ejercicio.Notas.push({
+            Nombre: admin.nombre,
+            nota: data.notas,
+          })
         repository.save(ejercicio)
       },
 
