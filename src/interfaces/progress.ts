@@ -12,18 +12,18 @@ export interface ProgressSchema {
 
     //perimetros
    
-    perimetros_cintura: string,
-    perimetros_abdomen: string,
-    perimetros_cadera: string,
-    perimetros_brazo_contraido: string,
-    perimetros_muslo: string,
-    perimetros_pantorrilla: string,
+    perimetros_cintura: number,
+    perimetros_abdomen: number,
+    perimetros_cadera: number,
+    perimetros_brazo_contraido: number,
+    perimetros_muslo: number,
+    perimetros_pantorrilla: number,
     //resultados
 
-    resultados_peso: string,
-    resultados_grasa_corporal: string,
-    resultados_kg_grasa: string,
-    resultados_kg_musculo: string,
+    resultados_peso: number,
+    resultados_grasa_corporal: number,
+    resultados_kg_grasa: number,
+    resultados_kg_musculo: number,
     resultados_suma_pliegues: number
 
 }

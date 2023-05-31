@@ -24,4 +24,6 @@ AdminRouter.patch('/patients/change-status/:idUsuario', h(checkToken), h(AdminCo
 AdminRouter.get('/patients/exercises/:idUsuario/:fecha',h(checkToken), h(AdminController.getPatientExercises))
 AdminRouter.get('/patients/steps/:idUsuario/:fecha',h(checkToken), h(AdminController.getPatientSteps))
 AdminRouter.patch('/patients/exercises/add-comment/:idUsuario/:idEjercicio',h(checkToken), h(AdminController.addComment))
+AdminRouter.delete('/patients/set-exercise/:idUsuario/:idEjercicio',h(checkToken),h(AdminController.deleteExercise))
+AdminRouter.get('/getPendingDates',h(checkToken),h(AdminController.getPendingDates))
 export { AdminRouter }

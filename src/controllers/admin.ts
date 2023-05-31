@@ -12,7 +12,10 @@ import { ImageSchema } from '../interfaces/image'
 import { NotesSchema } from '../interfaces/notes'
 
 export const AdminController = {
-
+    async getPendingDates(req: ExtendedRequest, res: Response) {
+      const dates= await AdminRepository.getPendingDates()
+       res.json({success: true, data: dates }) 
+    },
     async uploadProfilePicture(req: ExtendedRequest, res: Response) {
         const url = await handleProfilePicture(req.files.file)
         const user = req.user
@@ -21,6 +24,15 @@ export const AdminController = {
     
         res.json({ success: true })
     },
+
+    async deleteExercise(req: ExtendedRequest, res: Response) {
+        const idUsuario = req.params.idUsuario
+        const exerciseId= req.params.idEjercicio
+        await AdminRepository.deleteExercise(idUsuario,exerciseId)
+    
+        res.json({ success: true })
+    },
+    
     
     async profile(req: ExtendedRequest, res: Response) {
         const user = req.user
@@ -182,18 +194,18 @@ export const AdminController = {
 
             //perimetros
         
-            perimetros_cintura: Joi.string(),
-            perimetros_abdomen:  Joi.string(),
-            perimetros_cadera:  Joi.string(),
-            perimetros_brazo_contraido:  Joi.string(),
-            perimetros_muslo:  Joi.string(),
-            perimetros_pantorrilla:  Joi.string(),
+            perimetros_cintura: Joi.number(),
+            perimetros_abdomen:  Joi.number(),
+            perimetros_cadera:  Joi.number(),
+            perimetros_brazo_contraido:  Joi.number(),
+            perimetros_muslo:  Joi.number(),
+            perimetros_pantorrilla:  Joi.number(),
             //resultados
 
-            resultados_peso:  Joi.string(),
-            resultados_grasa_corporal:  Joi.string(),
-            resultados_kg_grasa:  Joi.string(),
-            resultados_kg_musculo:  Joi.string(),
+            resultados_peso:  Joi.number(),
+            resultados_grasa_corporal:  Joi.number(),
+            resultados_kg_grasa:  Joi.number(),
+            resultados_kg_musculo:  Joi.number(),
             resultados_suma_pliegues:  Joi.number()
 
         })

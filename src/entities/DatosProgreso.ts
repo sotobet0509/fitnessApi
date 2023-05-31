@@ -34,35 +34,35 @@ export class DatosProgreso {
    
 
     @Column({ comment: "Cintura" })
-    perimetros_cintura: string
+    perimetros_cintura: number
 
     @Column({ comment: "Abdomen" })
-    perimetros_abdomen: string
+    perimetros_abdomen: number
 
     @Column({ comment: "Cadera" })
-    perimetros_cadera: string
+    perimetros_cadera: number
 
     @Column({ comment: "Cintura" })
-    perimetros_brazo_contraido: string
+    perimetros_brazo_contraido: number
 
     @Column({ comment: "Abdomen" })
-    perimetros_muslo: string
+    perimetros_muslo: number
 
     @Column({ comment: "Cadera" })
-    perimetros_pantorrilla: string
+    perimetros_pantorrilla: number
     //resultados
 
     @Column({ comment: "Peso" })
-    resultados_peso: string
+    resultados_peso: number
 
     @Column({ comment: "Grasa corporal" })
-    resultados_grasa_corporal: string
+    resultados_grasa_corporal: number
 
     @Column({ comment: "Kg Grasa" })
-    resultados_kg_grasa: string
+    resultados_kg_grasa: number
 
     @Column({ comment: "Kg musculo" })
-    resultados_kg_musculo: string
+    resultados_kg_musculo: number
 
     @Column({ comment: "Suma pliegues" })
     resultados_suma_pliegues: number

@@ -9,7 +9,16 @@ import { ImageSchema } from '../interfaces/image'
 import { NotesSchema } from '../interfaces/notes'
 export const MeController = {
 
-
+    async getPendingDates(req:ExtendedRequest,res:Response){
+        const user = req.user
+        const dates= await MeRepository.getPendingDates(user.idUsuario)
+       res.json({success: true, data: dates }) 
+    },
+    async getPendingExercises(req:ExtendedRequest,res:Response){
+        const user = req.user
+        const dates= await MeRepository.getPendingExercises(user.idUsuario)
+       res.json({success: true, data: dates }) 
+    },
     async addComment(req:ExtendedRequest,res:Response){
         const user = req.user
         const exerciseId= req.params.idEjercicio

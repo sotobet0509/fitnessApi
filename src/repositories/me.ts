@@ -1,4 +1,4 @@
-import { getRepository } from "typeorm"
+import { MoreThanOrEqual, getRepository } from "typeorm"
 import { Citas } from "../entities/Citas"
 import { Dietas } from "../entities/Dietas"
 import { Ejercicios } from "../entities/Ejercicios"
@@ -10,6 +10,52 @@ import { ImageSchema } from "../interfaces/image"
 import { NotesSchema } from "../interfaces/notes"
 
 export const MeRepository = {
+
+    async getPendingExercises(user: string){
+        const temporalDate = new Date()
+        temporalDate.setHours(0, 0, 0, 0)
+        const repository = getRepository(Ejercicios)
+        const ejercicios = await repository.find({
+            where:{
+                Usuario:user,
+                fecha_ejercicio:MoreThanOrEqual(temporalDate),
+                completado :false
+            }
+        })
+        
+        const days =[]
+        for (var i in ejercicios){
+            const ejercicio = ejercicios[i]
+
+
+            days.push(ejercicio.fecha_ejercicio)
+        }
+        const count= ejercicios.length
+        
+        return {days,count}
+    },
+    async getPendingDates(user: string){
+        const temporalDate = new Date()
+        temporalDate.setHours(0, 0, 0, 0)
+        const repository = getRepository(Citas)
+        const dates = await repository.find({
+            where:{
+                Usuario:user,
+                fecha_cita:MoreThanOrEqual(temporalDate)
+            }
+        })
+        
+        const days =[]
+        for (var i in dates){
+            const date = dates[i]
+            date.fecha_cita
+
+            days.push(date.fecha_cita)
+        }
+        const count= dates.length
+        
+        return {days,count}
+    },
     async addComment(id : string,data :NotesSchema,idEjercicio:string){
         const repository  = getRepository(Ejercicios)
         let ejercicio  = await repository.findOne({

@@ -1,4 +1,4 @@
-import { getRepository } from "typeorm"
+import { MoreThan, MoreThanOrEqual, getRepository } from "typeorm"
 import { CategoriaEjercicios } from "../entities/CategoriasEjercicios"
 import { Citas } from "../entities/Citas"
 import { DatosProgreso } from "../entities/DatosProgreso"
@@ -19,11 +19,45 @@ import { ImageSchema } from "../interfaces/image"
 import { NotesSchema } from "../interfaces/notes"
 
 export const AdminRepository = {
+
+    async getPendingDates(){
+        const temporalDate = new Date()
+        temporalDate.setHours(0, 0, 0, 0)
+        const repository = getRepository(Citas)
+        const dates = await repository.find({
+            where:{
+                fecha_cita: MoreThanOrEqual(temporalDate)
+            },
+            relations:['Usuario']
+        })
+        const days =[]
+        for (var i in dates){
+            const date = dates[i]
+            date.fecha_cita
+
+            days.push(date.fecha_cita)
+        }
+        const count= dates.length
+        
+        return {days,count}
+
+    },
     async uploadProfilePicture(url: string, user: Usuario) {
         const userRepository = getRepository(Usuario)
         user.urlFoto = url
         await userRepository.save(user)
     },
+    async deleteExercise(id : string,idEjercicio:string){
+        const repository  = getRepository(Ejercicios)
+        let ejercicio  = await repository.findOne({
+            where:{
+                id:idEjercicio,
+                Usuario:id
+            }
+        })
+        repository.delete(ejercicio.id)
+    }
+    ,
 
     async getProfile(id: string) {
         const repository = getRepository(Usuario)
