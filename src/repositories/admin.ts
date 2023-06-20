@@ -84,7 +84,35 @@ export const AdminRepository = {
         const dates = await repository.find({
             relations:['Usuario']
         })
-        return dates
+        const days =[]
+        for (var i in dates){
+            const date = dates[i]
+            let fecha_cita= new Date(date.fecha_cita)
+            fecha_cita.setHours(fecha_cita.getHours()+6)
+
+            days.push({
+                id:date.id,
+                fecha_cita: fecha_cita,
+                lugar: date.lugar,
+                Usuario:{
+                    idUsuario:date.Usuario.idUsuario,
+                    nombre:date.Usuario.nombre,
+                    fecha_nacimiento:date.Usuario.fechaNacimiento,
+                    email:date.Usuario.email,
+                    contraseña:date.Usuario.contrasena,
+                    urlFoto:date.Usuario.urlFoto,
+                    genero:date.Usuario.genero,
+                    esAdministrador:date.Usuario.esAdministrador,
+                    tempToken:date.Usuario.tempToken,
+                    activo:date.Usuario.activo,
+                    seccion_ejercicios:date.Usuario.seccion_ejercicios
+
+                }
+            })
+        
+        }
+        console.log(days)
+        return days
         
     },
     
