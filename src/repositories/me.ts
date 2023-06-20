@@ -119,7 +119,7 @@ export const MeRepository = {
             dtes.push(
                 {
                     id:date.id,
-                    fecha_cita:date.fecha_cita,
+                    fecha_cita:fecha_cita,
                     lugar:date.lugar
                 }
             )
