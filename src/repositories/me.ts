@@ -29,7 +29,7 @@ export const MeRepository = {
 
         let fecha_ejercicios= new Date(ejercicio.fecha_ejercicio)
         fecha_ejercicios.setHours(fecha_ejercicios.getHours()+6)
-        days.push(ejercicio.fecha_ejercicio)
+        days.push(fecha_ejercicios)
         }
         const count= ejercicios.length
         
