@@ -351,6 +351,7 @@ export const AdminRepository = {
         const Exercise  = new Ejercicios()
         let fecha_cita= new Date()
         fecha_cita.setHours (0, 0, 0, 0)
+        fecha_cita.setHours(-6)
         Exercise.fecha_ejercicio= fecha_cita
         Exercise.completado=false
         Exercise.Usuario=user
