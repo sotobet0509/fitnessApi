@@ -349,9 +349,9 @@ export const AdminRepository = {
 
         const exercisesRepo = getRepository(Ejercicios)
         const Exercise  = new Ejercicios()
-        var dateAndTime = new Date()
-        var fecha = new Date(dateAndTime.toDateString());
-        Exercise.fecha_ejercicio= fecha
+        let fecha_cita= new Date()
+        fecha_cita.setHours(fecha_cita.getHours()-6)
+        Exercise.fecha_ejercicio= fecha_cita
         Exercise.completado=false
         Exercise.Usuario=user
         Exercise.Categoria_ejercicio = categoria
