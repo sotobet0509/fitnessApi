@@ -126,6 +126,8 @@ export const AdminRepository = {
             },
             relations: ["Categoria_ejercicio","Nombre_ejercicio","Series","Repeticiones","Descansos"]
         })
+
+        
        
         
        

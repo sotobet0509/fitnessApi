@@ -27,8 +27,9 @@ export const MeRepository = {
         for (var i in ejercicios){
             const ejercicio = ejercicios[i]
 
-
-            days.push(ejercicio.fecha_ejercicio)
+        let fecha_ejercicios= new Date(ejercicio.fecha_ejercicio)
+        fecha_ejercicios.setHours(fecha_ejercicios.getHours()+6)
+        days.push(ejercicio.fecha_ejercicio)
         }
         const count= ejercicios.length
         
@@ -48,6 +49,8 @@ export const MeRepository = {
         const days =[]
         for (var i in dates){
             const date = dates[i]
+            let fecha_cita= new Date(date.fecha_cita)
+        fecha_cita.setHours(fecha_cita.getHours()+6)
             days.push(date.fecha_cita)
         }
         const count= dates.length
