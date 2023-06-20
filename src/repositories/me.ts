@@ -49,8 +49,8 @@ export const MeRepository = {
         const days =[]
         for (var i in dates){
             const date = dates[i]
-            let fecha_cita= new Date(date.fecha_cita)
-        fecha_cita.setHours(fecha_cita.getHours()+6)
+            let fecha_cita= date.fecha_cita
+            fecha_cita.setHours(fecha_cita.getHours()+6)
             days.push(date.fecha_cita)
         }
         const count= dates.length
