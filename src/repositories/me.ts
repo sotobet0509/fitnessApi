@@ -8,6 +8,7 @@ import { Usuario } from "../entities/Usuarios"
 import { StepsSchema } from "../interfaces/steps"
 import { ImageSchema } from "../interfaces/image"
 import { NotesSchema } from "../interfaces/notes"
+import xPermittedCrossDomainPolicies from "helmet/dist/middlewares/x-permitted-cross-domain-policies"
 
 export const MeRepository = {
 
@@ -172,7 +173,7 @@ export const MeRepository = {
             const exercise = exercises[i]
             let fecha_ejercicio= new Date(exercise.fecha_ejercicio)
             fecha_ejercicio.setHours(fecha_ejercicio.getHours()+6)
-
+            console.log(exercise.Notas[i])
             days.push(
                 {
                     id: exercise.id,
