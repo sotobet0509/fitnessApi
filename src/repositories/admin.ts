@@ -177,7 +177,7 @@ export const AdminRepository = {
         
        
       
-      return exercises
+      return days
 
     },
 
