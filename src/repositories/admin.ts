@@ -126,6 +126,8 @@ export const AdminRepository = {
             },
             relations: ["Categoria_ejercicio","Nombre_ejercicio","Series","Repeticiones","Descansos"]
         })
+
+        console.log(exercises)
         const days =[]
         for (var i in exercises){
             const exercise = exercises[i]
