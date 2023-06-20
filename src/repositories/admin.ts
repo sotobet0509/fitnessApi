@@ -34,7 +34,7 @@ export const AdminRepository = {
         for (var i in dates){
             const date = dates[i]
             let fecha_cita= new Date(date.fecha_cita)
-            fecha_cita.setHours(fecha_cita.getHours()-6)
+            fecha_cita.setHours(fecha_cita.getHours()+6)
 
             days.push(fecha_cita)
         }
