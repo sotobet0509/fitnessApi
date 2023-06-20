@@ -111,7 +111,7 @@ export const AdminRepository = {
             })
         
         }
-        console.log(days)
+ 
         return days
         
     },
@@ -126,7 +126,50 @@ export const AdminRepository = {
             },
             relations: ["Categoria_ejercicio","Nombre_ejercicio","Series","Repeticiones","Descansos"]
         })
+        const days =[]
+        for (var i in exercises){
+            const exercise = exercises[i]
+            let fecha_ejercicio= new Date(exercise.fecha_ejercicio)
+            fecha_ejercicio.setHours(fecha_ejercicio.getHours()+6)
 
+            days.push(
+                {
+                    id: exercise.id,
+                    fecha_ejercicio:fecha_ejercicio,
+                    completado: exercise.completado,
+                    Peso: exercise.Peso,
+                    Notas: [
+                        {
+                            nota: exercise.Notas[i].nota,
+                            Nombre: exercise.Notas[i].Nombre
+                        }
+                    ],
+                    Descansos: {
+                        id: exercise.Descansos.id,
+                        descansos: exercise.Descansos.descansos
+                    },
+                    Repeticiones: {
+                        id: exercise.Repeticiones.id,
+                        repeticiones: exercise.Repeticiones.repeticiones
+                    },
+                    Series: {
+                        id: exercise.Series.id,
+                        series: exercise.Series.series
+                    },
+                    Nombre_ejercicio: {
+                        id: exercise.Nombre_ejercicio.id,
+                        nombre_ejercicio: exercise.Nombre_ejercicio.nombre_ejercicio,
+                        url_gif: exercise.Nombre_ejercicio.url_gif
+                    },
+                    Categoria_ejercicio: {
+                        id: exercise.Categoria_ejercicio.id,
+                        categoria: exercise.Categoria_ejercicio.categoria
+                    }
+                }
+            )
+        
+        }
+ 
         
        
         
