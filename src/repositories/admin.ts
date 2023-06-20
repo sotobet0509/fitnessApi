@@ -349,7 +349,8 @@ export const AdminRepository = {
 
       async setDate(id:string,data:DateSchema){
        
-        let fecha_cita= data.fecha_cita
+        let fecha_cita= new Date(data.fecha_cita)
+        fecha_cita.setHours(fecha_cita.getHours()-6)
         let lugar = data.lugar
         const UserRepository  =getRepository(Usuario)
         const user = await UserRepository.findOne({
@@ -358,11 +359,11 @@ export const AdminRepository = {
             }
         })
         const dateRepository  =getRepository(Citas)
-        const Date  = new Citas()
-        Date.fecha_cita= fecha_cita
-        Date.lugar=lugar
-        Date.Usuario=user
-        dateRepository.save(Date)
+        const Dates  = new Citas()
+        Dates.fecha_cita= fecha_cita
+        Dates.lugar=lugar
+        Dates.Usuario=user
+        dateRepository.save(Dates)
 
       },
 
