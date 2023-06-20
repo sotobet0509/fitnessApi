@@ -173,8 +173,10 @@ export const MeRepository = {
             const exercise = exercises[i]
             let fecha_ejercicio= new Date(exercise.fecha_ejercicio)
             fecha_ejercicio.setHours(fecha_ejercicio.getHours()+6)
+            console.log (exercise.Notas[i].nota)
             let nota = exercise.Notas[i].nota
             let Nombre = exercise.Notas[i].Nombre
+            console.log(nota)
             days.push(
                 {
                     id: exercise.id,
