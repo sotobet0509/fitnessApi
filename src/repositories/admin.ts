@@ -359,8 +359,6 @@ export const AdminRepository = {
         })
         const dateRepository  =getRepository(Citas)
         const Date  = new Citas()
-        const fechas  = fecha_cita.getHours()
-        console.log(fechas)
         Date.fecha_cita= fecha_cita
         Date.lugar=lugar
         Date.Usuario=user
