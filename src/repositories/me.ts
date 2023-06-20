@@ -19,7 +19,6 @@ export const MeRepository = {
         const ejercicios = await repository.find({
             where:{
                 Usuario:user,
-                fecha_ejercicio:MoreThanOrEqual(temporalDate),
                 completado :false
             }
         })
