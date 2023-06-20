@@ -34,8 +34,8 @@ export const AdminRepository = {
         for (var i in dates){
             const date = dates[i]
 
-
-            days.push(date.fecha_cita)
+            
+            days.push(date.fecha_cita.setHours(date.fecha_cita.getHours()-6))
         }
         const count= dates.length
         
