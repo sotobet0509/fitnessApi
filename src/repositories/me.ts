@@ -110,7 +110,21 @@ export const MeRepository = {
                 Usuario:id
             }
         })
-        return dates
+        const dtes =[]
+        for (var i in dates){
+            const date = dates[i]
+            let fecha_cita= new Date(date.fecha_cita)
+            fecha_cita.setHours(fecha_cita.getHours()+6)
+
+            dtes.push(
+                {
+                    id:date.id,
+                    fecha_cita:date.fecha_cita,
+                    lugar:date.lugar
+                }
+            )
+        }
+        return dtes
     },
 
     async setSteps (user: Usuario,data: StepsSchema){
