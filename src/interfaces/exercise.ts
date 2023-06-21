@@ -12,4 +12,5 @@ export interface ExerciseSchema {
     repeticiones:Repeticiones
     descansos:Descansos
     notas:string
+    fecha_ejercicio:Date
 }

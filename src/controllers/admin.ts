@@ -119,7 +119,8 @@ export const AdminController = {
             peso: Joi.string().required(),
             repeticiones: Joi.number().required(),
             descansos: Joi.number().required(),
-            notas: Joi.string().required()
+            notas: Joi.string().required(),
+            fecha_ejercicio: Joi.string().required()
         })
         const { error, value } = exerciseSchema.validate(req.body)
         console.log(error)
