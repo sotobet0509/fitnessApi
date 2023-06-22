@@ -141,10 +141,7 @@ export const AdminRepository = {
                     completado: exercise.completado,
                     Peso: exercise.Peso,
                     Notas: [
-                        {
-                            nota: exercise.Notas[0].nota,
-                            Nombre: exercise.Notas[0].Nombre
-                        }
+                        exercise.Notas
                     ],
                     Descansos: {
                         id: exercise.Descansos.id,
