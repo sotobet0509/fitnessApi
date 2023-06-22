@@ -172,8 +172,6 @@ export const MeRepository = {
             const exercise = exercises[i]
             let fecha_ejercicio= new Date(exercise.fecha_ejercicio)
             fecha_ejercicio.setHours(fecha_ejercicio.getHours()+6)
-            let nota = exercise.Notas[0].nota
-            let Nombre = exercise.Notas[0].Nombre
             days.push(
                 {
                     id: exercise.id,
@@ -181,10 +179,7 @@ export const MeRepository = {
                     completado: exercise.completado,
                     Peso: exercise.Peso,
                     Notas: [
-                        {
-                            nota:nota,
-                            Nombre: Nombre
-                        }
+                        exercise.Notas
                     ],
                     Descansos: {
                         id: exercise.Descansos.id,
