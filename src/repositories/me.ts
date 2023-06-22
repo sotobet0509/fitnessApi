@@ -178,9 +178,9 @@ export const MeRepository = {
                     fecha_ejercicio:fecha_ejercicio,
                     completado: exercise.completado,
                     Peso: exercise.Peso,
-                    Notas: [
+                    Notas: 
                         exercise.Notas
-                    ],
+                    ,
                     Descansos: {
                         id: exercise.Descansos.id,
                         descansos: exercise.Descansos.descansos
