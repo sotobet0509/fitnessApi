@@ -17,9 +17,52 @@ import { Dietas } from "../entities/Dietas"
 import { Pasos } from "../entities/PasosUsuarios"
 import { ImageSchema } from "../interfaces/image"
 import { NotesSchema } from "../interfaces/notes"
+import { ObjectivesSchema } from "../interfaces/objectives"
+import { Objetivos } from "../entities/Objetivos"
 
 export const AdminRepository = {
 
+    async getObjectives (id:string){
+        const repository = getRepository(Objetivos)
+        const objetivos  = await repository.find({
+            where:{
+                Usuario:id
+            }
+    
+        })
+        return objetivos
+    },
+
+    async markObjectiveAsCompleted(id:string,idObjective:string ){
+        const objectivesRepo = getRepository(Objetivos)
+        const objective = await objectivesRepo.findOne({
+            where:{
+                id:idObjective,
+                Usuario:id
+            }
+        })
+        objective.completado=true
+        objectivesRepo.save(objective)
+        return objective
+      }
+    ,
+    async setObjective(id:string,data:ObjectivesSchema){
+        let fecha= new Date()
+        fecha.setHours(fecha.getHours()-6)
+        let descripcion = data.descripcion
+        const UserRepository  =getRepository(Usuario)
+        const user = await UserRepository.findOne({
+            where:{
+                idUsuario:id
+            }
+        })
+        const objectivesRepo  =getRepository(Objetivos)
+        const Objective  = new Objetivos()
+        Objective.fecha_registro= fecha
+        Objective.Descripcion=data.descripcion
+        Objective.Usuario=user
+        objectivesRepo.save(Objective)
+    },
     async getPendingDates(){
         const temporalDate = new Date()
         temporalDate.setHours(0, 0, 0, 0)

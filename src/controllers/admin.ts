@@ -10,8 +10,21 @@ import { DateSchema } from '../interfaces/date'
 import { ProgressSchema } from '../interfaces/progress'
 import { ImageSchema } from '../interfaces/image'
 import { NotesSchema } from '../interfaces/notes'
+import { ObjectivesSchema } from '../interfaces/objectives'
 
 export const AdminController = {
+
+    async markObjectiveAsCompleted(req:ExtendedRequest,res:Response){
+        const idUsuario = req.params.idUsuario
+        const objectiveId= req.params.idObjective
+        const objective =await AdminRepository.markObjectiveAsCompleted(idUsuario,objectiveId)
+        res.json({success:true,data:objective})
+    },
+    async getObjectives(req: ExtendedRequest, res: Response) {
+        const idUsuario= req.params.idUsuario
+        const dates= await AdminRepository.getObjectives(idUsuario)
+         res.json({success: true, data: dates }) 
+      },
     async getPendingDates(req: ExtendedRequest, res: Response) {
       const dates= await AdminRepository.getPendingDates()
        res.json({success: true, data: dates }) 
@@ -155,6 +168,19 @@ export const AdminController = {
         const data = <DateSchema>value
         await AdminRepository.setDate(idUsuario,data)
         res.json({success:true})
+    },
+
+    async setObjective(req:ExtendedRequest,res:Response){
+        const idUsuario=req.params.idUsuario
+        const objectivesSchema=Joi.object().keys({
+            descripcion: Joi.string().required()
+        }) 
+        const { error, value } = objectivesSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ObjectivesSchema>value
+        await AdminRepository.setObjective(idUsuario,data)
+        res.json({success:true})
+
     },
 
     async uploadImage(req:ExtendedRequest,res:Response){

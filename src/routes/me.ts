@@ -18,4 +18,5 @@ MeRouter.post('/steps',h(checkToken), h(MeController.postSteps))
 MeRouter.patch('/exercises/add-comment/:idEjercicio',h(checkToken), h(MeController.addComment))
 MeRouter.get('/getPendingDates',h(checkToken), h(MeController.getPendingDates))
 MeRouter.get('/getPendingExercises',h(checkToken), h(MeController.getPendingExercises))
+MeRouter.get('/objectives',h(checkToken),h(MeController.getObjectives))
 export { MeRouter }

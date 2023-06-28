@@ -8,6 +8,12 @@ import { StepsSchema } from '../interfaces/steps'
 import { ImageSchema } from '../interfaces/image'
 import { NotesSchema } from '../interfaces/notes'
 export const MeController = {
+    async getObjectives(req: ExtendedRequest, res: Response) {
+        const user = req.user
+        const objectives = await MeRepository.getObjectives(user.idUsuario)
+        res.json({ success: true, data: objectives })
+    
+    },
 
     async getPendingDates(req:ExtendedRequest,res:Response){
         const user = req.user

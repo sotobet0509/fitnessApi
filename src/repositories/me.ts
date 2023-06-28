@@ -8,10 +8,19 @@ import { Usuario } from "../entities/Usuarios"
 import { StepsSchema } from "../interfaces/steps"
 import { ImageSchema } from "../interfaces/image"
 import { NotesSchema } from "../interfaces/notes"
-import xPermittedCrossDomainPolicies from "helmet/dist/middlewares/x-permitted-cross-domain-policies"
+import { Objetivos } from "../entities/Objetivos"
 
 export const MeRepository = {
-
+    async getObjectives (id: string){
+        const repository = getRepository(Objetivos)
+        const objetivos = await repository.find({
+            where:{
+                Usuario:id
+            }
+        })
+        return objetivos
+    },
+    
     async getPendingExercises(user: string){
         const temporalDate = new Date()
         temporalDate.setHours(0, 0, 0, 0)
