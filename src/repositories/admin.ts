@@ -21,7 +21,18 @@ import { ObjectivesSchema } from "../interfaces/objectives"
 import { Objetivos } from "../entities/Objetivos"
 
 export const AdminRepository = {
-
+    async editObjective(id:string,idObjective:string,data:ObjectivesSchema ){
+        const repository = getRepository(Objetivos)
+        const objective = await repository.findOne({
+            where:{
+                id:idObjective,
+                Usuario:id
+            }
+        })
+        objective.Descripcion= data.descripcion
+        repository.save(objective)
+        return objective
+    },
     async getObjectives (id:string){
         const repository = getRepository(Objetivos)
         const objetivos  = await repository.find({
@@ -41,9 +52,21 @@ export const AdminRepository = {
                 Usuario:id
             }
         })
-        objective.completado=true
+        objective.completado= !objective.completado
         objectivesRepo.save(objective)
         return objective
+      }
+    ,
+
+    async deleteObjective(id:string,idObjective:string ){
+        const objectivesRepo = getRepository(Objetivos)
+        const objective = await objectivesRepo.findOne({
+            where:{
+                id:idObjective,
+                Usuario:id
+            }
+        })
+        objectivesRepo.delete(objective.id)
       }
     ,
     async setObjective(id:string,data:ObjectivesSchema){
@@ -79,7 +102,7 @@ export const AdminRepository = {
             let fecha_cita= new Date(date.fecha_cita)
             fecha_cita.setHours(fecha_cita.getHours()+6)
 
-            days.push(fecha_cita)
+            days.push(fecha_cita,date.lugar)
         }
         const count= dates.length
         

@@ -13,7 +13,24 @@ import { NotesSchema } from '../interfaces/notes'
 import { ObjectivesSchema } from '../interfaces/objectives'
 
 export const AdminController = {
-
+    async deleteObjective(req:ExtendedRequest,res:Response){
+        const idUsuario = req.params.idUsuario
+        const objectiveId= req.params.idObjective
+        const objective =await AdminRepository.deleteObjective(idUsuario,objectiveId)
+        res.json({success:true})
+    },
+    async editObjective(req:ExtendedRequest,res:Response){
+        const idUsuario = req.params.idUsuario
+        const objectiveId= req.params.idObjective
+        const objectivesSchema=Joi.object().keys({
+            descripcion: Joi.string().required()
+        }) 
+        const { error, value } = objectivesSchema.validate(req.body)
+        if (error) throw new DataMissingError()
+        const data = <ObjectivesSchema>value
+        const objective =await AdminRepository.editObjective(idUsuario,objectiveId,data)
+        res.json({success:true,data:objective})
+    },
     async markObjectiveAsCompleted(req:ExtendedRequest,res:Response){
         const idUsuario = req.params.idUsuario
         const objectiveId= req.params.idObjective

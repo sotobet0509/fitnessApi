@@ -29,4 +29,6 @@ AdminRouter.get('/getPendingDates',h(checkToken),h(AdminController.getPendingDat
 AdminRouter.post('/patients/set-objective/:idUsuario',h(checkToken),h(AdminController.setObjective))
 AdminRouter.get('/patients/objectives/:idUsuario',h(checkToken),h(AdminController.getObjectives))
 AdminRouter.patch('/patients/mark-objective-as-completed/:idUsuario/:idObjective',h(checkToken),h(AdminController.markObjectiveAsCompleted))
+AdminRouter.delete('/patients/delete-objective/:idUsuario/:idObjective',h(checkToken),h(AdminController.deleteObjective))
+AdminRouter.patch('/patients/edit-objective/:idUsuario/:idObjective',h(checkToken),h(AdminController.editObjective))
 export { AdminRouter }
